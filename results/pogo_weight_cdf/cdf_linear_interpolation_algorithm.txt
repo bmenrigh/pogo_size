@@ -1,4 +1,4 @@
-For a given weight, x, find the CDF bin where x is >= the start of the
+For a given weight, x, find the CDF bin where x is > the start of the
 bin and <= the start of the next bin.
 
 For example if x = 1.31255 then it is in the bin that starts at 1.3125.
@@ -6,7 +6,7 @@ For example if x = 1.31255 then it is in the bin that starts at 1.3125.
 Find the width, wb, of the bin which is just the start of the next bin
 minus the start of the current bin.
 
-Find the delta height of the bin current bin over the previous bin,
+Find the delta height of the current bin over the previous bin,
 dh, which is hight of the current bin minus the hight of the previous
 bin.
 
