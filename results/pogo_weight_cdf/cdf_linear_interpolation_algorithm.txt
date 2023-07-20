@@ -1,0 +1,25 @@
+For a given weight, x, find the CDF bin where x is >= the start of the
+bin and <= the start of the next bin.
+
+For example if x = 1.31255 then it is in the bin that starts at 1.3125.
+
+Find the width, wb, of the bin which is just the start of the next bin
+minus the start of the current bin.
+
+Find the delta height of the bin current bin over the previous bin,
+dh, which is hight of the current bin minus the hight of the previous
+bin.
+
+Now the CDF value for x is:
+
+height of previous bin + ((x - start of current bin) / wb) * dh
+
+That is, the amount this bin contributes to the CDF over the previous
+bin depends on how far along x is in the bin. If x is right at the
+start of the bin then the bin doesn't contribute anything and the CDF
+is just the value of the previous bin.  If x is halfway along the
+current bin then half of the height of the current bin is added to the
+previous bin, and so forth.  Only at the start of the next bin does
+the current bin contribute its full height.
+
+See http://www.brandonenright.net/~bmenrigh/pogo_weight_cdf/pogo_weight_cdf_usage.png for a graphical representation of the bins.
