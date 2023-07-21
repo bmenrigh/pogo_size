@@ -38,7 +38,7 @@ func main() {
 	weight_buckets = make(map[string]float64)
 
 	// Handle the weight pdf spikes at 0.5 and 1.5
-	var pwp5 = weight_cdf(0.5) // This has the same probability as the spike at 1.5
+	var pwp5 = weight_cdf(0.5) * bucket_inv // This has the same probability as the spike at 1.5
 
 	for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
 		phx := height21m1_pdf(hx)
@@ -53,36 +53,28 @@ func main() {
 	}
 
 	// Now do the convolution between the weight normal dist and the the height21m1 dist
-	w_spill := 0.0
 	for wx := 0.5; wx < 1.5 - b_shift; wx += bucket_w {
-		pwx := weight_pdf(wx)
+		pwx := weight_pdf(wx) * bucket_inv
 		for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
 			phx := height21m1_pdf(hx)
 
-			if hx + wx > 0.0 - b_shift && w_spill > 0.0 {
-				add_weight(hx + wx, w_spill) // The spillover from the last sum
-				w_spill = 0.0
-			}
-
 			if hx + wx < 0.0 - (bucket_w + b_shift) {
 				add_weight(hx + 1.0, phx * pwx)
-			} else if hx + wx > 0.0 - (bucket_w + b_shift) && hx + wx < b_shift {
+			} else if hx + wx > 0.0 - (bucket_w + b_shift) && hx + wx < 0.0 - b_shift {
 				// This straddles zero
-				w_spill = (phx * pwx) / 2.0
-				add_weight(hx + 1.0, w_spill)
+				add_weight(hx + 1.0, (phx * pwx) / 2.0)
+				add_weight(hx + wx + bucket_w, (phx * pwx) / 2.0)
 			} else {
-				w_spill = (phx * pwx) / 2.0
-				add_weight(hx + wx, w_spill)
+				add_weight(hx + wx, (phx * pwx) / 2.0)
+				add_weight(hx + wx + bucket_w, (phx * pwx) / 2.0)
 			}
 		}
-		// account for the final spillover
-		add_weight(max_h2m1 + wx, w_spill)
 	}
 
 	add_weight(0.0 - bucket_w, 0.0);
 	add_weight(max_h2m1 + 1.5, 0.0);
 	for k, v := range weight_buckets {
-		fmt.Printf("%s\t%.015f\n", k, v * bucket_inv)
+		fmt.Printf("%s\t%.015f\n", k, v)
 	}
 }
 
