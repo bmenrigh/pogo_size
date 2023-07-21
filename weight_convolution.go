@@ -17,14 +17,19 @@ var h_bounds = [8]float64{min_h, 0.5 - (0.8 * xxs_w), 0.5, 0.75, 1.25, 1.5, 1.5 
 var h_area = [8]float64{0.0, 1.0 / (20.0 * 250.0), 19.0 / (20.0 * 250.0), 1.0 / 40.0, 471.0 / 500.0, 1.0 / 40.0, 19.0 / (20.0 * 250.0), 1.0 / (20.0 * 250.0)}
 
 var bucket_figs = 4 // the number of decimal digits for each bucket
-var bucket_w = 1.0 / math.Pow10(bucket_figs)
+var bucket_inv = math.Pow10(bucket_figs)
+var bucket_w = 1.0 / bucket_inv
 var b_shift = bucket_w / 2.0
 var b_fmt = fmt.Sprintf("%%.0%df", bucket_figs)
+
+//var min_h2m1 = math.Round((math.Pow(min_h, 2.0) - 1.0) * bucket_inv) / bucket_inv
+//var max_h2m1 = math.Round((math.Pow(1.5, 2.0) - 1.0) * bucket_inv) / bucket_inv
 
 var min_h2m1 = math.Pow(min_h, 2.0) - 1.0
 var max_h2m1 = math.Pow(1.5, 2.0) - 1.0
 
-var norm_factor = (1.0 / 8.0) * math.Sqrt(2.0) // normalization to error function for normal CDF
+var erf_norm_factor = (1.0 / 8.0) * math.Sqrt(2.0) // normalization to error function for normal CDF
+var pdf_norm_factor = (1.0 / 8.0) * math.Sqrt(2.0 * math.Pi) // normalization to normal PDF
 
 var weight_buckets map[string]float64
 
@@ -32,19 +37,13 @@ var weight_buckets map[string]float64
 func main() {
 	weight_buckets = make(map[string]float64)
 
-	// debug error function
-	//for dx := 0.5; dx <= 1.5; dx += bucket_w {
-	//fmt.Printf("%.07f %.07f\n", dx, weight_pdf(dx))
-	//}
-	//return;
-
 	// Handle the weight pdf spikes at 0.5 and 1.5
 	var pwp5 = weight_cdf(0.5) // This has the same probability as the spike at 1.5
 
 	for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
 		phx := height21m1_pdf(hx)
 
-		if hx + 0.5 < 0.0 {
+		if hx + 0.5 < 0.0 - b_shift {
 			add_weight(hx + 1.0, phx * pwp5)
 		} else {
 			add_weight(hx + 0.5, phx * pwp5)
@@ -60,11 +59,17 @@ func main() {
 		for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
 			phx := height21m1_pdf(hx)
 
-			add_weight(hx + wx, w_spill) // The spillover from the last sum
-			w_spill = 0.0
+			if hx + wx > 0.0 - b_shift && w_spill > 0.0 {
+				add_weight(hx + wx, w_spill) // The spillover from the last sum
+				w_spill = 0.0
+			}
 
-			if hx + wx < 0.0 {
+			if hx + wx < 0.0 - (bucket_w + b_shift) {
 				add_weight(hx + 1.0, phx * pwx)
+			} else if hx + wx > 0.0 - (bucket_w + b_shift) && hx + wx < b_shift {
+				// This straddles zero
+				w_spill = (phx * pwx) / 2.0
+				add_weight(hx + 1.0, w_spill)
 			} else {
 				w_spill = (phx * pwx) / 2.0
 				add_weight(hx + wx, w_spill)
@@ -74,15 +79,24 @@ func main() {
 		add_weight(max_h2m1 + wx, w_spill)
 	}
 
+	add_weight(0.0 - bucket_w, 0.0);
+	add_weight(max_h2m1 + 1.5, 0.0);
 	for k, v := range weight_buckets {
-		fmt.Printf("%s %.07f\n", k, v)
+		fmt.Printf("%s\t%.015f\n", k, v * bucket_inv)
 	}
 }
 
 
 func add_weight(w, p float64) {
 
-	wstr := fmt.Sprintf(b_fmt, w - b_shift)
+
+	w_shift := w // no shift
+	// Fix -0.0000
+	if w_shift < 0.0 && w_shift > 0.0 - b_shift {
+		w_shift = 0.0
+	}
+
+	wstr := fmt.Sprintf(b_fmt, w_shift)
 
 	_, ok := weight_buckets[wstr]
 	if !ok {
@@ -144,12 +158,10 @@ func weight_cdf(x float64) float64 {
 
 	// Normal distribution CDF is 1/2 * (1 + erf((x - u) / (sigma * sqrt(2))))
 
-	return 0.5 * (1.0 + math.Erf((x - 1.0) / norm_factor));
+	return 0.5 * (1.0 + math.Erf((x - 1.0) / erf_norm_factor));
 }
 
-// Using the cdf for the PDF when the CDF is based on Go's Erf()
-// performs very poorly, showing nasty aliasing steps
-// This needs a better PDF implimentation...
+
 func weight_pdf(x float64) float64 {
 
 	return weight_cdf(x + bucket_w) - weight_cdf(x)
