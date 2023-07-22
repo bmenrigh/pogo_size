@@ -75,5 +75,5 @@ for (my $x = $bmin; $x < $bmax; $x += $b_width) {
 
 foreach my $w (sort {$a <=> $b} keys %counts) {
 
-    print sprintf('%.04f %.15f %.15f', $w, $counts{$w} * $scale, (($counts{$w} * $box_factor * $scale) / $total)), "\n";
+    print sprintf("%s\t%.15f\t%.15f", $w, $counts{$w} * $scale, (($counts{$w} * $box_factor * $scale) / $total)), "\n";
 }
