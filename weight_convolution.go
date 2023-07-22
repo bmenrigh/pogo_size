@@ -33,15 +33,53 @@ var pdf_norm_factor = (1.0 / 8.0) * math.Sqrt(2.0 * math.Pi) // normalization to
 
 var weight_buckets map[string]float64
 
+var h_x_cache []float64
+var h_p_cache []float64
+
+var w_x_cache []float64
+var w_p_cache []float64
+
 
 func main() {
 	weight_buckets = make(map[string]float64)
+	h_x_cache = make([]float64, 0, int(math.Round((math.Pow(1.5, 2.0) - math.Pow(min_h, 2.0)) * bucket_inv) + 1))
+	h_p_cache = make([]float64, 0, int(math.Round((math.Pow(1.5, 2.0) - math.Pow(min_h, 2.0)) * bucket_inv) + 1))
+
+	w_x_cache = make([]float64, 0, int(((1.5 - 0.5) * bucket_inv) + 1))
+	w_p_cache = make([]float64, 0, int(((1.5 - 0.5) * bucket_inv) + 1))
+
+	for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
+		phx := height21m1_pdf(hx)
+
+		h_x_cache = append(h_x_cache, hx)
+		h_p_cache = append(h_p_cache, phx)
+	}
+
+	for wx := 0.5; wx < 1.5 - b_shift; wx += bucket_w {
+		pwx := weight_pdf(wx) * bucket_inv
+
+		w_x_cache = append(w_x_cache, wx)
+		w_p_cache = append(w_p_cache, pwx)
+	}
+
+	// The magic
+	build_w_pdf()
+
+	add_weight(0.0 - bucket_w, 0.0);
+	add_weight(max_h2m1 + 1.5, 0.0);
+	for k, v := range weight_buckets {
+		fmt.Printf("%s\t%.015f\n", k, v)
+	}
+}
+
+
+func build_w_pdf() {
 
 	// Handle the weight pdf spikes at 0.5 and 1.5
 	var pwp5 = weight_cdf(0.5) * bucket_inv // This has the same probability as the spike at 1.5
 
-	for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
-		phx := height21m1_pdf(hx)
+	for i, hx := range h_x_cache {
+		phx := h_p_cache[i]
 
 		if hx + 0.5 < 0.0 - b_shift {
 			add_weight(hx + 1.0, phx * pwp5)
@@ -53,10 +91,11 @@ func main() {
 	}
 
 	// Now do the convolution between the weight normal dist and the the height21m1 dist
-	for wx := 0.5; wx < 1.5 - b_shift; wx += bucket_w {
-		pwx := weight_pdf(wx) * bucket_inv
-		for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
-			phx := height21m1_pdf(hx)
+	for i, wx := range w_x_cache {
+		pwx := w_p_cache[i]
+
+		for j, hx := range h_x_cache {
+			phx := h_p_cache[j]
 
 			if hx + wx < 0.0 - (bucket_w + b_shift) {
 				add_weight(hx + 1.0, phx * pwx)
@@ -71,11 +110,6 @@ func main() {
 		}
 	}
 
-	add_weight(0.0 - bucket_w, 0.0);
-	add_weight(max_h2m1 + 1.5, 0.0);
-	for k, v := range weight_buckets {
-		fmt.Printf("%s\t%.015f\n", k, v)
-	}
 }
 
 
