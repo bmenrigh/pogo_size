@@ -7,7 +7,6 @@ import (
 
 var max_h = 1.75 // The maximum height class one of {1.55, 1.75, 2.00}
 var xxl_w = max_h - 1.5 // width of xxl class
-var max_w = (max_h - 1.0) + 1.5 // Yes this is the same thing as + 0.5
 
 var min_h = 0.49    // Scatterbug min is 0.25, all others min is 0.49
 var xxs_w = 0.5 - min_h
@@ -172,7 +171,7 @@ func height21m1_pdf(x float64) float64 {
 
 	p := height_cdf(math.Sqrt(xp1 + bucket_w)) - height_cdf(math.Sqrt(xp1))
 
-	if xp1 > 1.5 {
+	if xp1 >= 1.5 {
 		p += height_cdf(xp1 + bucket_w) - height_cdf(xp1)
 	}
 
