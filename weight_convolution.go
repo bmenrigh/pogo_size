@@ -47,15 +47,26 @@ func main() {
 	w_x_cache = make([]float64, 0, int(((1.5 - 0.5) * bucket_inv) + 1))
 	w_p_cache = make([]float64, 0, int(((1.5 - 0.5) * bucket_inv) + 1))
 
-	for hx := min_h2m1; hx < max_h2m1 - b_shift; hx += bucket_w {
-		phx := height21m1_pdf(hx)
+	// Experimentation shows incremeting by bucket_w when starting from
+	// min_h2m1 which may not be exactly representable by a float64
+	// results in a small amount of error accumulating over the whole loop
+	// so instead incremeting by 1 and doing a division on each step
+	// eliminates errors from accumulating
+	for hx := min_h2m1 * bucket_inv; hx < max_h2m1 * bucket_inv - 0.5; hx += 1 {
+		phx := height21m1_pdf(hx * bucket_w)
 
-		h_x_cache = append(h_x_cache, hx)
+		phx_sum += phx
+
+		h_x_cache = append(h_x_cache, hx * bucket_w)
 		h_p_cache = append(h_p_cache, phx)
 	}
 
+	// Starting here at 0.5 which has an exact representation
+	// has no accumulated error issues
 	for wx := 0.5; wx < 1.5 - b_shift; wx += bucket_w {
-		pwx := weight_pdf(wx) * bucket_inv
+		pwx := weight_pdf(wx)
+
+		pwx_sum += pwx
 
 		w_x_cache = append(w_x_cache, wx)
 		w_p_cache = append(w_p_cache, pwx)
@@ -75,7 +86,7 @@ func main() {
 func build_w_pdf() {
 
 	// Handle the weight pdf spikes at 0.5 and 1.5
-	var pwp5 = weight_cdf(0.5) * bucket_inv // This has the same probability as the spike at 1.5
+	var pwp5 = weight_cdf(0.5) // This has the same probability as the spike at 1.5
 
 	for i, hx := range h_x_cache {
 		phx := h_p_cache[i]
@@ -134,7 +145,7 @@ func add_weight(w, p float64) {
 
 func height_cdf(x float64) float64 {
 
-	if x <= h_bounds[0] {
+	if x < h_bounds[0] {
 		return 0.0
 	}
 
@@ -183,7 +194,7 @@ func weight_cdf(x float64) float64 {
 
 	// Normal distribution CDF is 1/2 * (1 + erf((x - u) / (sigma * sqrt(2))))
 
-	return 0.5 * (1.0 + math.Erf((x - 1.0) / erf_norm_factor));
+	return 0.5 * (1.0 + math.Erf((x - 1.0) / erf_norm_factor)) * bucket_inv
 }
 
 
