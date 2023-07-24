@@ -55,8 +55,6 @@ func main() {
 	for hx := min_h2m1 * bucket_inv; hx < max_h2m1 * bucket_inv - 0.5; hx += 1 {
 		phx := height21m1_pdf(hx * bucket_w)
 
-		phx_sum += phx
-
 		h_x_cache = append(h_x_cache, hx * bucket_w)
 		h_p_cache = append(h_p_cache, phx)
 	}
@@ -65,8 +63,6 @@ func main() {
 	// has no accumulated error issues
 	for wx := 0.5; wx < 1.5 - b_shift; wx += bucket_w {
 		pwx := weight_pdf(wx)
-
-		pwx_sum += pwx
 
 		w_x_cache = append(w_x_cache, wx)
 		w_p_cache = append(w_p_cache, pwx)
