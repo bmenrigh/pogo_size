@@ -21,16 +21,13 @@ var bucket_w = 1.0 / bucket_inv
 var b_shift = bucket_w / 2.0
 var b_fmt = fmt.Sprintf("%%.0%df", bucket_figs)
 
-//var min_h2m1 = math.Round((math.Pow(min_h, 2.0) - 1.0) * bucket_inv) / bucket_inv
-//var max_h2m1 = math.Round((math.Pow(1.5, 2.0) - 1.0) * bucket_inv) / bucket_inv
-
 var min_h2m1 = math.Pow(min_h, 2.0) - 1.0
 var max_h2m1 = math.Pow(1.5, 2.0) - 1.0
 
 var erf_norm_factor = (1.0 / 8.0) * math.Sqrt(2.0) // normalization to error function for normal CDF
 var pdf_norm_factor = (1.0 / 8.0) * math.Sqrt(2.0 * math.Pi) // normalization to normal PDF
 
-var weight_buckets map[string]float64
+var weight_buckets []float64
 
 var h_x_cache []float64
 var h_p_cache []float64
@@ -40,7 +37,8 @@ var w_p_cache []float64
 
 
 func main() {
-	weight_buckets = make(map[string]float64)
+	weight_buckets = make([]float64, int(math.Round(((math.Pow(1.5, 2.0) - 1) + 1.5) * bucket_inv) + 1))
+
 	h_x_cache = make([]float64, 0, int(math.Round((math.Pow(1.5, 2.0) - math.Pow(min_h, 2.0)) * bucket_inv) + 1))
 	h_p_cache = make([]float64, 0, int(math.Round((math.Pow(1.5, 2.0) - math.Pow(min_h, 2.0)) * bucket_inv) + 1))
 
@@ -71,10 +69,8 @@ func main() {
 	// The magic
 	build_w_pdf()
 
-	add_weight(0.0 - bucket_w, 0.0);
-	add_weight(max_h2m1 + 1.5, 0.0);
 	for k, v := range weight_buckets {
-		fmt.Printf("%s\t%.015f\n", k, v)
+		fmt.Printf("%s\t%.015f\n", fmt.Sprintf(b_fmt, float64(k) * bucket_w), v)
 	}
 }
 
@@ -121,21 +117,7 @@ func build_w_pdf() {
 
 func add_weight(w, p float64) {
 
-
-	w_shift := w // no shift
-	// Fix -0.0000
-	if w_shift < 0.0 && w_shift > 0.0 - b_shift {
-		w_shift = 0.0
-	}
-
-	wstr := fmt.Sprintf(b_fmt, w_shift)
-
-	_, ok := weight_buckets[wstr]
-	if !ok {
-		weight_buckets[wstr] = 0.0
-	}
-
-	weight_buckets[wstr] += p
+	weight_buckets[int(math.Round(w * bucket_inv))] += p
 }
 
 
