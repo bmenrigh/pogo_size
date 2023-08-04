@@ -19,7 +19,7 @@ while (<STDIN>) {
 
 
         push @cdf_v, $numlist[0];
-        push @cdf_p, $numlist[2];
+        push @cdf_p, $numlist[3];
     }
 }
 
@@ -43,9 +43,10 @@ while (<STDIN>) {
 #report('Big Karp', 13.126, 10.0, 1);
 #exit(0);
 
-#report('Tiny Rat (regular)', 2.40625, 3.5, 0);
-report('Flabebe', 0.025, 0.1, 0);
-report('Flabebe', 0.015, 0.1, 0);
+report('Tiny Rat (regular)', 2.40625, 3.5, 0);
+report('Tiny Rat (regular)', 3.14159265, 3.5, 0);
+#report('Flabebe', 0.025, 0.1, 0);
+#report('Flabebe', 0.015, 0.1, 0);
 #report('Tiny Rat (alolan)', 2.40625, 3.8, 0);
 #print sprintf('%.015f', pval(11.0/16.0)), "\n";
 #report('Big Karp', 13.125, 10.0, 1);
@@ -79,7 +80,7 @@ sub report {
         $pv = 1.0 - $pv;
     }
 
-    print sprintf('%s weight at %s %.04f kg: p=%.06f; %.04f%% (1 in %.04f)', $str, ($r == 0)? 'least' : 'most', $m, $pv, $pv * 100.0, ($pv == 0)? "inf" : (1.0 / $pv)), "\n";
+    print sprintf('%s weight at %s %.06f kg: p=%.06f; %.06f%% (1 in %.04f)', $str, ($r == 0)? 'most' : 'least', $m, $pv, $pv * 100.0, ($pv == 0)? "inf" : (1.0 / $pv)), "\n";
 
 }
 
@@ -115,8 +116,39 @@ sub find_weight_from_p_val {
     return $m;
 }
 
-# New func left-aligned CDF bins
+# new right-aligned bins
 sub pval {
+    my $v = shift;
+
+    my $l = scalar @cdf_v;
+
+    if ($v <= $cdf_v[0]) {
+        return 0.0;
+    }
+
+    if ($v >= $cdf_v[$l - 1]) {
+        return 1.0;
+    }
+
+    for (my $i = 0; $i < ($l - 1); $i++) {
+        if  (($v >= $cdf_v[$i]) && ($v < $cdf_v[$i + 1])) {
+
+            #warn sprintf('Search value %.015f is >= %.015f in bucket %d with p-val %.015f (1 - p: %0.15f)', $v, $cdf_v[$i], $i, $cdf_p[$i], 1.0 - $cdf_p[$i]), "\n";
+
+            my $vdelta = $cdf_v[$i + 1] - $cdf_v[$i]; # The width of this bucket
+            my $pdelta = $cdf_p[$i + 1] - $cdf_p[$i]; # The height of this bucket
+
+            my $voffset = $v - $cdf_v[$i];
+
+            return ($cdf_p[$i] + (($voffset / $vdelta) * $pdelta));
+        }
+    }
+
+    die 'Failed to find pval', "\n";
+}
+
+# Old left-aligned bins
+sub pval_left {
     my $v = shift;
 
     my $l = scalar @cdf_v;
