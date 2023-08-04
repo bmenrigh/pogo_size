@@ -116,7 +116,7 @@ sub find_weight_from_p_val {
     return $m;
 }
 
-# new right-aligned bins
+# new left-aligned bins
 sub pval {
     my $v = shift;
 
@@ -147,8 +147,8 @@ sub pval {
     die 'Failed to find pval', "\n";
 }
 
-# Old left-aligned bins
-sub pval_left {
+# Old right-aligned bins
+sub pval_right {
     my $v = shift;
 
     my $l = scalar @cdf_v;
