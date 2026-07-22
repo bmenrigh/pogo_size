@@ -15,7 +15,7 @@ import numpy as np
 
 DEGREE = 5
 DEFAULT_RELATIVE_ERROR = 1.0 / 1_000_000.0
-ZERO_ABSOLUTE_ERROR = 1e-15
+ZERO_WEIGHT_FLOOR = 1e-15
 INITIAL_SEARCH_SPAN = 32
 
 
@@ -70,11 +70,15 @@ def read_cdf(path: Path | None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def evaluate_polynomial(coefficients: np.ndarray, t: np.ndarray) -> np.ndarray:
-    """Evaluate ascending power-basis coefficients with Horner's method."""
-    result = np.full_like(t, coefficients[-1], dtype=np.float64)
-    for coefficient in coefficients[-2::-1]:
-        result = result * t + coefficient
-    return result
+    """Evaluate endpoint values plus a cubic correction, totaling degree five."""
+    correction = np.full_like(t, coefficients[-1], dtype=np.float64)
+    for coefficient in coefficients[-2:1:-1]:
+        correction = correction * t + coefficient
+    return (
+        (1.0 - t) * coefficients[0]
+        + t * coefficients[1]
+        + t * (1.0 - t) * correction
+    )
 
 
 def _is_monotone(coefficients: np.ndarray, *, increasing: bool) -> bool:
@@ -116,9 +120,10 @@ def fit_segment(
 
     # p(t) = baseline(t) + t(1-t) q(t), where degree(q) <= 3. This
     # constrains both segment endpoints exactly while retaining degree five.
-    coefficients = np.zeros(DEGREE + 1, dtype=np.float64)
-    coefficients[0] = left
-    coefficients[1] = right - left
+    power_coefficients = np.zeros(DEGREE + 1, dtype=np.float64)
+    power_coefficients[0] = left
+    power_coefficients[1] = right - left
+    q_coefficients = np.zeros(DEGREE - 1, dtype=np.float64)
     if count > 2:
         interior_t = t[1:-1]
         factor = interior_t * (1.0 - interior_t)
@@ -126,20 +131,21 @@ def fit_segment(
             [factor * interior_t**power for power in range(DEGREE - 1)]
         )
         residual = observed[1:-1] - baseline[1:-1]
-        error_scale = np.maximum(np.abs(observed[1:-1]), ZERO_ABSOLUTE_ERROR)
+        error_scale = np.maximum(np.abs(observed[1:-1]), ZERO_WEIGHT_FLOOR)
         weights = 1.0 / error_scale
         q_coefficients, *_ = np.linalg.lstsq(
             design * weights[:, None], residual * weights, rcond=None
         )
         for power, coefficient in enumerate(q_coefficients):
-            coefficients[power + 1] += coefficient
-            coefficients[power + 2] -= coefficient
+            power_coefficients[power + 1] += coefficient
+            power_coefficients[power + 2] -= coefficient
 
+    coefficients = np.concatenate(([left, right], q_coefficients))
     predicted = evaluate_polynomial(coefficients, t)
     absolute_error = np.abs(predicted - observed)
     error_denominator = np.abs(observed)
     exact_mask = error_denominator == 0.0
-    if np.any(absolute_error[exact_mask] > ZERO_ABSOLUTE_ERROR):
+    if np.any(absolute_error[exact_mask] != 0.0):
         return None
 
     relative_mask = ~exact_mask
@@ -151,7 +157,7 @@ def fit_segment(
     # Leave a tiny margin for lookup evaluation and coefficient serialization.
     if maximum_relative_error > relative_error * (1.0 - 1e-10):
         return None
-    if not _is_monotone(coefficients, increasing=kind == "C"):
+    if not _is_monotone(power_coefficients, increasing=kind == "C"):
         return None
     return PolynomialSegment(kind, start, end, coefficients, maximum_relative_error)
 
@@ -259,9 +265,9 @@ def write_segments(
     segments: Sequence[PolynomialSegment],
     output: TextIO,
 ) -> None:
-    print("# cdf-poly-v2 degree=5 basis=t", file=output)
+    print("# cdf-poly-v3 degree=5 basis=endpoint-q", file=output)
     print("# t=(x-start)/(end-start)", file=output)
-    print("# kind start end c0 c1 c2 c3 c4 c5", file=output)
+    print("# kind start end y0 y1 q0 q1 q2 q3", file=output)
     for segment in segments:
         fields = [
             segment.kind,

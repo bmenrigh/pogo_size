@@ -95,6 +95,20 @@ class CompressCDFPolynomialTests(unittest.TestCase):
 
         self.assertEqual(table.lookup(0.5), 0.0)
 
+    def test_survival_zero_plateau_is_exact(self):
+        cumulatives = np.array([0.0, 0.5, 1.0, 1.0, 1.0])
+        survivals = np.array([1.0, 0.5, 1e-20, 0.0, 0.0])
+        coordinates = np.arange(len(cumulatives), dtype=float)
+
+        segments = compress_cdf(
+            cumulatives, 1e-9, survivals, coordinates=coordinates
+        )
+        output = io.StringIO()
+        write_segments(coordinates, segments, output)
+        table = PolynomialCDF.from_lines(io.StringIO(output.getvalue()))
+
+        self.assertEqual(table.p_value(3.5, upper_tail=True), 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

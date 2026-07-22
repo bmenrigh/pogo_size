@@ -14,12 +14,22 @@ from typing import Iterable, Sequence
 @dataclass(frozen=True)
 class Segment:
     kind: str
+    basis: str
     start: float
     end: float
     coefficients: tuple[float, ...]
 
     def evaluate(self, value: float) -> float:
         t = (value - self.start) / (self.end - self.start)
+        if self.basis == "endpoint-q":
+            correction = self.coefficients[-1]
+            for coefficient in self.coefficients[-2:1:-1]:
+                correction = correction * t + coefficient
+            return (
+                (1.0 - t) * self.coefficients[0]
+                + t * self.coefficients[1]
+                + t * (1.0 - t) * correction
+            )
         result = self.coefficients[-1]
         for coefficient in self.coefficients[-2::-1]:
             result = result * t + coefficient
@@ -34,6 +44,8 @@ class PolynomialCDF:
         for row, segment in enumerate(segments, start=1):
             if segment.kind not in ("C", "S"):
                 raise ValueError(f"segment kind must be C or S (row {row})")
+            if segment.basis not in ("power", "endpoint-q"):
+                raise ValueError(f"unknown polynomial basis (row {row})")
             if not (
                 math.isfinite(segment.start)
                 and math.isfinite(segment.end)
@@ -53,9 +65,14 @@ class PolynomialCDF:
     @classmethod
     def from_lines(cls, lines: Iterable[str]) -> "PolynomialCDF":
         segments: list[Segment] = []
+        basis = "power"
         for line_number, line in enumerate(lines, start=1):
             line = line.strip()
-            if not line or line.startswith("#"):
+            if not line:
+                continue
+            if line.startswith("#"):
+                if line.startswith("# cdf-poly-v3"):
+                    basis = "endpoint-q"
                 continue
             columns = line.split()
             if len(columns) not in (8, 9):
@@ -74,7 +91,9 @@ class PolynomialCDF:
                 raise ValueError(
                     f"line {line_number}: all columns must be numbers"
                 ) from error
-            segments.append(Segment(kind, numbers[0], numbers[1], numbers[2:]))
+            segments.append(
+                Segment(kind, basis, numbers[0], numbers[1], numbers[2:])
+            )
         return cls(segments)
 
     @classmethod

@@ -116,14 +116,19 @@ $ ./pdf_tools/compress_cdf_poly.py out.txt > distribution.cdfpoly
 Each output row contains:
 
 ```text
-kind  start_x  end_x  c0  c1  c2  c3  c4  c5
+kind  start_x  end_x  y0  y1  q0  q1  q2  q3
 ```
 
-Within that segment, `t = (x - start_x) / (end_x - start_x)` and:
+Within that segment, `t = (x - start_x) / (end_x - start_x)`, and the
+endpoint-constrained fifth-order representation is:
 
 ```text
-tail(x) = c0 + c1*t + c2*t^2 + c3*t^3 + c4*t^4 + c5*t^5
+q(t)    = q0 + q1*t + q2*t^2 + q3*t^3
+tail(x) = (1-t)*y0 + t*y1 + t*(1-t)*q(t)
 ```
+
+Storing `y0` and `y1` directly avoids cancellation when adjacent tail values
+differ by many orders of magnitude.
 
 `kind` is `C` for a lower-tail CDF polynomial and `S` for an upper-tail
 survival polynomial. The compressor fits whichever tail is smaller, preserving
