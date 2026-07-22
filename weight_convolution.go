@@ -5,17 +5,23 @@ import (
 	"fmt"
 )
 
-var max_h = 1.75 // The maximum height class one of {1.55, 1.75, 2.00}
+var max_h = 1.55 // The maximum height class one of {1.55, 1.75, 2.00}
 var xxl_w = max_h - 1.5 // width of xxl class
 
-var min_h = 0.49    // Scatterbug min is 0.25, all others min is 0.49
+var min_h = 0.49  // Scatterbug min is 0.25, all others min is 0.49
+//var min_h = 0.25    // Scatterbug min is 0.25, all others min is 0.49
 var xxs_w = 0.5 - min_h
 
 //                        min_h, xxs_l               xxs_u  xs    avg   xl  xxl_l                 xxl_u
 var h_bounds = [8]float64{min_h, 0.5 - (0.8 * xxs_w), 0.5, 0.75, 1.25, 1.5, 1.5 +  (0.8 * xxl_w), max_h}
-var h_area = [8]float64{0.0, 1.0 / (20.0 * 250.0), 19.0 / (20.0 * 250.0), 1.0 / 40.0, 471.0 / 500.0, 1.0 / 40.0, 19.0 / (20.0 * 250.0), 1.0 / (20.0 * 250.0)}
+var h_area = [8]float64{0.0, 1.0 / (20.0 * 250.0), 19.0 / (20.0 * 250.0), 1.0 / 40.0, 471.0 / 500.0, 1.0 / 40.0, 19.0 / (20.0 * 250.0), 1.0 / (20.0 * 250.0)} // all combined
+//var h_area = [8]float64{0.0, 1.0 / 20.0, 19.0 / 20.0, 0.0, 0.0, 0.0, 0.0, 0.0} // XXS
+//var h_area = [8]float64{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0} // XS
+//var h_area = [8]float64{0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0} // Avg
+//var h_area = [8]float64{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0} // XL
+//var h_area = [8]float64{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 19.0 / 20.0, 1.0 / 20.0} // XXL
 
-var bucket_figs = 4 // the number of decimal digits for each bucket
+var bucket_figs = 6 // the number of decimal digits for each bucket
 var bucket_inv = math.Pow10(bucket_figs)
 var bucket_w = 1.0 / bucket_inv
 var b_shift = bucket_w / 2.0
@@ -52,6 +58,10 @@ func main() {
 	// eliminates errors from accumulating
 	for hx := min_h2m1 * bucket_inv; hx < max_h2m1 * bucket_inv - 0.5; hx += 1 {
 		phx := height21m1_pdf(hx * bucket_w)
+
+		if phx == 0.0 {
+			continue
+		}
 
 		h_x_cache = append(h_x_cache, hx * bucket_w)
 		h_p_cache = append(h_p_cache, phx)

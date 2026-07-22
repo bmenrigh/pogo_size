@@ -43,6 +43,8 @@ while (<STDIN>) {
 #report('Big Karp', 13.126, 10.0, 1);
 #exit(0);
 
+report('0.03kg Mimikyu', 0.035, 0.7, 0);
+
 report('Tiny Rat (regular)', 2.40625, 3.5, 0);
 report('Tiny Rat (regular)', 3.14159265, 3.5, 0);
 #report('Flabebe', 0.025, 0.1, 0);
@@ -65,6 +67,11 @@ report('Tiny Rat (regular)', 3.14159265, 3.5, 0);
 #print '0.01kg Rat: ', sprintf('%.015f', pval(0.0149999 / 3.5)), "\n";
 #print '22.66kg Karp: ', sprintf('%.015f', 1.0 - pval(22.655 / 10.0)), "\n";
 #print '0.4kg Karp: ', sprintf('%.015f', pval(0.405 / 10.0)), "\n";
+report('Azelf', 0.005, 0.3, 0);
+
+report('Nymble 0.0kg', 0.005, 1.0, 0);
+report('Groudon 0.0kg', 0.005, 950.0, 0);
+
 
 #print sprintf('%.015f', (pval(2.40625 / 3.5) - pval(2.405 / 3.5)) / (pval(2.415 / 3.5) - pval(2.405 / 3.5))), "\n";
 
