@@ -2,6 +2,133 @@
 
 [New Size System](https://twitter.com/bmenrigh_pogo/status/1618456354712350720?s=20)
 
+## Building the standalone probability app
+
+The finished app is `pvalue_lookup.html`. It is a single, self-contained HTML
+file: Pokémon statistics, float32 display-extrema notes, polynomial CDF tables,
+CSS, and JavaScript are all embedded during the build. It can be opened
+directly without a web server and makes no network requests.
+
+The normal refresh-and-build workflow is:
+
+1. obtain a current Game Master in JSON format;
+2. extract and validate `pokemon_stats.tsv`;
+3. review the float32 display-extrema report;
+4. build `pvalue_lookup.html`; and
+5. run the tests.
+
+The app builder requires Python 3 and the existing compressed distributions in
+`cdfs_poly/`. NumPy is needed only to regenerate those polynomial CDF files,
+as described under [Polynomial CDF compression](#polynomial-cdf-compression).
+
+### 1. Get a current JSON Game Master
+
+Download or export a new, complete Pokémon GO Game Master from a trusted
+source and save it as `GAME_MASTER.json` in the repository root. The extractor
+expects decoded JSON whose top level is an array of Game Master template
+objects, not protobuf data or a partial list containing only ordinary Pokémon
+settings. The extended Pokémon settings and temporary-evolution overrides are
+needed for size bounds and forms such as Primal Groudon and Primal Kyogre.
+
+The build tools do not download the Game Master automatically. The source JSON
+also does not provide a reliable upstream snapshot date or version, so the
+date embedded in the finished page records when the app was built.
+
+### 2. Extract the Pokémon statistics
+
+Run:
+
+```console
+$ ./read_pokemon_stats_from_gm.py GAME_MASTER.json > pokemon_stats.tsv
+```
+
+The TSV written to standard output contains Pokédex number, form name, mean
+height, mean weight, XXS class, and XXL class. Progress and validation warnings
+are written to standard error, so they remain visible when the table is
+redirected.
+
+Review every warning when updating the Game Master. Records with missing,
+contradictory, or unsupported settings are omitted instead of being guessed.
+Zorua, Pumpkaboo, and Gourgeist are intentionally omitted, as are forms whose
+Pokédex means conflict with their size bounds. Use `--strict` when a nonzero
+exit status is desired for any validation warning:
+
+```console
+$ ./read_pokemon_stats_from_gm.py --strict GAME_MASTER.json \
+    > pokemon_stats.tsv
+```
+
+The supported class definitions are XXS minima of `0.49` and `0.25`, and XXL
+maxima of `1.55`, `1.75`, and `2.00`. If a future Game Master introduces
+another class, the extractor and the distribution set must be updated rather
+than silently assigning it to an existing class.
+
+### 3. Audit float32 display extrema
+
+Generate the human-readable report with:
+
+```console
+$ ./check_float32_display_extrema.py pokemon_stats.tsv \
+    > float32_display_extrema.txt
+```
+
+This reports theoretical minimum-height, maximum-height, and maximum-weight
+display boundaries whose two-decimal rounding changes after conversion to
+IEEE-754 float32. Review the report when the stats change. It is an audit
+artifact and is not an input to the next command: the app builder runs the
+same extrema calculation directly from `pokemon_stats.tsv` and embeds the
+affected rows automatically.
+
+### 4. Build the standalone HTML
+
+With the default filenames and directories, run:
+
+```console
+$ ./build_pvalue_webapp.py
+```
+
+This reads:
+
+- `pokemon_stats.tsv`;
+- the 12 compressed CDF files in `cdfs_poly/`; and
+- `pvalue_webapp_template.html`.
+
+It writes `pvalue_lookup.html` and prints the number of embedded Pokémon,
+polynomial segments, and output bytes to standard error. The current local
+date is embedded as the page's build date. The builder also verifies the stats,
+compressed-CDF format, contiguous polynomial ranges, and template markers
+before writing the page.
+
+Alternative locations can be supplied explicitly:
+
+```console
+$ ./build_pvalue_webapp.py \
+    --stats pokemon_stats.tsv \
+    --cdfs cdfs_poly \
+    --template pvalue_webapp_template.html \
+    --output pvalue_lookup.html
+```
+
+The distributions in `cdfs_poly/` are normalized and species-independent, so
+adding ordinary Pokémon or forms normally requires only a new stats extraction
+and HTML build. Regenerate the CDFs when the modeled generation algorithm,
+class distributions, numerical convolution, or compression settings change.
+
+### 5. Verify the build
+
+Run the app, stats-extractor, and float32-extrema tests:
+
+```console
+$ python3 -m unittest -q \
+    test_build_pvalue_webapp.py \
+    test_check_float32_display_extrema.py \
+    test_read_pokemon_stats_from_gm.py
+```
+
+After the tests pass, open `pvalue_lookup.html` directly and check both light
+and dark themes, a height lookup, a weight lookup, Displayed and Exact input
+modes, and both tail directions.
+
 ## Weighted size-class PDFs
 
 `pdf_tools/weighted_average_pdfs.py` accepts alternating `n/m` weights and PDF
