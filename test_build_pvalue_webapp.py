@@ -182,6 +182,8 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("embeds 837 polynomial segments across 12 distributions", html)
         self.assertIn("that large PDF is not included in this page", html)
         self.assertIn("answers tail-probability questions", html)
+        self.assertIn('href="https://github.com/bmenrigh/pogo_size"', html)
+        self.assertIn("needed to reproduce this application", html)
         self.assertIn("How the game generates height and weight", html)
         self.assertIn("chooses the size class first", html)
         self.assertIn("exact random-selection implementation is not known", html)
