@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Pokémon Size Probability in Pokémon GO</title>
+  <script>
+    (()=>{let theme;try{theme=localStorage.getItem("pogo-size-theme")}catch{}if(theme!=="light"&&theme!=="dark")theme=typeof matchMedia==="function"&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=theme})();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #647084;
+      --paper: #fffdf8;
+      --panel: rgba(255,255,255,.88);
+      --line: #dce1e8;
+      --red: #e84855;
+      --red-dark: #bd2938;
+      --blue: #3975d5;
+      --blue-soft: #eaf2ff;
+      --shadow: 0 20px 55px rgba(29,42,68,.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(232,72,85,.13), transparent 30rem),
+        radial-gradient(circle at 88% 2%, rgba(57,117,213,.14), transparent 34rem),
+        linear-gradient(145deg, #fffaf1, #f5f8fc 55%, #eef4ff);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .25;
+      background-image: linear-gradient(rgba(23,32,51,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,32,51,.035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(to bottom, black, transparent 70%);
+    }
+    main { width: min(1040px, calc(100% - 32px)); margin: 0 auto; padding: 52px 0 64px; position: relative; }
+    header { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; }
+    .header-copy { min-width: 0; }
+    .mark {
+      width: 64px; height: 64px; flex: 0 0 auto;
+      filter: drop-shadow(0 9px 10px rgba(23,32,51,.18));
+    }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1; letter-spacing: -.045em; }
+    header p { margin: 8px 0 0; color: var(--muted); font-size: .98rem; }
+    button.theme-switch {
+      width: 64px; height: 36px; flex: 0 0 auto; margin-left: auto; padding: 0 8px; position: relative;
+      display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--line); border-radius: 999px;
+      color: var(--muted); background: rgba(255,255,255,.72); box-shadow: 0 5px 14px rgba(23,32,51,.12); font-size: 15px;
+    }
+    button.theme-switch::after {
+      content: ""; width: 26px; height: 26px; position: absolute; left: 4px; top: 4px; border-radius: 50%;
+      background: white; box-shadow: 0 2px 7px rgba(23,32,51,.22); transition: transform .2s ease;
+    }
+    .theme-switch span { position: relative; z-index: 1; width: 18px; line-height: 1; text-align: center; }
+    .theme-sun { color: #d98d0b; }
+    .theme-moon { color: #72819a; }
+    html[data-theme="dark"] .theme-switch::after { transform: translateX(28px); }
+    html[data-theme="dark"] .theme-moon { color: #4a5b76; }
+    .workspace { display: grid; grid-template-columns: minmax(290px, .82fr) minmax(360px, 1.18fr); gap: 22px; align-items: start; }
+    .panel { background: var(--panel); border: 1px solid rgba(255,255,255,.9); box-shadow: var(--shadow); border-radius: 22px; backdrop-filter: blur(12px); }
+    .controls { padding: 25px; position: sticky; top: 20px; }
+    .eyebrow { color: var(--red-dark); font-size: .74rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 18px; }
+    label, legend { display: block; color: #3d485b; font-size: .8rem; font-weight: 750; letter-spacing: .035em; margin-bottom: 8px; }
+    .field { margin-bottom: 20px; }
+    input[type="text"] {
+      width: 100%; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.92); color: var(--ink); font: inherit; padding: 12px 13px; outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(57,117,213,.14); }
+    .measurement { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; }
+    .unit { display: grid; place-items: center; min-width: 48px; border-radius: 12px; color: var(--muted); background: #eef1f5; font-weight: 800; }
+    fieldset { border: 0; padding: 0; margin: 0 0 20px; }
+    .toggle { display: grid; grid-template-columns: 1fr 1fr; background: #edf0f4; padding: 4px; border-radius: 12px; }
+    .toggle input { position: absolute; opacity: 0; pointer-events: none; }
+    .toggle label { margin: 0; padding: 9px 8px; border-radius: 9px; text-align: center; cursor: pointer; color: var(--muted); }
+    .toggle input:checked + label { color: var(--ink); background: white; box-shadow: 0 2px 8px rgba(23,32,51,.11); }
+    .mode-hint { margin: 7px 2px 0; color: var(--muted); font-size: .72rem; line-height: 1.35; }
+    button { width: 100%; border: 0; border-radius: 12px; padding: 13px 16px; color: white; background: linear-gradient(135deg, var(--red), var(--red-dark)); font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 9px 20px rgba(189,41,56,.2); }
+    button:hover { filter: brightness(1.04); }
+    .error { min-height: 1.2em; margin: 12px 2px 0; color: var(--red-dark); font-size: .82rem; }
+    .results { padding: 25px; }
+    .result-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+    .result-head h2 { margin: 0 0 5px; font-size: 1.25rem; letter-spacing: -.02em; }
+    .result-head p { margin: 0; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+    .normalized { flex: 0 0 auto; color: var(--blue); background: var(--blue-soft); padding: 8px 10px; border-radius: 10px; font: 750 .78rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .rounding-note { margin: 14px 0 -6px; padding: 11px 13px; border-radius: 11px; color: #325584; background: var(--blue-soft); font-size: .78rem; line-height: 1.5; }
+    .profile { margin-top: 18px; border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: rgba(255,255,255,.58); }
+    .profile-metrics { display: grid; grid-template-columns: repeat(3,1fr); border-bottom: 1px solid var(--line); }
+    .metric { padding: 12px 14px; }
+    .metric + .metric { border-left: 1px solid var(--line); }
+    .metric small { display: block; color: var(--muted); font-size: .69rem; font-weight: 750; text-transform: uppercase; letter-spacing: .07em; }
+    .metric b { display: block; margin-top: 3px; font: 750 .91rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .range-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .range-table caption { padding: 11px 14px 7px; color: var(--ink); text-align: left; font-weight: 800; }
+    .range-table th, .range-table td { padding: 7px 14px; border-top: 1px solid rgba(220,225,232,.75); text-align: left; }
+    .range-table th { color: var(--muted); font-size: .67rem; text-transform: uppercase; letter-spacing: .07em; }
+    .range-table tbody th { color: var(--ink); font-size: .76rem; text-transform: none; letter-spacing: 0; }
+    .range-table td { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+    .extrema-alert { margin-top: 13px; padding: 13px 14px; border: 1px solid #e7bf70; border-radius: 13px; background: #fff7df; color: #694b13; }
+    .extrema-alert strong { display: block; color: #593b08; font-size: .82rem; }
+    .extrema-alert > p { margin: 4px 0 0; font-size: .74rem; line-height: 1.45; }
+    .extrema-alert ul { margin: 9px 0 0; padding-left: 18px; }
+    .extrema-alert li { margin: 7px 0; font-size: .76rem; line-height: 1.45; }
+    .extrema-alert code { overflow-wrap: anywhere; color: #593b08; font-size: .72rem; }
+    .overall { margin: 22px 0; padding: 18px; border-radius: 16px; background: linear-gradient(135deg, #24324d, #172033); color: white; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; }
+    .overall small { display: block; color: #bfc9dc; margin-bottom: 5px; font-weight: 650; }
+    .overall strong { font: 750 clamp(1.25rem, 4vw, 1.8rem) ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.04em; }
+    .overall .percent { color: #bfc9dc; font-size: .86rem; text-align: right; }
+    .one-in { grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,.14); padding-top: 13px; color: #e7ecf5; font-size: .86rem; line-height: 1.45; }
+    .section-title { margin: 0 0 10px; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    .class-list { display: grid; gap: 7px; }
+    .class-row { display: grid; grid-template-columns: 84px 1fr auto; gap: 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.66); }
+    .class-row.not-applicable { opacity: .43; background: #edf0f3; filter: grayscale(.8); }
+    .class-row b { font-size: .83rem; }
+    .class-row span { color: var(--muted); font-size: .77rem; }
+    .class-row output { font: 720 .84rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .class-human { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 9px; color: #465268; font-size: .78rem; line-height: 1.45; }
+    .class-note { padding: 13px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+    .empty { color: var(--muted); text-align: center; padding: 64px 20px; }
+    .info-stack { display: grid; gap: 14px; margin-top: 22px; }
+    details.info-panel { overflow: hidden; }
+    details.info-panel summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 19px 23px; cursor: pointer; list-style: none; font-weight: 800; letter-spacing: -.01em; user-select: none; }
+    details.info-panel summary::-webkit-details-marker { display: none; }
+    details.info-panel summary::after { content: "+"; display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; color: var(--blue); background: var(--blue-soft); font-size: 1.15rem; transition: transform .18s ease; }
+    details.info-panel[open] summary::after { transform: rotate(45deg); }
+    .info-body { padding: 0 23px 23px; border-top: 1px solid var(--line); color: #465268; font-size: .88rem; line-height: 1.65; }
+    .info-body h3 { margin: 21px 0 5px; color: var(--ink); font-size: .95rem; }
+    .info-body p { margin: 0 0 10px; }
+    .info-body ol, .info-body ul { margin: 7px 0 13px; padding-left: 22px; }
+    .info-body li { margin: 5px 0; }
+    .equation { margin: 11px 0; padding: 10px 12px; border-left: 3px solid var(--blue); border-radius: 0 9px 9px 0; background: var(--blue-soft); color: #294c7d; font: .78rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .tech-note { padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.62); }
+    .weights { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 7px; margin: 13px 0; }
+    .weight-chip { padding: 10px 6px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.7); text-align: center; }
+    .weight-chip b { display: block; color: var(--ink); font-size: .78rem; }
+    .weight-chip span { display: block; color: var(--muted); font: .74rem ui-monospace, SFMono-Regular, Menlo, monospace; margin-top: 3px; }
+    .site-footer { margin-top: 24px; padding: 14px 4px 0; border-top: 1px solid var(--line); color: var(--muted); text-align: left; font-size: .64rem; line-height: 1.45; opacity: .72; }
+    .site-footer p { margin: 0 0 5px; }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --ink: #eef3fb;
+      --muted: #aab6c8;
+      --panel: rgba(24,31,46,.9);
+      --line: #3c485c;
+      --red: #ff6674;
+      --red-dark: #ed4b5a;
+      --blue: #82adff;
+      --blue-soft: #203653;
+      --shadow: 0 20px 55px rgba(0,0,0,.3);
+    }
+    html[data-theme="dark"] body {
+      background:
+        radial-gradient(circle at 12% 12%, rgba(232,72,85,.12), transparent 30rem),
+        radial-gradient(circle at 88% 2%, rgba(57,117,213,.16), transparent 34rem),
+        linear-gradient(145deg, #111621, #151c29 55%, #101827);
+    }
+    html[data-theme="dark"] body::before {
+      opacity: .32;
+      background-image: linear-gradient(rgba(210,222,242,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(210,222,242,.035) 1px, transparent 1px);
+    }
+    html[data-theme="dark"] .panel { border-color: rgba(104,121,148,.38); }
+    html[data-theme="dark"] label, html[data-theme="dark"] legend { color: #c4cede; }
+    html[data-theme="dark"] input[type="text"] { background: rgba(15,21,32,.88); }
+    html[data-theme="dark"] .unit, html[data-theme="dark"] .toggle { background: #202a3a; }
+    html[data-theme="dark"] .toggle input:checked + label { background: #354257; }
+    html[data-theme="dark"] button.theme-switch { background: rgba(24,31,46,.88); }
+    html[data-theme="dark"] button.theme-switch::after { background: #cbd5e3; }
+    html[data-theme="dark"] .rounding-note { color: #b9d2ff; }
+    html[data-theme="dark"] .profile, html[data-theme="dark"] .class-row, html[data-theme="dark"] .tech-note, html[data-theme="dark"] .weight-chip { background: rgba(15,21,32,.54); }
+    html[data-theme="dark"] .range-table th, html[data-theme="dark"] .range-table td { border-top-color: rgba(74,88,110,.72); }
+    html[data-theme="dark"] .class-row.not-applicable { background: #222b38; }
+    html[data-theme="dark"] .class-human, html[data-theme="dark"] .info-body { color: #bdc7d6; }
+    html[data-theme="dark"] .equation { color: #c1d7ff; }
+    html[data-theme="dark"] .extrema-alert { border-color: #85692f; background: #342b18; color: #ead29e; }
+    html[data-theme="dark"] .extrema-alert strong, html[data-theme="dark"] .extrema-alert code { color: #f0d99f; }
+    @media (max-width: 760px) {
+      main { padding-top: 30px; }
+      .workspace { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .result-head { display: block; }
+      .normalized { display: inline-block; margin-top: 12px; }
+      .weights { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .profile-metrics { grid-template-columns: 1fr; }
+      .metric + .metric { border-left: 0; border-top: 1px solid var(--line); }
+      .range-table th, .range-table td { padding-left: 10px; padding-right: 10px; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .panel { animation: rise .45s ease both; }
+      .results { animation-delay: .08s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <clipPath id="heavy-ball-shell"><circle cx="32" cy="32" r="29"/></clipPath>
+          <linearGradient id="heavy-ball-top" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#88796d"/>
+            <stop offset="1" stop-color="#6e6259"/>
+          </linearGradient>
+          <linearGradient id="heavy-ball-blue" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#3470d0"/>
+            <stop offset="1" stop-color="#174898"/>
+          </linearGradient>
+        </defs>
+        <g clip-path="url(#heavy-ball-shell)">
+          <circle cx="32" cy="32" r="29" fill="#f4f6f7"/>
+          <path d="M3 33A29 29 0 0 1 61 33V39H3Z" fill="url(#heavy-ball-top)"/>
+          <path class="heavy-ball-side" d="M-1 12C4 7 11 6 16 9C17 16 14 24 7 29C3 30 0 27-2 24Z" fill="url(#heavy-ball-blue)" stroke="#173b78" stroke-width="1.5"/>
+          <path class="heavy-ball-side" d="M65 12C60 7 53 6 48 9C47 16 50 24 57 29C61 30 64 27 66 24Z" fill="url(#heavy-ball-blue)" stroke="#173b78" stroke-width="1.5"/>
+          <circle class="heavy-ball-dot" cx="21" cy="27" r="4.8" fill="url(#heavy-ball-blue)" stroke="#173b78" stroke-width="1.4"/>
+          <circle class="heavy-ball-dot" cx="43" cy="27" r="4.8" fill="url(#heavy-ball-blue)" stroke="#173b78" stroke-width="1.4"/>
+          <path d="M1 31Q14 37 26 37Q32 33 38 37Q50 37 63 31V39Q50 44 39 42Q32 39 25 42Q13 43 1 38Z" fill="#292827"/>
+          <path d="M4 38Q15 42 25 41M39 41Q49 42 60 38" fill="none" stroke="#4b4743" stroke-width="2" stroke-linecap="round"/>
+          <ellipse cx="25" cy="12" rx="13" ry="5" fill="rgba(255,255,255,.09)" transform="rotate(-12 25 12)"/>
+        </g>
+        <circle cx="32" cy="32" r="29" fill="none" stroke="#292827" stroke-width="3"/>
+        <circle cx="32" cy="37" r="8.5" fill="#292827"/>
+        <circle cx="32" cy="37" r="6.2" fill="#f4f6f7" stroke="#aeb8bf" stroke-width="1.4"/>
+        <circle cx="32" cy="37" r="3.7" fill="#e4e8eb"/>
+      </svg>
+      <div class="header-copy"><h1>Pokémon Size Probability in Pokémon GO</h1><p>Exact offline tail probabilities for height and weight.</p></div>
+      <button class="theme-switch" id="theme-switch" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">☾</span></button>
+    </header>
+    <div class="workspace">
+      <form class="panel controls" id="calculator" novalidate>
+        <div class="eyebrow">Size prevalence lookup</div>
+        <div class="field">
+          <label for="pokemon">Pokémon or form</label>
+          <input id="pokemon" type="text" list="pokemon-options" autocomplete="off" spellcheck="false" placeholder="Start typing a name or number">
+          <datalist id="pokemon-options"></datalist>
+        </div>
+        <fieldset>
+          <legend>Measurement</legend>
+          <div class="toggle">
+            <input id="type-height" type="radio" name="measurement" value="height" checked><label for="type-height">Height</label>
+            <input id="type-weight" type="radio" name="measurement" value="weight"><label for="type-weight">Weight</label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label id="value-label" for="value">Observed height</label>
+          <div class="measurement"><input id="value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"><span class="unit" id="unit">m</span></div>
+        </div>
+        <fieldset>
+          <legend>Entered value is</legend>
+          <div class="toggle">
+            <input id="mode-displayed" type="radio" name="interpretation" value="displayed" checked><label for="mode-displayed">Displayed</label>
+            <input id="mode-exact" type="radio" name="interpretation" value="exact"><label for="mode-exact">Exact</label>
+          </div>
+          <div class="mode-hint" id="mode-hint">Displayed is selected automatically for two or fewer decimal places.</div>
+        </fieldset>
+        <fieldset>
+          <legend>Tail</legend>
+          <div class="toggle">
+            <input id="tail-lower" type="radio" name="tail" value="lower" checked><label for="tail-lower">Lower ≤</label>
+            <input id="tail-upper" type="radio" name="tail" value="upper"><label for="tail-upper">Upper ≥</label>
+          </div>
+        </fieldset>
+        <button type="submit">Calculate probability</button>
+        <div class="error" id="error" role="alert"></div>
+      </form>
+      <section class="panel results" id="results" aria-live="polite">
+        <div class="empty">Choose a Pokémon and enter a measurement to calculate its probability.</div>
+      </section>
+    </div>
+    <div class="info-stack">
+      <details class="panel info-panel">
+        <summary>Frequently Asked Questions</summary>
+        <div class="info-body">
+          <h3>What does the overall probability mean?</h3>
+          <p>It estimates the fraction of Pokémon from the modeled wild-catch population whose displayed or exact height or weight is at least as extreme in the selected direction. “1 in 1,000” is another way to read a probability of 0.001.</p>
+
+          <h3>Is this a traditional statistical p-value?</h3>
+          <p>No. This app reports a <b>one-sided tail probability</b> under the size model: either the fraction at or below the observation or the fraction at or above it. It does not perform a formal hypothesis test or calculate a two-sided p-value.</p>
+
+          <h3>How common is each size class in the wild?</h3>
+          <p>The overall wild-catch distribution uses these class weights:</p>
+          <div class="weights">
+            <div class="weight-chip"><b>XXS</b><span>1/250</span></div>
+            <div class="weight-chip"><b>XS</b><span>1/40</span></div>
+            <div class="weight-chip"><b>Average</b><span>471/500</span></div>
+            <div class="weight-chip"><b>XL</b><span>1/40</span></div>
+            <div class="weight-chip"><b>XXL</b><span>1/250</span></div>
+          </div>
+          <p>These add to exactly 1. The average class therefore accounts for 94.2% of this model.</p>
+
+          <h3>Does this mixture apply to every encounter?</h3>
+          <p>We don't know, but probably not. Raid, research, and Team GO Rocket encounters may use different class probabilities, and some events may adjust size rates. No exact data is available here for the class weights of non-wild encounters. The overall result should therefore be treated as a wild-catch estimate unless the encounter is known to use the same rates.</p>
+
+          <h3>Does everyone who catches the same Pokémon get the same height and weight?</h3>
+          <p>No. When multiple Trainers catch the same spawn, its size class is shared: they will all receive an XXS, XS, Average, XL, or XXL Pokémon. Within that class, however, the height and intrinsic-weight variates are randomized separately for each Trainer, so the resulting height and weight can differ.</p>
+          <p>This behavior has changed over time. Originally, everyone catching the same spawn received the same height and weight. Around the introduction of PokéStop Showcases, the intrinsic-weight variate began to be randomized for each Trainer while the height variate remained shared. At some later point, on a date that is not known, the height variate also began to be randomized. The current model reflects the present behavior: shared size class, independently randomized height and weight variates.</p>
+
+          <h3>Does evolution reroll a Pokémon’s height or weight?</h3>
+          <p>No. Evolution preserves the Pokémon’s size class and its underlying height and intrinsic-weight variates. Its evolved height therefore changes predictably with the species’ mean height:</p>
+          <div class="equation">new height = old height × (new mean height / old mean height)</div>
+          <p>The evolved weight is predictable as well, but it does not have an equally simple ratio rule. It must be recomputed from the preserved height and intrinsic-weight variates, the evolved species’ mean weight, the squared-height rule (or the unsquared XXL rule), and the nonpositive-weight fallback.</p>
+          <p>The practical obstacle is display rounding, not new randomness during evolution. The game shows only two decimal places, so the displayed height and weight hide the exact variates within rounding intervals. With the exact underlying values the evolved measurements would be deterministic; from displayed values alone, it may only be possible to predict a narrow range of outcomes.</p>
+
+          <h3>Does trading reroll a Pokémon’s height or weight?</h3>
+          <p>Not currently. Trading preserves the Pokémon’s existing height and weight. This was not always the case: trades formerly rerolled the intrinsic-weight variate, which could change the Pokémon’s weight while preserving its height. The date when trading changed to preserve weight is not known.</p>
+
+          <h3>What are the conditional class results?</h3>
+          <p>They answer a different question: given that a Pokémon belongs to a particular size class, how unusual is its measurement within that class? Height normally determines the class directly. Weight alone can be possible in several classes because height and weight both contribute to the weight distribution.</p>
+
+          <h3>Do conditional results show which class is most likely?</h3>
+          <p>No. A result such as “10% of XS Pokémon are this light or lighter” is P(weight ≤ observation | XS); it is not the probability that the observed Pokémon belongs to XS. Estimating class membership from weight would require combining every class’s prior frequency with the probability of observing that weight in each class. This app does not perform that reverse inference.</p>
+
+          <h3>Why can more than one conditional height class appear?</h3>
+          <p>An exact height determines one size class under the game’s boundary convention. A displayed two-decimal height represents an interval of possible exact heights, however, and that interval can cross a class boundary. In that case this app shows every class compatible with the displayed value and gives the conditional result within each possible class.</p>
+
+          <h3>Why are some conditional weight classes grey?</h3>
+          <p>The entered weight lies outside those classes’ possible weight ranges, so a Pokémon with that weight cannot belong to those classes under this model.</p>
+
+          <h3>What is the difference between Displayed and Exact?</h3>
+          <p>Pokémon GO displays height and weight rounded to two decimal places. Displayed mode treats an entered value as the full interval that rounds to it; Exact mode treats it as the underlying value. The calculator selects Displayed automatically for values with two or fewer decimal places and Exact for values with more precision.</p>
+
+          <h3>How does Displayed mode affect Lower and Upper results?</h3>
+          <p>A displayed value of 2.41 represents exact values in the half-open interval [2.405, 2.415). A Lower result therefore counts values that would display as 2.41 or less by looking just below 2.415. An Upper result counts values that would display as 2.41 or more by looking at 2.405 inclusively. This is why the exact value used for a displayed lookup depends on the selected tail direction.</p>
+
+          <h3>Does the Pokédex use the same rounding as an individual Pokémon?</h3>
+          <p>No. An individual Pokémon’s displayed height and weight use the usual nearest-value convention: a halfway digit rounds up (0.5 toward 1), while a value just below halfway rounds down (for example, 0.4999 toward 0). The size records stored and displayed in the Pokédex use a different rounding convention.</p>
+          <p>This calculator’s <b>Displayed</b> treatment models the rounded height or weight shown for an individual Pokémon only. It does not model the Pokédex size-record display, so Pokédex record values should not be entered as though they were individual displayed measurements.</p>
+
+          <h3>Can a Pokémon display a weight of 0 kg?</h3>
+          <p>Yes. Any actual weight from 0 kg up to, but not including, 0.005 kg rounds to a displayed weight of 0.00 kg. The modeled weight ranges of both the XXS and XS size classes extend below 0.005 kg, so every species can theoretically display a weight of 0 kg.</p>
+          <p>The higher a species’ mean weight, the smaller this interval is relative to its usual weight and the less likely the result becomes. At the extreme, Primal Groudon has a mean weight of 999.7 kg and only about a 1 in 50.6 million chance of displaying 0 kg!</p>
+
+          <h3>Can float32 change an extreme displayed value?</h3>
+          <p>Possibly. Pokémon height and weight are transmitted to the game as IEEE-754 float32 values—the 32-bit single-precision floating-point format. Most decimal values cannot be represented exactly as float32. Usually the difference is far too small to affect a two-decimal display, but a theoretical minimum or maximum ending exactly at a half-cent rounding boundary can move just below that boundary.</p>
+          <p>The current stats contain three kinds of changed display boundary:</p>
+          <ol>
+            <li><b>Minimum height displays lower:</b> Kyogre’s nominal minimum is 2.205 m, which would round to 2.21 m. Its exact float32 value is 2.2049999237060546875, which should round to 2.20 m.</li>
+            <li><b>Maximum height displays lower:</b> Kyogre’s nominal maximum is 6.975 m, which would round to 6.98 m. Its exact float32 value is 6.974999904632568359375, which should round to 6.97 m.</li>
+            <li><b>Maximum weight displays lower:</b> Caterpie’s nominal maximum is 7.975 kg, which would round to 7.98 kg. Its exact float32 value is 7.974999904632568359375, which should round to 7.97 kg.</li>
+          </ol>
+          <p class="tech-note"><b>This behavior is theorized, not verified in practice.</b> Testing it requires finding a Pokémon at the true mathematical minimum or maximum height, or maximum possible weight. Landing exactly at one of those endpoints is so extraordinarily unlikely that no real-world example has come forward. The affected Pokémon are flagged in their result cards, but those notes should be treated as predictions until an endpoint specimen can test them.</p>
+
+          <h3>How do displayed weights affect the Youngster and Fisher badges?</h3>
+          <p>For the <b>Youngster</b> badge (“tiny Rattata”), the maximum exact weight is 2.40625 kg for both Kanto and Alolan Rattata, even though Alolan Rattata has a higher mean weight. Every Rattata displayed as 2.40 kg or less qualifies, and every Rattata displayed as 2.42 kg or more does not. A displayed weight of 2.41 kg represents [2.405, 2.415) kg, so exactly 1 in 8 Rattata with that displayed weight qualify.</p>
+          <p>For the <b>Fisher</b> badge (“big Magikarp”), the minimum exact weight is 13.125 kg. Therefore every Magikarp displayed as 13.13 kg or more qualifies.</p>
+
+          <h3>Why is Zorua missing?</h3>
+          <p>Zorua has multiple in-game bugs involving its recorded height and weight. Because those measurements do not reliably follow the normal size system, Zorua has been omitted from this calculator.</p>
+
+          <h3>Why are Pumpkaboo and Gourgeist missing?</h3>
+          <p>Pumpkaboo and Gourgeist are special cases whose size classes do not behave like those of other Pokémon. Their Game Master bounds do not fit the standard size model used by this calculator, so both species and all their forms have been omitted for now.</p>
+
+          <h3>What other Pokémon are excluded?</h3>
+          <p>Several regional or alternate forms have contradictory records in the Game Master. Their form-specific Pokédex mean heights disagree with the mean implied by their extended size-class bounds:</p>
+          <ul>
+            <li><b>Hisuian Lilligant:</b> Pokédex mean 1.2 m; size-class mean 1.1 m.</li>
+            <li><b>Hisuian Avalugg:</b> Pokédex mean 1.4 m; size-class mean 2.0 m.</li>
+            <li><b>Black Kyurem:</b> Pokédex mean 3.3 m; size-class mean 3.0 m.</li>
+            <li><b>White Kyurem:</b> Pokédex mean 3.6 m; size-class mean 3.0 m.</li>
+          </ul>
+          <p>In each case, the extended size bounds appear to have been copied from the ordinary form instead of being adjusted for the alternate form’s mean height. This is likely a Game Master oversight or in-game data bug. The calculator omits these forms rather than guessing which contradictory value should determine their height and weight distributions.</p>
+
+          <h3>What are the three XXL height classes?</h3>
+          <p>XXL begins at 1.5 times a Pokémon’s mean height, but its maximum depends on the species. The three possible upper bounds are 1.55, 1.75, and 2.00 times the mean height: 155%, 175%, or 200% of the species’ average. The calculator reads each Pokémon’s XXL class and selects the matching full and conditional weight distributions.</p>
+          <p>It is not known what criteria were used to assign an individual species to one of these three XXL classes. The assignments are taken from the species’ size settings rather than inferred from its ordinary height, weight, body shape, or evolutionary relationships.</p>
+          <p>Most members of an evolutionary family share the same XXL class, but not every family does, so evolution can cross from one class to another. For example, Eevee uses the 1.75 class, while Vaporeon uses the 1.55 class; evolving Eevee into Vaporeon therefore changes the applicable XXL upper bound from 1.75 to 1.55 times the species’ mean height. The other included Eeveelutions also use the 1.55 class.</p>
+          <p>Within any of these XXL ranges, 95% of XXL heights occupy the first 80% of the range and 5% occupy the final 20%.</p>
+
+          <h3>How does the XXS height class work?</h3>
+          <p>For most Pokémon, XXS height runs from 0.49 to 0.50 times the species’ mean height. Five percent of XXS heights occupy the first 20% of that narrow range, while 95% occupy the remaining 80%.</p>
+          <p>The Scatterbug family (Scatterbug, Spewpa, and Vivillon) uses a different XXS range from 0.25 to 0.50 times mean height. Its internal split occurs at 0.30 times the mean, and the calculator uses dedicated full and conditional XXS weight distributions for this family.</p>
+
+          <h3>Why can XL Pokémon be heavier than XXL Pokémon?</h3>
+          <p>The weight formula squares normalized height for XXS through XL Pokémon, which greatly increases height’s contribution near the top of the XL range. XXL is a special case: its normalized height is not squared. As a result, XL Pokémon tend to be much heavier than XXL Pokémon, and an XXL Pokémon can have a lower weight than an XL Pokémon of the same species.</p>
+
+          <h3>Where do the species data come from?</h3>
+          <p>Species names, forms, mean heights, mean weights, and size bounds were extracted from a Pokémon GO Game Master snapshot bundled with the build tools. This page was built on <time datetime="@@BUILD_DATE_ISO@@">@@BUILD_DATE_LONG@@</time>, and its data and knowledge are up to date as of that build date.</p>
+          <p>This is a standalone page and does not dynamically load new Game Master data or behavior updates. It will not reflect Pokémon or forms released after the build date, nor later changes to size mechanics, class rates, existing species data, or known game behavior, until the source data are updated and the page is rebuilt.</p>
+        </div>
+      </details>
+
+      <details class="panel info-panel">
+        <summary>Technical Details</summary>
+        <div class="info-body">
+          <h3>Normalized variables</h3>
+          <p>The distributions are species-independent after normalization. A Pokémon’s observed height and weight are divided by the mean height and mean weight for that form:</p>
+          <div class="equation">h = observed height / mean height<br>w = observed weight / mean weight</div>
+          <p>A normalized value of 1 therefore means that species’ average. The calculator performs all probability lookups in normalized coordinates and converts class ranges back to metres and kilograms for display.</p>
+
+          <h3>How the game generates height and weight</h3>
+          <p>The generation order matters. The game does not draw a height and then infer a size class from it; it chooses the size class first and samples from that class’s height range:</p>
+          <ol>
+            <li><b>Choose a size class.</b> The modeled wild class probabilities are 1/250 for XXS, 1/40 for XS, 471/500 for Average, 1/40 for XL, and 1/250 for XXL. These weights have a common denominator of 500, but the game’s exact random-selection implementation is not known; only the resulting class probabilities matter to this model.</li>
+            <li><b>Draw normalized height <i>h</i>.</b> XS is uniform on [0.5, 0.75], Average on [0.75, 1.25], and XL on [1.25, 1.5]. XXS and XXL use the two-piece distributions described below. Multiplying <i>h</i> by the species’ mean height produces its actual height.</li>
+            <li><b>Draw the intrinsic-weight variate <i>w</i><sub>v</sub>.</b> Draw <i>Z</i> from a standard normal distribution, form <i>w</i><sub>v,raw</sub> = 1 + <i>Z</i>/8, and clamp the result to [0.5, 1.5]. This draw is independent of height.</li>
+            <li><b>Combine the variates.</b> For XXS through XL, the height contribution is <i>t</i> = <i>h</i>². For XXL only, it is <i>t</i> = <i>h</i>. The provisional normalized weight is <i>w</i><sub>0</sub> = <i>w</i><sub>v</sub> + <i>t</i> − 1, and actual weight is the species’ mean weight multiplied by the resulting normalized <i>w</i>.</li>
+          </ol>
+          <div class="equation">XXS–XL: w₀ = w<sub>v</sub> + h² − 1<br>XXL: w₀ = w<sub>v</sub> + h − 1</div>
+          <p>If <i>w</i><sub>0</sub> is zero or negative, the implemented generator does not resample. It replaces the <b>intrinsic-weight variate</b> <i>w</i><sub>v</sub> with 1.0, making the final normalized weight <i>w</i> = <i>t</i>.</p>
+
+          <h3>The XXS and XXL height-density steps</h3>
+          <p>XXS and XXL are not uniform across their complete height ranges. Each is made by first choosing one of two adjacent subranges and then drawing uniformly within the chosen subrange. There is no gap and no discrete mass at the boundary, but the PDF is a step function: its height changes abruptly while its CDF remains continuous.</p>
+          <p>Let <i>d</i><sub>small</sub> = 0.5 − <i>h</i><sub>min</sub>. For XXS, 1/20 of the class lands uniformly in the lowest 20% of its range, while 19/20 lands uniformly in the upper 80%:</p>
+          <div class="equation">5%: [h<sub>min</sub>, h<sub>min</sub> + 0.2d<sub>small</sub>]<br>95%: [h<sub>min</sub> + 0.2d<sub>small</sub>, 0.5]</div>
+          <p>The density is therefore 0.25/<i>d</i><sub>small</sub> below the split and 1.1875/<i>d</i><sub>small</sub> above it: an upward jump by a factor of 4.75. For ordinary species the split is at 0.492; for the Scatterbug family it is at 0.30.</p>
+          <p>XXL reverses the arrangement. Let <i>d</i><sub>large</sub> = <i>h</i><sub>max</sub> − 1.5. The first 80% of the range receives 19/20 of XXL Pokémon and the final 20% receives 1/20:</p>
+          <div class="equation">95%: [1.5, 1.5 + 0.8d<sub>large</sub>]<br>5%: [1.5 + 0.8d<sub>large</sub>, h<sub>max</sub>]</div>
+          <p>Its density consequently steps downward by the same factor of 4.75. The split points are 1.54, 1.70, and 1.90 for the 1.55, 1.75, and 2.00 XXL classes.</p>
+
+          <h3>Exact probability at the weight clamps</h3>
+          <p>Before clamping, <i>w</i><sub>v,raw</sub> has mean 1 and standard deviation 1/8. Both clamp boundaries are exactly four standard deviations from the mean. All draws at or below 0.5 become exactly 0.5, and all draws at or above 1.5 become exactly 1.5. Symmetry gives the same discrete probability mass at both endpoints:</p>
+          <div class="equation">P(w<sub>v</sub> = 0.5) = P(Z ≤ −4) = Φ(−4) = ½ erfc(2√2)<br>P(w<sub>v</sub> = 1.5) = P(Z ≥ 4) = Φ(−4) = ½ erfc(2√2)</div>
+          <p>Each endpoint therefore has probability 0.00003167124183311996, or 0.003167124183311996%, about 1 in 31,574.4 weight-variate draws. Together the two clamp masses account for 0.00006334248366623993, or 0.006334248366623993% (about 1 in 15,787.2); the remaining 99.99366575163338% is continuous between the endpoints. The convolution carries these two exact point masses separately from the continuous normal density.</p>
+
+          <h3>Why the weight distribution is not estimated by random sampling</h3>
+          <p>A Monte Carlo simulation is straightforward: randomly choose a size class, draw a height variate, draw an intrinsic-weight variate, combine them, and count the result in a weight bucket. It is not precise enough for this job. A sampled PDF is visibly noisy even after hundreds of billions of generated Pokémon.</p>
+          <p>The difficulty is that the PDF is divided into buckets only 0.000001 normalized-weight units wide. Many individual buckets (especially in the tails) have tiny probabilities. If a bucket has probability <i>p</i> and the simulation makes <i>N</i> draws, it receives only <i>Np</i> samples on average, and its relative sampling noise is roughly proportional to 1/√(<i>Np</i>). Increasing an already enormous simulation reduces noise only by the square root of the extra work. Rare-tail buckets remain noisy, and accumulating those errors damages the p-values this tool is intended to measure.</p>
+          <p class="tech-note">The generated tables therefore contain no Monte Carlo sampling noise. They come from deterministic numerical convolution of the input distributions.</p>
+
+          <h3>The exact input distributions</h3>
+          <p>The normalized height distribution is known analytically. Each size class is uniform over one or two fixed intervals. The overall wild model mixes those intervals using the XXS, XS, Average, XL, and XXL probabilities listed in the FAQ. XXS and XXL have their internal 1-to-19 splits, and the outer endpoints come from the species’ XXS and XXL classes.</p>
+          <p>The intrinsic-weight variate is known analytically as well. Its continuous bucket probabilities are calculated from differences of the normal CDF (the error function), while the exact masses created by clamping at 0.5 and 1.5 are handled explicitly. The squared or linear height transformation and the nonpositive-result rule are then applied exactly as described above. These transformations explain both the shape of the weight PDF and why the XXL weight range can begin below the XL range.</p>
+
+          <h3>Why height needs no polynomial compression</h3>
+          <p>The height distribution is well behaved and can be evaluated directly. Its PDF is constant within each of the class subranges described above, so integrating it produces an exact piecewise-linear CDF. For a height lookup, this app locates the containing subrange, adds the complete probability of every preceding subrange, and adds the appropriate linear fraction of the current one. The upper tail is computed from the same exact interval probabilities.</p>
+          <p>No numerical convolution, millionth-spaced table, or fitted polynomial is needed for height. The complex PDF construction and degree-5 CDF/survival compression described below apply only to weight.</p>
+
+          <h3>High-resolution numerical convolution</h3>
+          <p>The height and intrinsic-weight inputs are first converted into exact bucket probabilities on a grid with width Δx = 10<sup>−6</sup>. This is done by subtracting their analytic CDF values at the two edges of each bucket, not by sampling. The height calculation applies the inverse square-root transformation where height was squared and the linear inverse transformation for XXL.</p>
+          <p>The two independent distributions are then convolved. Let <i>a</i> = <i>t</i> − 1 be the transformed-height offset. For every possible offset <i>a</i> and intrinsic-weight variate <i>w</i><sub>v</sub>, their probabilities are multiplied and added to the bucket for <i>a</i> + <i>w</i><sub>v</sub>:</p>
+          <div class="equation">f<sub>W</sub>(w) = ∫ f<sub>A</sub>(a) f<sub>Wv</sub>(w − a) da</div>
+          <p>The implementation performs the discrete high-resolution equivalent, including the clamped endpoint masses and splitting contributions across neighboring buckets to retain the left-edge alignment. Because each input bucket probability is derived from an analytic CDF, the result is a deterministic numerical integration rather than a random estimate.</p>
+          <p>The resulting normalized weight PDF spans 0 through 2.75 and contains 2,750,001 rows at millionth-unit spacing for each distribution. Separate convolutions produce the three full XXL variants, the Scatterbug-family mixture, and the conditional XXS, XS, Average, XL, and XXL distributions.</p>
+
+          <h3>PDF density versus CDF probability</h3>
+          <p>The direct result of convolution is a probability density function (PDF), written <i>f(w)</i>. A PDF value describes how concentrated probability is near a weight; it is not itself the probability of observing that exact weight. In the continuous parts of the model, probability comes from the <i>area</i> under the PDF across an interval. The intrinsic-weight input also has discrete boundary masses introduced by clamping; those are carried through the convolution explicitly rather than being mistaken for ordinary density.</p>
+          <div class="equation">P(a ≤ W ≤ b) = ∫<sub>a</sub><sup>b</sup> f(w) dw</div>
+          <p>This distinction matters for interpretation. A large density says that nearby weights are locally common, but it does not answer “How many Pokémon are this light or lighter?” or “How many are this heavy or heavier?” Those are cumulative, one-sided tail questions.</p>
+          <p>The resulting PDF is piecewise smooth, not globally differentiable. Three parts of the generation algorithm create non-smooth features:</p>
+          <ul>
+            <li>Clamping <i>w</i><sub>v</sub> creates point masses at 0.5 and 1.5. Convolution with the continuous height distribution spreads each mass into a shifted copy of the transformed-height density, including its edges and density steps.</li>
+            <li>The XXS and XXL height PDFs change density abruptly at their internal 5%/95% boundaries. Their transformed contributions carry those step changes into the weight PDF.</li>
+            <li>When a provisional weight is nonpositive, replacing <i>w</i><sub>v</sub> with 1 concentrates all such outcomes onto <i>w</i> = <i>t</i>. This adds another component shaped by the transformed-height distribution, with its own sharp boundaries.</li>
+          </ul>
+          <p>Depending on how these components meet, the weight PDF can have jump discontinuities (the density itself changes instantly) or kinks (the density is continuous but its slope changes instantly). “Discontinuity” is correct for the former, but <b>non-smooth breakpoint</b> is the useful general term covering both.</p>
+          <p>The lower cumulative distribution function (CDF) integrates all PDF area from the minimum possible weight through <i>x</i>. The survival function integrates in the opposite direction:</p>
+          <div class="equation">F(x) = ∫<sub>−∞</sub><sup>x</sup> f(w) dw = P(W ≤ x)<br>S(x) = ∫<sub>x</sub><sup>∞</sup> f(w) dw = P(W ≥ x)</div>
+          <p>Integration smooths these features but does not erase them. The final-weight distribution has no point masses because height remains continuously distributed, so its CDF is continuous. A jump in the PDF becomes an abrupt change in CDF slope, making the CDF nondifferentiable at that point; a PDF kink appears as a change in the CDF’s curvature. The survival function has the same non-smooth locations.</p>
+          <p class="tech-note">The expensive convolution builds the high-resolution PDF, but that large PDF is not included in this page. It is integrated once during the build process, and this page stores compact polynomial representations of the resulting CDF and survival functions. This app therefore answers tail-probability questions, not point-density questions.</p>
+
+          <h3>Converting the PDF into accurate lower and upper tails</h3>
+          <p>Every raw PDF value is aligned to the left edge of its bucket. Its probability mass is the density multiplied by the distance to the next coordinate. All bucket masses are summed and normalized so that the total area is exactly 1 at output precision.</p>
+          <p>The lower-tail CDF is accumulated from left to right. The survival function (the upper-tail probability) is accumulated independently from right to left. Both directions use compensated floating-point summation. Computing the survival tail independently is important: obtaining a tiny upper-tail probability by subtracting a CDF near 1 would discard many significant digits.</p>
+          <div class="equation">CDF(x) = P(W ≤ x)<br>Survival(x) = P(W ≥ x) = 1 − CDF(x)</div>
+          <p>The uncompressed table stores the coordinate, CDF, and survival value with 17 significant decimal digits. This is highly accurate but far too large to embed directly in a small offline page.</p>
+
+          <h3>Compressing millions of CDF points into fifth-order polynomials</h3>
+          <p>The compressor replaces long runs of table rows with best-fit degree-5 polynomial segments. For a candidate segment from <i>x₀</i> to <i>x₁</i>, the coordinate is first rescaled to <i>t</i> in [0, 1]. The polynomial is represented in an endpoint-constrained form:</p>
+          <div class="equation">t = (x − x₀) / (x₁ − x₀)<br>P(t) = (1 − t)y₀ + ty₁ + t(1 − t)Q(t)</div>
+          <p>Here <i>y₀</i> and <i>y₁</i> are the exact table values at the segment endpoints and <i>Q(t)</i> is a cubic. Multiplying the cubic by <i>t(1−t)</i> produces a polynomial of degree at most five. That factor is zero at both endpoints, so every fitted segment is forced to reproduce <i>y₀</i> and <i>y₁</i> exactly.</p>
+          <p>Adjacent segments share their endpoint. Fixing both endpoint values therefore prevents jumps at segment boundaries; the representation guarantees value continuity even though it does not require equal derivatives on the two sides.</p>
+
+          <h3>Fitting, validation, and segment selection</h3>
+          <p>The four coefficients of <i>Q</i> are found by weighted least squares over all interior points. Values closer to zero receive proportionally greater weight so that relative error, rather than only absolute error, controls the tails. The candidate is then evaluated at every original grid point it covers.</p>
+          <p>A segment is accepted only when all of these checks pass:</p>
+          <ul>
+            <li>Every nonzero source value has relative error below 10<sup>−9</sup>.</li>
+            <li>Every exact zero is reconstructed as exactly zero.</li>
+            <li>The polynomial remains monotone over the entire continuous segment, checked from the derivative and its interior extrema.</li>
+            <li>A small safety margin remains for coefficient serialization and evaluation by this page.</li>
+          </ul>
+          <p>Starting at each endpoint, the compressor uses exponential search and then binary search to find the furthest future point that still passes every test. That greedy process repeats until the entire table is covered. Thus each segment spans as much of the distribution as possible under the error and monotonicity constraints.</p>
+          <p>This exhaustive point-by-point validation is what preserves the non-smooth CDF features. The compressor does not need to know their locations beforehand. A candidate polynomial that stretches across a sharp slope or curvature change will normally exceed the error bound, causing the accepted segment to end at or immediately beside that breakpoint. The next polynomial then starts from the same exact source value, and independent derivatives on the two sides allow it to represent the abrupt change. If one polynomial can cross a milder feature, it is accepted only after reproducing every millionth-spaced source value within the 10<sup>−9</sup> bound. A feature is therefore captured either by a polynomial boundary or by a segment that has been explicitly verified across it.</p>
+
+          <h3>Why both CDF and survival polynomials are stored</h3>
+          <p>A relative-error bound on the CDF does not protect a tiny upper tail. For example, when CDF = 0.999999999, a seemingly tiny CDF error can be comparable to (or larger than) the entire survival probability of 0.000000001. Subtracting the fitted CDF from 1 would make “1 in a billion” results unreliable.</p>
+          <p>To prevent that, the lower half of each table fits CDF values directly, while the upper half fits independently accumulated survival values directly. The representation switches near the point where CDF and survival cross. At that shared boundary, the first survival value is explicitly made the exact complement of the preceding CDF value, preserving continuity.</p>
+          <p>The 10<sup>−9</sup> relative-error requirement is applied to whichever tail is smaller and therefore numerically sensitive. This keeps both the displayed probability and its reciprocal “1 in N” interpretation within the target error across the tails. The requirement is checked at every millionth-spaced source point; monotonicity prevents unphysical oscillations between those points.</p>
+
+          <h3>How this page performs a lookup</h3>
+          <p>The finished page embeds @@CDF_SEGMENT_COUNT@@ polynomial segments across @@CDF_DISTRIBUTION_COUNT@@ distributions. Their markers, endpoints, and coefficients are stored as compact base64-encoded float64 records, preserving the values written by the compressor without verbose decimal text.</p>
+          <p>For a lookup, JavaScript selects the full or conditional distribution from the Pokémon’s XXS and XXL classes, uses binary search to locate the segment containing the normalized weight, rescales the coordinate to <i>t</i>, and evaluates the polynomial with Horner’s method. A segment marked C stores the CDF; a segment marked S stores survival. In either half, the smaller and more sensitive tail is stored directly; the larger complementary tail can then be calculated safely as 1 minus that small value.</p>
+
+          <h3>Distribution selection and displayed values</h3>
+          <p>The Pokémon’s XXL class selects the 1.55, 1.75, or 2.00 full and conditional XXL distributions. Scatterbug, Spewpa, and Vivillon use their dedicated 0.25 XXS distributions and the 1.75 XXL distribution.</p>
+          <p>A displayed value such as 2.41 represents the half-open interval [2.405, 2.415). Lower-tail calculations use the greatest representable value below 2.415; upper-tail calculations use 2.405 inclusively.</p>
+
+          <h3>Accuracy and model limitations</h3>
+          <p>Every practical care has been taken to make this calculator as accurate as possible: the input distributions are evaluated analytically, the weight PDF is built by deterministic high-resolution convolution, the two tails are accumulated separately with compensated summation, polynomial endpoints are fixed exactly, and every source point is checked against a strict error bound. These measures are intended to make error introduced by this page negligible compared with the limitations of the source data and the game itself.</p>
+          <p>The 10<sup>−9</sup> relative-error target describes <b>polynomial-compression error</b>, not total error relative to real Pokémon encounters. It compares each fitted CDF or survival polynomial with the high-resolution numerical table from which it was built. That source table is itself a deterministic float64 approximation produced on a grid with spacing 10<sup>−6</sup>; it has discretization and floating-point error even though it has no Monte Carlo sampling noise.</p>
+          <p>The relative-error requirement is checked at every millionth-spaced source coordinate. Between those coordinates, the polynomial is guaranteed to remain monotone and its endpoints are fixed exactly, but there is no separate formal 10<sup>−9</sup> relative-error proof for every real number between grid points. The extremely dense grid and degree-5 shape make unobserved error unlikely, but the stated numerical guarantee is point-by-point at the source coordinates.</p>
+          <p>Numerical precision is also different from model accuracy. Results assume that the Game Master means and size bounds are correct and that the documented height and weight transformations are used. The <b>Overall population</b> result additionally assumes the modeled wild mixture: 1/250 XXS, 1/40 XS, 471/500 Average, 1/40 XL, and 1/250 XXL. If an encounter type (such as research, raids, Team GO Rocket, or an event) uses different or unknown class weights, the Overall population result will not describe that encounter population correctly. In that case, only the per-class conditional probability is meaningful once the Pokémon’s actual size class is known, because that result does not depend on how frequently the different classes occur.</p>
+          <p>Data mistakes, encounter-specific behavior, event bonuses, or future game changes can matter far more than polynomial-fitting error.</p>
+          <p>The weight distributions model continuously valued height and weight before transmission. They do not quantize every generated outcome onto the complete float32 value lattice. Some species’ possible height or weight ranges contain fewer than one billion distinct float32 values, so “one in a billion” numerical accuracy cannot literally correspond to a billion independently distinguishable in-game measurements in those ranges. The 10<sup>−9</sup> target is still useful as a conservative fitting tolerance: it ensures that polynomial compression contributes far less error than the game’s own numerical resolution.</p>
+          <p>Displayed mode accounts for the two-decimal interval represented by an individual measurement, and this page flags theorized float32 changes at exact extrema, but the full CDF tables do not model every tiny probability change that float32 quantization could introduce. The result is as accurate as practically achievable under the documented model, but finite numerical resolution, discretization, imperfect source data, and unknown or changing game behavior prevent perfect accuracy from being possible.</p>
+
+          <h3>Offline and reproducible</h3>
+          <p>Pokémon statistics and polynomial coefficients are embedded directly in this file. The calculator makes no network requests and performs every lookup locally in your browser. The standalone page is generated from the stats table and compressed CDF files, so it can be rebuilt whenever either source changes.</p>
+        </div>
+      </details>
+    </div>
+    <footer class="site-footer">
+      <p>© @@BUILD_YEAR@@ Pokémon. © 1995–@@BUILD_YEAR@@ Nintendo / Creatures Inc. / GAME FREAK inc. Pokémon GO is developed and operated by Scopely Explore—the former Niantic game team—as part of Scopely.</p>
+      <p>Pokémon names, game statistics, and related data are used without permission for informational, analytical, and commentary purposes under a good-faith claim of fair use. This unofficial fan tool is not affiliated with, endorsed by, or sponsored by Nintendo, Creatures Inc., GAME FREAK inc., The Pokémon Company, Scopely Explore, Scopely, or Niantic. No ownership of the referenced Pokémon or Pokémon GO copyrights, trademarks, or other intellectual property is claimed; all such rights remain with their respective owners.</p>
+    </footer>
+  </main>
+  <script>
+  "use strict";
+  const POKEMON_NAMES=@@POKEMON_NAMES@@.split("\n");
+  const STAT_COLUMNS=@@POKEMON_COLUMNS@@;
+  const DISPLAY_EXTREMA=@@DISPLAY_EXTREMA@@;
+  const CDF_PACKED=@@CDF_TABLES@@;
+  const [HEIGHT_VALUES,WEIGHT_VALUES,DEX_NUMBERS,HEIGHT_INDEXES,WEIGHT_INDEXES,XXS_CODES,XXL_CODES]=STAT_COLUMNS;
+  const XXL_VALUES=[1.55,1.75,2];
+  const POKEMON=POKEMON_NAMES.map((name,i)=>({index:i,dex:DEX_NUMBERS[i],name,height:HEIGHT_VALUES[HEIGHT_INDEXES[i]],weight:WEIGHT_VALUES[WEIGHT_INDEXES[i]],xxs:XXS_CODES[i]==="1"?.25:.49,xxl:XXL_VALUES[+XXL_CODES[i]]}));
+  const EXTREMA_BY_POKEMON=new Map();
+  for(const entry of DISPLAY_EXTREMA){if(!EXTREMA_BY_POKEMON.has(entry[0]))EXTREMA_BY_POKEMON.set(entry[0],[]);EXTREMA_BY_POKEMON.get(entry[0]).push(entry)}
+  const RECORD_SIZE=65;
+  const decodedTables=new Map();
+
+  function decodeTable(name){
+    if(decodedTables.has(name))return decodedTables.get(name);
+    const binary=atob(CDF_PACKED[name]);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    const table={view:new DataView(bytes.buffer),count:bytes.length/RECORD_SIZE};
+    decodedTables.set(name,table);
+    return table;
+  }
+  function segmentStart(table,index){return table.view.getFloat64(index*RECORD_SIZE+1,true)}
+  function evaluateSegment(table,index,value){
+    const offset=index*RECORD_SIZE,view=table.view;
+    const start=view.getFloat64(offset+1,true),end=view.getFloat64(offset+9,true);
+    const t=(value-start)/(end-start);
+    const y0=view.getFloat64(offset+17,true),y1=view.getFloat64(offset+25,true);
+    let correction=view.getFloat64(offset+57,true);
+    correction=correction*t+view.getFloat64(offset+49,true);
+    correction=correction*t+view.getFloat64(offset+41,true);
+    correction=correction*t+view.getFloat64(offset+33,true);
+    return (1-t)*y0+t*y1+t*(1-t)*correction;
+  }
+  function polynomialTails(tableName,value){
+    if(!Number.isFinite(value))throw new Error("Lookup value must be finite");
+    const table=decodeTable(tableName),view=table.view;
+    if(value<segmentStart(table,0))return [0,1];
+    const lastOffset=(table.count-1)*RECORD_SIZE;
+    if(value>=view.getFloat64(lastOffset+9,true))return [1,0];
+    let low=0,high=table.count;
+    while(low<high){const middle=(low+high)>>>1;if(segmentStart(table,middle)<=value)low=middle+1;else high=middle}
+    const index=low-1,stored=Math.min(1,Math.max(0,evaluateSegment(table,index,value)));
+    return view.getUint8(index*RECORD_SIZE)===0?[stored,Math.max(0,1-stored)]:[Math.max(0,1-stored),stored];
+  }
+
+  function heightBounds(xxs,xxl){
+    const lowWidth=.5-xxs,highWidth=xxl-1.5;
+    return [xxs,.5-.8*lowWidth,.5,.75,1.25,1.5,1.5+.8*highWidth,xxl];
+  }
+  function piecewiseTails(value,bounds,areas){
+    if(value<bounds[0])return [0,1];
+    if(value>=bounds[bounds.length-1])return [1,0];
+    let interval=1;
+    while(value>bounds[interval])interval++;
+    const fraction=(value-bounds[interval-1])/(bounds[interval]-bounds[interval-1]);
+    let lower=areas[interval]*fraction,upper=areas[interval]*(1-fraction);
+    for(let i=1;i<interval;i++)lower+=areas[i];
+    for(let i=interval+1;i<areas.length;i++)upper+=areas[i];
+    return [Math.min(1,Math.max(0,lower)),Math.min(1,Math.max(0,upper))];
+  }
+  function heightAreas(sizeClass){
+    if(sizeClass==="full")return [0,1/5000,19/5000,1/40,471/500,1/40,19/5000,1/5000];
+    if(sizeClass==="xxs")return [0,1/20,19/20,0,0,0,0,0];
+    if(sizeClass==="xs")return [0,0,0,1,0,0,0,0];
+    if(sizeClass==="average")return [0,0,0,0,1,0,0,0];
+    if(sizeClass==="xl")return [0,0,0,0,0,1,0,0];
+    return [0,0,0,0,0,0,19/20,1/20];
+  }
+  function heightTails(value,pokemon,sizeClass){return piecewiseTails(value,heightBounds(pokemon.xxs,pokemon.xxl),heightAreas(sizeClass))}
+  function heightClass(value,pokemon){
+    if(value<pokemon.xxs||value>pokemon.xxl)return null;
+    if(value<.5)return "xxs";
+    if(value<.75)return "xs";
+    if(value<=1.25)return "average";
+    if(value<=1.5)return "xl";
+    return "xxl";
+  }
+  function heightClassSupport(pokemon,sizeClass){
+    if(sizeClass==="xxs")return [pokemon.xxs,.5];
+    if(sizeClass==="xs")return [.5,.75];
+    if(sizeClass==="average")return [.75,1.25];
+    if(sizeClass==="xl")return [1.25,1.5];
+    return [1.5,pokemon.xxl];
+  }
+  function weightTable(pokemon,sizeClass){
+    const suffix=String(Math.round(pokemon.xxl*100));
+    if(sizeClass==="full")return pokemon.xxs===.25?"fullScatterbug":"full"+suffix;
+    if(sizeClass==="xxs")return pokemon.xxs===.25?"xxsScatterbug":"xxs";
+    if(sizeClass==="xxl")return "xxl"+suffix;
+    return sizeClass;
+  }
+  function weightSupport(pokemon,sizeClass){
+    const [heightMinimum,heightMaximum]=heightClassSupport(pokemon,sizeClass);
+    if(sizeClass==="xxl")return [heightMinimum-.5,heightMaximum+.5];
+    return [Math.max(0,heightMinimum*heightMinimum-.5),heightMaximum*heightMaximum+.5];
+  }
+  function lookupTails(measurement,value,pokemon,sizeClass){return measurement==="weight"?polynomialTails(weightTable(pokemon,sizeClass),value):heightTails(value,pokemon,sizeClass)}
+
+  const floatBuffer=new ArrayBuffer(8),floatView=new DataView(floatBuffer);
+  function nextDown(value){
+    if(Number.isNaN(value)||value===-Infinity)return value;
+    if(value===Infinity)return Number.MAX_VALUE;
+    if(Object.is(value,0))return -Number.MIN_VALUE;
+    floatView.setFloat64(0,value,false);
+    let bits=floatView.getBigUint64(0,false);
+    bits+=value>0?-1n:1n;
+    floatView.setBigUint64(0,bits,false);
+    return floatView.getFloat64(0,false);
+  }
+  function decimalPlaces(rawValue){
+    if(/[eE]/.test(rawValue))return Infinity;
+    const match=rawValue.match(/^[+]?\d*(?:\.(\d*))?$/);
+    return match&&match[1]?match[1].length:0;
+  }
+  function interpretedObservation(rawValue,observed,displayed,upperTail,unit){
+    if(!displayed)return {lookup:observed,lower:observed,upper:observed,note:""};
+    const places=decimalPlaces(rawValue),digits=Number.isFinite(places)?Math.max(3,places):15;
+    const lower=Number((observed-.005).toFixed(digits));
+    const upper=Number((observed+.005).toFixed(digits));
+    const lookup=upperTail?lower:nextDown(upper);
+    const exactText=upperTail?`${lower} ${unit}`:`${lookup.toPrecision(17)} ${unit} (just below ${upper} ${unit})`;
+    return {lookup,lower,upper,note:`Displayed rounding interval [${lower}, ${upper}) ${unit}; using exact value ${exactText} for this lookup.`};
+  }
+  function rangeIntersects(lower,upper,support){
+    return lower===upper?lower>=support[0]&&lower<=support[1]:upper>support[0]&&lower<=support[1];
+  }
+
+  function displayName(name){return name.toLowerCase().split("_").map(word=>word?word[0].toUpperCase()+word.slice(1):word).join(" ")}
+  function optionName(pokemon){return `#${String(pokemon.dex).padStart(4,"0")} · ${displayName(pokemon.name)}`}
+  function formatP(value){
+    if(value===0||value===1)return String(value);
+    return value<1e-5?value.toExponential(8):value.toPrecision(10).replace(/0+$/," ").trim();
+  }
+  function formatPercent(value){return value===0?"0%":value<1e-6?`${(value*100).toExponential(4)}%`:`${(value*100).toPrecision(6)}%`}
+  function formatMeasurement(value){return String(Number(value.toPrecision(9)))}
+  function pokemonProfile(pokemon){
+    const classes=[["xxs","XXS"],["xs","XS"],["average","Average"],["xl","XL"],["xxl","XXL"]];
+    const rows=classes.map(([key,label])=>{
+      const height=heightClassSupport(pokemon,key),weight=weightSupport(pokemon,key);
+      return `<tr><th scope="row">${label}</th><td>${formatMeasurement(height[0]*pokemon.height)}–${formatMeasurement(height[1]*pokemon.height)} m</td><td>${formatMeasurement(weight[0]*pokemon.weight)}–${formatMeasurement(weight[1]*pokemon.weight)} kg</td></tr>`;
+    }).join("");
+    return `<div class="profile"><div class="profile-metrics"><div class="metric"><small>Mean height</small><b>${formatMeasurement(pokemon.height)} m</b></div><div class="metric"><small>Mean weight</small><b>${formatMeasurement(pokemon.weight)} kg</b></div><div class="metric"><small>XXL class</small><b>${formatMeasurement(pokemon.xxl)}× mean</b></div></div><table class="range-table"><caption>Possible ranges by size class</caption><thead><tr><th>Class</th><th>Height range</th><th>Weight range</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function displayExtremaNotes(pokemon){
+    const entries=EXTREMA_BY_POKEMON.get(pokemon.index);
+    if(!entries)return "";
+    const labels=["Minimum height","Maximum height","Maximum weight"],units=["m","m","kg"];
+    const rows=entries.map(([,kind,nominal,float32,expected,actual])=>`<li><b>${labels[kind]}:</b> nominal boundary ${nominal} ${units[kind]} would display as ${expected} ${units[kind]}; its exact float32 value is <code>${float32}</code> ${units[kind]}, predicted to display as ${actual} ${units[kind]}.</li>`).join("");
+    return `<div class="extrema-alert"><strong>Theorized float32 display-boundary difference</strong><p>This Pokémon has one or more extreme values whose two-decimal display may change after float32 transmission. This has not been verified with an actual endpoint specimen.</p><ul>${rows}</ul></div>`;
+  }
+  function oneInText(probability,measurement,observed,upperTail,unit,population="Pokémon caught"){
+    const relation=upperTail?"greater than or equal to":"less than or equal to";
+    const predicate=measurement==="weight"?`weigh ${relation} ${observed} ${unit}`:`are ${upperTail?"taller":"shorter"} than or equal to ${observed} ${unit}`;
+    if(probability<=0)return `No ${population} ${predicate}.`;
+    if(probability>=1)return `Every ${population} ${predicate}.`;
+    const denominator=new Intl.NumberFormat("en-US",{maximumSignificantDigits:3}).format(1/probability);
+    return `About 1 in ${denominator} ${population} ${predicate}.`;
+  }
+  function resolvePokemon(text){
+    const cleaned=text.trim(),upper=cleaned.toUpperCase();
+    return POKEMON.find(p=>optionName(p)===cleaned||p.name===upper)||null;
+  }
+  function renderResults(pokemon,measurement,rawValue,observed,upperTail,displayed){
+    const mean=measurement==="height"?pokemon.height:pokemon.weight,unit=measurement==="height"?"m":"kg";
+    const interpretation=interpretedObservation(rawValue,observed,displayed,upperTail,unit);
+    const normalized=interpretation.lookup/mean,normalizedLower=interpretation.lower/mean,normalizedUpper=interpretation.upper/mean,tailIndex=upperTail?1:0;
+    const overall=lookupTails(measurement,normalized,pokemon,"full")[tailIndex];
+    const allClasses=[["xxs","XXS"],["xs","XS"],["average","Average"],["xl","XL"],["xxl","XXL"]];
+    const heightClasses=measurement==="height"?allClasses.filter(([key])=>rangeIntersects(normalizedLower,normalizedUpper,heightClassSupport(pokemon,key))):[];
+    const classes=measurement==="height"?heightClasses:allClasses;
+    const relation=upperTail?"greater than or equal to":"less than or equal to";
+    const rows=classes.map(([key,label])=>{
+      const probability=lookupTails(measurement,normalized,pokemon,key)[tailIndex];
+      let detail="Conditional distribution";
+      let applicable=true;
+      if(measurement==="height"){
+        const bounds=heightBounds(pokemon.xxs,pokemon.xxl),ranges={xxs:[0,2],xs:[2,3],average:[3,4],xl:[4,5],xxl:[5,7]},range=ranges[key];
+        detail=`${(bounds[range[0]]*mean).toPrecision(5).replace(/\.?0+$/,"")}–${(bounds[range[1]]*mean).toPrecision(5).replace(/\.?0+$/,"")} ${unit}`;
+      }else{
+        const support=weightSupport(pokemon,key);
+        applicable=rangeIntersects(normalizedLower,normalizedUpper,support);
+        detail=applicable?"Conditional distribution":`Outside possible ${label} weight range`;
+      }
+      const human=applicable?oneInText(probability,measurement,observed,upperTail,unit,`${label} Pokémon`):`Not applicable: a Pokémon in the ${label} class cannot have this weight.`;
+      return `<div class="class-row${applicable?"":" not-applicable"}"${applicable?"":' aria-disabled="true"'}><b>${label}</b><span>${measurement==="height"?"Observed size class · ":""}${detail}</span><output>${formatP(probability)}</output><div class="class-human">${human}</div></div>`;
+    }).join("");
+    const conditional=rows||`<div class="class-note">This height is outside the modeled size range, so it has no conditional size class.</div>`;
+    const sectionTitle=measurement==="height"&&heightClasses.length===1?`Conditional within ${heightClasses[0][1]} class`:measurement==="height"&&heightClasses.length>1?"Possible conditional size classes":measurement==="height"?"Conditional size class":"Conditional on size class";
+    const roundingNote=interpretation.note?`<div class="rounding-note">${interpretation.note}</div>`:"";
+    document.getElementById("results").innerHTML=`
+      <div class="result-head"><div><h2>${displayName(pokemon.name)}</h2><p>#${String(pokemon.dex).padStart(4,"0")} · Probability of a ${measurement} ${relation} ${observed} ${unit}</p></div><div class="normalized">${displayed?"lookup ":""}normalized ${normalized.toPrecision(9)}</div></div>${roundingNote}${pokemonProfile(pokemon)}${displayExtremaNotes(pokemon)}
+      <div class="overall"><div><small>Overall population</small><strong>${formatP(overall)}</strong></div><div class="percent">${formatPercent(overall)}</div><div class="one-in">${oneInText(overall,measurement,observed,upperTail,unit)}</div></div>
+      <h3 class="section-title">${sectionTitle}</h3><div class="class-list">${conditional}</div>
+      `;
+  }
+
+  function initThemeSwitch(){
+    const button=document.getElementById("theme-switch"),root=document.documentElement;
+    function setTheme(theme,persist){
+      const dark=theme==="dark",next=dark?"light":"dark";
+      root.dataset.theme=theme;
+      button.setAttribute("aria-pressed",String(dark));
+      button.setAttribute("aria-label",`Switch to ${next} theme`);
+      button.title=`Switch to ${next} theme`;
+      if(persist)try{localStorage.setItem("pogo-size-theme",theme)}catch{}
+    }
+    setTheme(root.dataset.theme==="dark"?"dark":"light",false);
+    button.addEventListener("click",()=>setTheme(root.dataset.theme==="dark"?"light":"dark",true));
+  }
+
+  function initApp(){
+    const form=document.getElementById("calculator"),pokemonInput=document.getElementById("pokemon"),valueInput=document.getElementById("value"),options=document.getElementById("pokemon-options"),error=document.getElementById("error");
+    let interpretationWasManuallySet=false;
+    for(const pokemon of POKEMON){const option=document.createElement("option");option.value=optionName(pokemon);options.appendChild(option)}
+    pokemonInput.value=optionName(POKEMON[0]);valueInput.value=POKEMON[0].height;
+    for(const input of [pokemonInput,valueInput])input.addEventListener("focus",()=>input.select());
+    function measurement(){return form.elements.measurement.value}
+    function selectedPokemon(){return resolvePokemon(pokemonInput.value)}
+    function updateInterpretation(){
+      if(interpretationWasManuallySet)return;
+      const places=decimalPlaces(valueInput.value.trim()),displayed=places<=2;
+      form.elements.interpretation.value=displayed?"displayed":"exact";
+      document.getElementById("mode-hint").textContent=`${displayed?"Displayed":"Exact"} selected automatically from the entered decimal precision.`;
+    }
+    function updateMeasurement(resetValue=true){
+      const type=measurement(),pokemon=selectedPokemon();
+      document.getElementById("unit").textContent=type==="height"?"m":"kg";
+      document.getElementById("value-label").textContent=type==="height"?"Observed height":"Observed weight";
+      if(resetValue&&pokemon)valueInput.value=type==="height"?pokemon.height:pokemon.weight;
+      interpretationWasManuallySet=false;
+      updateInterpretation();
+    }
+    function calculate(event){
+      if(event)event.preventDefault();
+      const pokemon=selectedPokemon(),rawValue=valueInput.value.trim(),observed=Number(rawValue);
+      if(!pokemon){error.textContent="Choose a Pokémon from the list.";return}
+      if(rawValue===""||!Number.isFinite(observed)||observed<0){error.textContent="Enter a nonnegative measurement.";return}
+      error.textContent="";
+      renderResults(pokemon,measurement(),rawValue,observed,form.elements.tail.value==="upper",form.elements.interpretation.value==="displayed");
+    }
+    form.addEventListener("submit",calculate);
+    form.elements.measurement.forEach(input=>input.addEventListener("change",()=>{updateMeasurement();calculate()}));
+    form.elements.tail.forEach(input=>input.addEventListener("change",calculate));
+    form.elements.interpretation.forEach(input=>input.addEventListener("change",()=>{interpretationWasManuallySet=true;document.getElementById("mode-hint").textContent="Interpretation selected manually.";calculate()}));
+    pokemonInput.addEventListener("change",()=>{updateMeasurement();calculate()});
+    valueInput.addEventListener("input",()=>{updateInterpretation();if(valueInput.value!=="")calculate()});
+    updateInterpretation();
+    calculate();
+  }
+  if(typeof document!=="undefined"){initThemeSwitch();initApp()}
+  if(typeof module!=="undefined")module.exports={POKEMON,DISPLAY_EXTREMA,decodeTable,polynomialTails,heightTails,heightClass,heightClassSupport,weightTable,weightSupport,lookupTails,oneInText,pokemonProfile,displayExtremaNotes,nextDown,decimalPlaces,interpretedObservation,rangeIntersects};
+  </script>
+</body>
+</html>
