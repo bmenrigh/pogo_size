@@ -72,17 +72,31 @@
     .eyebrow { color: var(--red-dark); font-size: .74rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 18px; }
     label, legend { display: block; color: #3d485b; font-size: .8rem; font-weight: 750; letter-spacing: .035em; margin-bottom: 8px; }
     .field { margin-bottom: 20px; }
+    .measurement-entry { margin-bottom: 18px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.42); }
+    .measurement-entry .field { margin-bottom: 11px; }
+    .measurement-entry fieldset { margin-bottom: 0; }
     input[type="text"] {
       width: 100%; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.92); color: var(--ink); font: inherit; padding: 12px 13px; outline: none; transition: border-color .15s, box-shadow .15s;
     }
     input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(57,117,213,.14); }
-    .measurement { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: stretch; }
+    .measurement { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: stretch; }
+    .input-clear-wrap { position: relative; min-width: 0; }
+    .input-clear-wrap input { padding-right: 46px; }
+    button.clear-input {
+      position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: 36px; height: 36px; padding: 0;
+      display: grid; place-items: center; border-radius: 9px; color: var(--muted); background: transparent;
+      box-shadow: none; font-size: 1.35rem; font-weight: 500; line-height: 1;
+    }
+    button.clear-input:hover { color: var(--ink); background: #edf0f4; filter: none; }
+    button.clear-input:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+    button.clear-input[hidden] { display: none; }
     .unit { display: grid; place-items: center; min-width: 48px; border-radius: 12px; color: var(--muted); background: #eef1f5; font-weight: 800; }
     fieldset { border: 0; padding: 0; margin: 0 0 20px; }
     .toggle { display: grid; grid-template-columns: 1fr 1fr; background: #edf0f4; padding: 4px; border-radius: 12px; }
     .toggle input { position: absolute; opacity: 0; pointer-events: none; }
     .toggle label { margin: 0; padding: 9px 8px; border-radius: 9px; text-align: center; cursor: pointer; color: var(--muted); }
     .toggle input:checked + label { color: var(--ink); background: white; box-shadow: 0 2px 8px rgba(23,32,51,.11); }
+    .measurement-entry .toggle label { padding: 7px 8px; font-size: .74rem; }
     .mode-hint { margin: 7px 2px 0; color: var(--muted); font-size: .72rem; line-height: 1.35; }
     button { width: 100%; border: 0; border-radius: 12px; padding: 13px 16px; color: white; background: linear-gradient(135deg, var(--red), var(--red-dark)); font: inherit; font-weight: 800; cursor: pointer; box-shadow: 0 9px 20px rgba(189,41,56,.2); }
     button:hover { filter: brightness(1.04); }
@@ -91,6 +105,7 @@
     .result-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
     .result-head h2 { margin: 0 0 5px; font-size: 1.25rem; letter-spacing: -.02em; }
     .result-head p { margin: 0; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+    .normalized-stack { display: grid; justify-items: end; gap: 7px; }
     .normalized { flex: 0 0 auto; color: var(--blue); background: var(--blue-soft); padding: 8px 10px; border-radius: 10px; font: 750 .78rem ui-monospace, SFMono-Regular, Menlo, monospace; }
     .rounding-note { margin: 14px 0 -6px; padding: 11px 13px; border-radius: 11px; color: #325584; background: var(--blue-soft); font-size: .78rem; line-height: 1.5; }
     .profile { margin-top: 18px; border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: rgba(255,255,255,.58); }
@@ -116,12 +131,26 @@
     .overall strong { font: 750 clamp(1.25rem, 4vw, 1.8rem) ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: -.04em; }
     .overall .percent { color: #bfc9dc; font-size: .86rem; text-align: right; }
     .one-in { grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,.14); padding-top: 13px; color: #e7ecf5; font-size: .86rem; line-height: 1.45; }
+    .measurement-results { margin-top: 24px; padding-top: 21px; border-top: 1px solid var(--line); }
+    .measurement-results > h3 { margin: 0; font-size: 1.05rem; letter-spacing: -.015em; }
+    .measurement-results > p { margin: 4px 0 0; color: var(--muted); font-size: .8rem; line-height: 1.45; }
+    .measurement-results .overall { margin-top: 16px; }
+    .variates { margin-top: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--blue-soft); }
+    .variates h3 { margin: 0 0 10px; color: var(--ink); font-size: .9rem; }
+    .variate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .variate-value { padding: 10px 11px; border-radius: 10px; background: rgba(255,255,255,.62); }
+    .variate-value small { display: block; color: var(--muted); font-size: .68rem; font-weight: 750; text-transform: uppercase; letter-spacing: .07em; }
+    .variate-value b { display: block; margin-top: 4px; font: 750 .84rem ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .variate-note { margin: 9px 1px 0; color: #465f83; font-size: .74rem; line-height: 1.45; }
+    .variate-warning { color: var(--red-dark); font-weight: 700; }
     .section-title { margin: 0 0 10px; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
     .class-list { display: grid; gap: 7px; }
     .class-row { display: grid; grid-template-columns: 84px 1fr auto; gap: 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.66); }
+    .class-row.observed-class { border-color: rgba(57,117,213,.52); background: rgba(234,242,255,.78); box-shadow: inset 3px 0 0 var(--blue); }
     .class-row.not-applicable { opacity: .43; background: #edf0f3; filter: grayscale(.8); }
     .class-row b { font-size: .83rem; }
     .class-row span { color: var(--muted); font-size: .77rem; }
+    .class-row .class-match { display: inline-block; margin-left: 7px; padding: 2px 6px; border-radius: 999px; color: var(--blue); background: rgba(57,117,213,.1); font-size: .64rem; font-style: normal; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
     .class-row output { font: 720 .84rem ui-monospace, SFMono-Regular, Menlo, monospace; }
     .class-human { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 9px; color: #465268; font-size: .78rem; line-height: 1.45; }
     .class-note { padding: 13px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
@@ -174,8 +203,12 @@
     html[data-theme="dark"] .toggle input:checked + label { background: #354257; }
     html[data-theme="dark"] button.theme-switch { background: rgba(24,31,46,.88); }
     html[data-theme="dark"] button.theme-switch::after { background: #cbd5e3; }
+    html[data-theme="dark"] button.clear-input:hover { background: #293344; }
     html[data-theme="dark"] .rounding-note { color: #b9d2ff; }
-    html[data-theme="dark"] .profile, html[data-theme="dark"] .class-row, html[data-theme="dark"] .tech-note, html[data-theme="dark"] .weight-chip { background: rgba(15,21,32,.54); }
+    html[data-theme="dark"] .variate-note { color: #b9cae5; }
+    html[data-theme="dark"] .profile, html[data-theme="dark"] .class-row, html[data-theme="dark"] .tech-note, html[data-theme="dark"] .weight-chip, html[data-theme="dark"] .measurement-entry, html[data-theme="dark"] .variate-value { background: rgba(15,21,32,.54); }
+    html[data-theme="dark"] .class-row.observed-class { border-color: rgba(105,157,242,.72); background: rgba(42,72,119,.42); }
+    html[data-theme="dark"] .class-row .class-match { color: #b9d2ff; background: rgba(105,157,242,.16); }
     html[data-theme="dark"] .range-table th, html[data-theme="dark"] .range-table td { border-top-color: rgba(74,88,110,.72); }
     html[data-theme="dark"] .class-row.not-applicable { background: #222b38; }
     html[data-theme="dark"] .class-human, html[data-theme="dark"] .info-body { color: #bdc7d6; }
@@ -187,7 +220,10 @@
       .workspace { grid-template-columns: 1fr; }
       .controls { position: static; }
       .result-head { display: block; }
+      .normalized-stack { justify-items: start; margin-top: 12px; }
       .normalized { display: inline-block; margin-top: 12px; }
+      .normalized-stack .normalized { margin-top: 0; }
+      .variate-grid { grid-template-columns: 1fr; }
       .weights { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .profile-metrics { grid-template-columns: 1fr; }
       .metric + .metric { border-left: 0; border-top: 1px solid var(--line); }
@@ -239,28 +275,37 @@
         <div class="eyebrow">Size prevalence lookup</div>
         <div class="field">
           <label for="pokemon">Pokémon or form</label>
-          <input id="pokemon" type="text" list="pokemon-options" autocomplete="off" spellcheck="false" placeholder="Start typing a name or number">
+          <div class="input-clear-wrap"><input id="pokemon" type="text" list="pokemon-options" autocomplete="off" spellcheck="false" placeholder="Start typing a name or number"><button class="clear-input" id="clear-pokemon" type="button" tabindex="-1" aria-label="Clear selected Pokémon" title="Clear Pokémon">×</button></div>
           <datalist id="pokemon-options"></datalist>
         </div>
-        <fieldset>
-          <legend>Measurement</legend>
-          <div class="toggle">
-            <input id="type-height" type="radio" name="measurement" value="height" checked><label for="type-height">Height</label>
-            <input id="type-weight" type="radio" name="measurement" value="weight"><label for="type-weight">Weight</label>
+        <div class="measurement-entry">
+          <div class="field">
+            <label for="weight-value">Observed weight</label>
+            <div class="measurement"><div class="input-clear-wrap"><input id="weight-value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"><button class="clear-input" id="clear-weight" type="button" tabindex="-1" aria-label="Clear observed weight" title="Clear weight">×</button></div><span class="unit">kg</span></div>
           </div>
-        </fieldset>
-        <div class="field">
-          <label id="value-label" for="value">Observed height</label>
-          <div class="measurement"><input id="value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"><span class="unit" id="unit">m</span></div>
+          <fieldset>
+            <legend>Weight value is</legend>
+            <div class="toggle">
+              <input id="weight-mode-displayed" type="radio" name="weight-interpretation" value="displayed" tabindex="-1" checked><label for="weight-mode-displayed">Displayed</label>
+              <input id="weight-mode-exact" type="radio" name="weight-interpretation" value="exact" tabindex="-1"><label for="weight-mode-exact">Exact</label>
+            </div>
+            <div class="mode-hint" id="weight-mode-hint">Displayed is selected automatically for two or fewer decimal places.</div>
+          </fieldset>
         </div>
-        <fieldset>
-          <legend>Entered value is</legend>
-          <div class="toggle">
-            <input id="mode-displayed" type="radio" name="interpretation" value="displayed" checked><label for="mode-displayed">Displayed</label>
-            <input id="mode-exact" type="radio" name="interpretation" value="exact"><label for="mode-exact">Exact</label>
+        <div class="measurement-entry">
+          <div class="field">
+            <label for="height-value">Observed height</label>
+            <div class="measurement"><div class="input-clear-wrap"><input id="height-value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"><button class="clear-input" id="clear-height" type="button" tabindex="-1" aria-label="Clear observed height" title="Clear height">×</button></div><span class="unit">m</span></div>
           </div>
-          <div class="mode-hint" id="mode-hint">Displayed is selected automatically for two or fewer decimal places.</div>
-        </fieldset>
+          <fieldset>
+            <legend>Height value is</legend>
+            <div class="toggle">
+              <input id="height-mode-displayed" type="radio" name="height-interpretation" value="displayed" tabindex="-1" checked><label for="height-mode-displayed">Displayed</label>
+              <input id="height-mode-exact" type="radio" name="height-interpretation" value="exact" tabindex="-1"><label for="height-mode-exact">Exact</label>
+            </div>
+            <div class="mode-hint" id="height-mode-hint">Displayed is selected automatically for two or fewer decimal places.</div>
+          </fieldset>
+        </div>
         <fieldset>
           <legend>Tail</legend>
           <div class="toggle">
@@ -272,7 +317,7 @@
         <div class="error" id="error" role="alert"></div>
       </form>
       <section class="panel results" id="results" aria-live="polite">
-        <div class="empty">Choose a Pokémon and enter a measurement to calculate its probability.</div>
+        <div class="empty">Choose a Pokémon and enter a height, a weight, or both to calculate their probabilities.</div>
       </section>
     </div>
     <div class="info-stack">
@@ -305,13 +350,21 @@
           <p>The difference affects weight prevalence too, because normalized height contributes to the weight formula and is generally squared. Consequently, neither the overall nor the conditional height and weight probabilities on this page are valid for Pokémon generated under the old system. Evolution or trading does not convert an older Pokémon to the new generator; applicability depends on when its original size values were generated.</p>
 
           <h3>Does everyone who catches the same Pokémon get the same height and weight?</h3>
-          <p>No. When multiple Trainers catch the same spawn, its size class is shared: they will all receive an XXS, XS, Average, XL, or XXL Pokémon. Within that class, however, the height and intrinsic-weight variates are randomized separately for each Trainer, so the resulting height and weight can differ.</p>
-          <p>This behavior has changed over time. Originally, everyone catching the same spawn received the same height and weight. Around the introduction of PokéStop Showcases, the intrinsic-weight variate began to be randomized for each Trainer while the height variate remained shared. At some later point, on a date that is not known, the height variate also began to be randomized. The current model reflects the present behavior: shared size class, independently randomized height and weight variates.</p>
+          <p>No. When multiple Trainers catch the same spawn, its size class and intrinsic-weight variate <i>w</i><sub>v</sub> are shared. The height variate is independently randomized for each Trainer within that size class, so the resulting height and weight can differ.</p>
+          <p>The resulting weights are nevertheless strongly positively correlated between Trainers. Weight is calculated from the shared intrinsic-weight variate plus the Trainer-specific height contribution. For example, when catching Rattata or Magikarp, an unusually low or high spawn <i>w</i><sub>v</sub>, respectively, makes a tiny Rattata or large Magikarp more likely for every Trainer. Each Trainer’s independently drawn height still affects whether an individual catch crosses the badge threshold.</p>
+          <p>For example, two Trainers caught the same Average Bidoof spawn and saw different measurements:</p>
+          <ul>
+            <li><b>10.17 kg and 0.41 m</b> implies a height variate in [0.81, 0.83) and an intrinsic-weight variate range of 0.81935–0.85265.</li>
+            <li><b>16.99 kg and 0.50 m</b> implies a height variate in [0.99, 1.01) and an intrinsic-weight variate range of 0.82915–0.86965.</li>
+          </ul>
+          <p>The height intervals do not overlap, as expected for independently randomized heights. The intrinsic-weight ranges overlap between 0.82915 and 0.85265, which is consistent with both catches sharing one exact <i>w</i><sub>v</sub>. These are ranges rather than exact values because each displayed height and weight hides an interval of values that round to it.</p>
+          <p>This behavior has changed over time. Originally, everyone catching the same spawn received the same height and weight. Per-Trainer variation appears to have begun around the introduction of PokéStop Showcases, but the exact transition date is not known. The present behavior is a shared size class and intrinsic-weight variate with independently randomized height.</p>
 
           <h3>Does evolution reroll a Pokémon’s height or weight?</h3>
-          <p>No. Evolution preserves the Pokémon’s size class and its underlying height and intrinsic-weight variates. Its evolved height therefore changes predictably with the species’ mean height:</p>
+          <p>No. Evolution does not draw new random values. It preserves the Pokémon’s size class and intrinsic-weight variate. Normally it also preserves normalized height, so the evolved height follows a simple ratio:</p>
           <div class="equation">new height = old height × (new mean height / old mean height)</div>
-          <p>The evolved weight is predictable as well, but it does not have an equally simple ratio rule. It must be recomputed from the preserved height and intrinsic-weight variates, the evolved species’ mean weight, the squared-height rule (or the unsquared XXL rule), and the nonpositive-weight fallback.</p>
+          <p>The height rule has one exception: when an XXL Pokémon evolves between species with different 1.55, 1.75, or 2.00 XXL height classes, the game maps its relative position in the old XXL range to the same relative position in the new range. This changes its normalized height while keeping it inside the target range. The intrinsic-weight variate remains unchanged. This is deterministic, not a reroll; the <b>Evolution between different XXL height classes</b> section in Technical Details gives the exact mapping.</p>
+          <p>The evolved weight is therefore predictable too, but it does not generally follow a simple mean ratio. It is recomputed from the preserved intrinsic-weight variate, the preserved or remapped height variate, the evolved species’ mean weight, and the applicable weight formula.</p>
           <p>The practical obstacle is display rounding, not new randomness during evolution. The game shows only two decimal places, so the displayed height and weight hide the exact variates within rounding intervals. With the exact underlying values the evolved measurements would be deterministic; from displayed values alone, it may only be possible to predict a narrow range of outcomes.</p>
 
           <h3>Does trading reroll a Pokémon’s height or weight?</h3>
@@ -330,7 +383,7 @@
           <p>The entered weight lies outside those classes’ possible weight ranges, so a Pokémon with that weight cannot belong to those classes under this model.</p>
 
           <h3>What is the difference between Displayed and Exact?</h3>
-          <p>Pokémon GO displays height and weight rounded to two decimal places. Displayed mode treats an entered value as the full interval that rounds to it; Exact mode treats it as the underlying value. The calculator selects Displayed automatically for values with two or fewer decimal places and Exact for values with more precision.</p>
+          <p>Pokémon GO displays height and weight rounded to two decimal places. Displayed mode treats an entered value as the full interval that rounds to it; Exact mode treats it as the underlying value. The calculator selects the mode independently for each input: Displayed automatically for values with two or fewer decimal places and Exact for values with more precision.</p>
 
           <h3>How does Displayed mode affect Lower and Upper results?</h3>
           <p>A displayed value of 2.41 represents exact values in the half-open interval [2.405, 2.415). A Lower result therefore counts values that would display as 2.41 or less by looking just below 2.415. An Upper result counts values that would display as 2.41 or more by looking at 2.405 inclusively. This is why the exact value used for a displayed lookup depends on the selected tail direction.</p>
@@ -421,6 +474,11 @@
           <div class="equation">XXS–XL: w₀ = w<sub>v</sub> + h² − 1<br>XXL: w₀ = w<sub>v</sub> + h − 1</div>
           <p>If <i>w</i><sub>0</sub> is zero or negative, the implemented generator does not resample. It replaces the <b>intrinsic-weight variate</b> <i>w</i><sub>v</sub> with 1.0, making the final normalized weight <i>w</i> = <i>t</i>.</p>
 
+          <h3>Exact probability at the weight clamps</h3>
+          <p>Before clamping, <i>w</i><sub>v,raw</sub> has mean 1 and standard deviation 1/8. Both clamp boundaries are exactly four standard deviations from the mean. All draws at or below 0.5 become exactly 0.5, and all draws at or above 1.5 become exactly 1.5. Symmetry gives the same discrete probability mass at both endpoints:</p>
+          <div class="equation">P(w<sub>v</sub> = 0.5) = P(Z ≤ −4) = Φ(−4) = ½ erfc(2√2)<br>P(w<sub>v</sub> = 1.5) = P(Z ≥ 4) = Φ(−4) = ½ erfc(2√2)</div>
+          <p>Each endpoint therefore has probability 0.00003167124183311996, or 0.003167124183311996%, about 1 in 31,574.4 weight-variate draws. Together the two clamp masses account for 0.00006334248366623993, or 0.006334248366623993% (about 1 in 15,787.2); the remaining 99.99366575163338% is continuous between the endpoints. The convolution carries these two exact point masses separately from the continuous normal density.</p>
+
           <h3>The XXS and XXL height-density steps</h3>
           <p>XXS and XXL are not uniform across their complete height ranges. Each is made by first choosing one of two adjacent subranges and then drawing uniformly within the chosen subrange. There is no gap and no discrete mass at the boundary, but the PDF is a step function: its height changes abruptly while its CDF remains continuous.</p>
           <p>Let <i>d</i><sub>small</sub> = 0.5 − <i>h</i><sub>min</sub>. For XXS, 1/20 of the class lands uniformly in the lowest 20% of its range, while 19/20 lands uniformly in the upper 80%:</p>
@@ -430,10 +488,15 @@
           <div class="equation">95%: [1.5, 1.5 + 0.8d<sub>large</sub>]<br>5%: [1.5 + 0.8d<sub>large</sub>, h<sub>max</sub>]</div>
           <p>Its density consequently steps downward by the same factor of 4.75. The split points are 1.54, 1.70, and 1.90 for the 1.55, 1.75, and 2.00 XXL classes.</p>
 
-          <h3>Exact probability at the weight clamps</h3>
-          <p>Before clamping, <i>w</i><sub>v,raw</sub> has mean 1 and standard deviation 1/8. Both clamp boundaries are exactly four standard deviations from the mean. All draws at or below 0.5 become exactly 0.5, and all draws at or above 1.5 become exactly 1.5. Symmetry gives the same discrete probability mass at both endpoints:</p>
-          <div class="equation">P(w<sub>v</sub> = 0.5) = P(Z ≤ −4) = Φ(−4) = ½ erfc(2√2)<br>P(w<sub>v</sub> = 1.5) = P(Z ≥ 4) = Φ(−4) = ½ erfc(2√2)</div>
-          <p>Each endpoint therefore has probability 0.00003167124183311996, or 0.003167124183311996%, about 1 in 31,574.4 weight-variate draws. Together the two clamp masses account for 0.00006334248366623993, or 0.006334248366623993% (about 1 in 15,787.2); the remaining 99.99366575163338% is continuous between the endpoints. The convolution carries these two exact point masses separately from the continuous normal density.</p>
+          <h3>Evolution between different XXL height classes</h3>
+          <p>Ordinary evolution can preserve normalized height because multiplying by the ratio of the new and old mean heights leaves <i>h</i> unchanged. That rule is insufficient for an XXL evolution when the two species have different XXL upper bounds. A normalized height valid in a 1.75 or 2.00 class could otherwise lie beyond the maximum of a target species in the 1.55 class.</p>
+          <p>The game instead preserves the Pokémon’s relative position through the complete XXL interval. Let <i>H</i><sub>s</sub> be the source height, μ<sub>s</sub> and μ<sub>t</sub> the source and target mean heights, and <i>c</i><sub>s</sub> and <i>c</i><sub>t</sub> their XXL upper-bound classes. First calculate the source fraction <i>q</i>, where 0 is the common 1.5× lower boundary and 1 is the source maximum. Apply that same fraction between the target boundaries:</p>
+          <div class="equation">q = (H<sub>s</sub> − 1.5μ<sub>s</sub>) / ((c<sub>s</sub> − 1.5)μ<sub>s</sub>)<br>H<sub>t</sub> = 1.5μ<sub>t</sub> + q(c<sub>t</sub> − 1.5)μ<sub>t</sub></div>
+          <p>Equivalently, the normalized height is linearly remapped from [1.5, <i>c</i><sub>s</sub>] to [1.5, <i>c</i><sub>t</sub>]. Both endpoints and the internal 80% density-step boundary map exactly to their counterparts in the target class.</p>
+          <p>For example, Skorupi has mean height 0.8 m and uses the 1.75 XXL class. An XXL Skorupi measuring 1.22 m is 10% of the way from its 1.20 m XXL minimum to its 1.40 m maximum. Drapion has mean height 1.3 m and uses the 1.55 class, whose XXL interval is 1.95–2.015 m. Placing the evolved Pokémon 10% through that interval gives:</p>
+          <div class="equation">q = (1.22 − 1.20) / (1.40 − 1.20) = 0.1<br>H<sub>t</sub> = 1.95 + 0.1(2.015 − 1.95) = 1.9565 m</div>
+          <p>The evolved Drapion therefore displays as 1.96 m. Its normalized height changes from 1.525 to 1.505. Its intrinsic-weight variate remains unchanged: the target’s XXL weight equation uses the preserved <i>w</i><sub>v</sub>, the remapped height, and Drapion’s mean weight.</p>
+          <p>A measured Noibat evolution provides a useful check. Noibat has mean height 0.5 m and a 1.75 XXL class; Noivern has mean height 1.5 m and a 1.55 class. Taking the displayed 0.82 m as the center gives a source normalized height of 1.64, 56% through the XXL range. Remapping gives 1.528 for Noivern, or 2.292 m, which displays as 2.29 m. Because the source measurements were displayed as 0.82 m and 11.84 kg rather than known exactly, preserving <i>w</i><sub>v</sub> predicts an evolved displayed weight between 115.55 and 117.01 kg. The observed Noivern was 2.29 m and 115.93 kg, matching both the height remapping and preservation of <i>w</i><sub>v</sub>. Additional checked evolutions, including significant intrinsic-weight-variate outliers, confirm that <i>w</i><sub>v</sub> is preserved rather than rerolled.</p>
 
           <h3>Why the weight distribution is not estimated by random sampling</h3>
           <p>A Monte Carlo simulation is straightforward: randomly choose a size class, draw a height variate, draw an intrinsic-weight variate, combine them, and count the result in a weight bucket. It is not precise enough for this job. A sampled PDF is visibly noisy even after hundreds of billions of generated Pokémon.</p>
@@ -443,10 +506,6 @@
           <h3>The exact input distributions</h3>
           <p>The normalized height distribution is known analytically. Each size class is uniform over one or two fixed intervals. The overall wild model mixes those intervals using the XXS, XS, Average, XL, and XXL probabilities listed in the FAQ. XXS and XXL have their internal 1-to-19 splits, and the outer endpoints come from the species’ XXS and XXL classes.</p>
           <p>The intrinsic-weight variate is known analytically as well. Its continuous bucket probabilities are calculated from differences of the normal CDF (the error function), while the exact masses created by clamping at 0.5 and 1.5 are handled explicitly. The squared or linear height transformation and the nonpositive-result rule are then applied exactly as described above. These transformations explain both the shape of the weight PDF and why the XXL weight range can begin below the XL range.</p>
-
-          <h3>Why height needs no polynomial compression</h3>
-          <p>The height distribution is well behaved and can be evaluated directly. Its PDF is constant within each of the class subranges described above, so integrating it produces an exact piecewise-linear CDF. For a height lookup, this app locates the containing subrange, adds the complete probability of every preceding subrange, and adds the appropriate linear fraction of the current one. The upper tail is computed from the same exact interval probabilities.</p>
-          <p>No numerical convolution, millionth-spaced table, or fitted polynomial is needed for height. The complex PDF construction and degree-5 CDF/survival compression described below apply only to weight.</p>
 
           <h3>High-resolution numerical convolution</h3>
           <p>The height and intrinsic-weight inputs are first converted into exact bucket probabilities on a grid with width Δx = 10<sup>−6</sup>. This is done by subtracting their analytic CDF values at the two edges of each bucket, not by sampling. The height calculation applies the inverse square-root transformation where height was squared and the linear inverse transformation for XXL.</p>
@@ -499,6 +558,10 @@
           <p>A relative-error bound on the CDF does not protect a tiny upper tail. For example, when CDF = 0.999999999, a seemingly tiny CDF error can be comparable to (or larger than) the entire survival probability of 0.000000001. Subtracting the fitted CDF from 1 would make “1 in a billion” results unreliable.</p>
           <p>To prevent that, the lower half of each table fits CDF values directly, while the upper half fits independently accumulated survival values directly. The representation switches near the point where CDF and survival cross. At that shared boundary, the first survival value is explicitly made the exact complement of the preceding CDF value, preserving continuity.</p>
           <p>The 10<sup>−9</sup> relative-error requirement is applied to whichever tail is smaller and therefore numerically sensitive. This keeps both the displayed probability and its reciprocal “1 in N” interpretation within the target error across the tails. The requirement is checked at every millionth-spaced source point; monotonicity prevents unphysical oscillations between those points.</p>
+
+          <h3>Why height needs no polynomial compression</h3>
+          <p>The height distribution is well behaved and can be evaluated directly. Its PDF is constant within each of the class subranges described above, so integrating it produces an exact piecewise-linear CDF. For a height lookup, this app locates the containing subrange, adds the complete probability of every preceding subrange, and adds the appropriate linear fraction of the current one. The upper tail is computed from the same exact interval probabilities.</p>
+          <p>No numerical convolution, millionth-spaced table, or fitted polynomial is needed for height. The complex PDF construction and degree-5 CDF/survival compression described above apply only to weight.</p>
 
           <h3>How this page performs a lookup</h3>
           <p>The finished page embeds @@CDF_SEGMENT_COUNT@@ polynomial segments across @@CDF_DISTRIBUTION_COUNT@@ distributions. Their markers, endpoints, and coefficients are stored as compact base64-encoded float64 records, preserving the values written by the compressor without verbose decimal text.</p>
@@ -639,6 +702,7 @@
     floatView.setBigUint64(0,bits,false);
     return floatView.getFloat64(0,false);
   }
+  function nextUp(value){return -nextDown(-value)}
   function decimalPlaces(rawValue){
     if(/[eE]/.test(rawValue))return Infinity;
     const match=rawValue.match(/^[+]?\d*(?:\.(\d*))?$/);
@@ -647,7 +711,7 @@
   function interpretedObservation(rawValue,observed,displayed,upperTail,unit){
     if(!displayed)return {lookup:observed,lower:observed,upper:observed,note:""};
     const places=decimalPlaces(rawValue),digits=Number.isFinite(places)?Math.max(3,places):15;
-    const lower=Number((observed-.005).toFixed(digits));
+    const lower=Math.max(0,Number((observed-.005).toFixed(digits)));
     const upper=Number((observed+.005).toFixed(digits));
     const lookup=upperTail?lower:nextDown(upper);
     const exactText=upperTail?`${lower} ${unit}`:`${lookup.toPrecision(17)} ${unit} (just below ${upper} ${unit})`;
@@ -655,6 +719,112 @@
   }
   function rangeIntersects(lower,upper,support){
     return lower===upper?lower>=support[0]&&lower<=support[1]:upper>support[0]&&lower<=support[1];
+  }
+  function analyzeMeasurement(measurement,rawValue,observed,pokemon,upperTail,displayed){
+    const mean=measurement==="height"?pokemon.height:pokemon.weight,unit=measurement==="height"?"m":"kg";
+    const interpretation=interpretedObservation(rawValue,observed,displayed,upperTail,unit);
+    return {
+      measurement,rawValue,observed,displayed,mean,unit,interpretation,
+      normalized:interpretation.lookup/mean,
+      normalizedLower:interpretation.lower/mean,
+      normalizedUpper:interpretation.upper/mean
+    };
+  }
+  function heightTransform(value,pokemon){
+    const sizeClass=heightClass(value,pokemon);
+    if(sizeClass===null)return NaN;
+    return sizeClass==="xxl"?value:value*value;
+  }
+  function compatibleHeightClasses(lower,upper,pokemon,includeXXL=true){
+    const classes=["xxs","xs","average","xl","xxl"];
+    return classes.filter(sizeClass=>(includeXXL||sizeClass!=="xxl")&&rangeIntersects(lower,upper,heightClassSupport(pokemon,sizeClass)));
+  }
+  function transformedHeightBranches(lower,upper,pokemon){
+    if(lower===upper){
+      const transformed=heightTransform(lower,pokemon),sizeClass=heightClass(lower,pokemon);
+      return Number.isFinite(transformed)?[{range:[transformed,transformed],classes:[sizeClass]}]:[];
+    }
+    const clippedLower=Math.max(lower,pokemon.xxs);
+    const clippedUpper=Math.min(upper,nextUp(pokemon.xxl));
+    if(clippedLower>=clippedUpper)return [];
+    const branches=[];
+    if(clippedLower<=1.5){
+      const squareUpper=Math.min(clippedUpper,1.5);
+      if(squareUpper>clippedLower||squareUpper===1.5&&clippedUpper>1.5)branches.push({
+        range:[clippedLower*clippedLower,squareUpper*squareUpper],
+        classes:compatibleHeightClasses(clippedLower,clippedUpper>1.5?nextUp(1.5):clippedUpper,pokemon,false)
+      });
+    }
+    if(clippedUpper>1.5){
+      const linearLower=Math.max(clippedLower,1.5);
+      if(clippedUpper>linearLower)branches.push({range:[linearLower,clippedUpper],classes:["xxl"]});
+    }
+    return branches;
+  }
+  function transformedHeightRanges(lower,upper,pokemon){
+    return transformedHeightBranches(lower,upper,pokemon).map(branch=>branch.range);
+  }
+  function transformedHeightRange(lower,upper,pokemon){
+    const ranges=transformedHeightRanges(lower,upper,pokemon);
+    return ranges.length?[Math.min(...ranges.map(range=>range[0])),Math.max(...ranges.map(range=>range[1]))]:null;
+  }
+  function impliedVariates(pokemon,heightAnalysis,weightAnalysis){
+    const heightExact=heightAnalysis.normalizedLower===heightAnalysis.normalizedUpper;
+    const weightExact=weightAnalysis.normalizedLower===weightAnalysis.normalizedUpper;
+    const transformBranches=transformedHeightBranches(heightAnalysis.normalizedLower,heightAnalysis.normalizedUpper,pokemon);
+    if(!transformBranches.length)return {
+      heightLower:heightAnalysis.normalizedLower,heightUpper:heightAnalysis.normalizedUpper,
+      heightExact,weightExact,possible:false,reason:"The entered height is outside this Pokémon’s modeled size range."
+    };
+    const transformRanges=transformBranches.map(branch=>branch.range);
+    const rawRanges=transformBranches.map(({range:[transformLower,transformUpper],classes})=>{
+      let lower=weightAnalysis.normalizedLower-transformUpper+1;
+      let upper=weightAnalysis.normalizedUpper-transformLower+1;
+      for(const boundary of [.5,1.5]){
+        if(Math.abs(lower-boundary)<1e-12)lower=boundary;
+        if(Math.abs(upper-boundary)<1e-12)upper=boundary;
+      }
+      return {range:[lower,upper],classes};
+    });
+    const weightedRanges=rawRanges
+      .map(({range:[lower,upper],classes})=>({range:[Math.max(.5,lower),Math.min(1.5,upper)],classes}))
+      .filter(({range:[lower,upper]})=>lower<=upper)
+      .sort((left,right)=>left.range[0]-right.range[0])
+      .reduce((merged,entry)=>{
+        const previous=merged[merged.length-1];
+        if(previous&&entry.range[0]<=previous.range[1]){
+          previous.range[1]=Math.max(previous.range[1],entry.range[1]);
+          previous.classes=[...new Set([...previous.classes,...entry.classes])];
+        }else merged.push({range:entry.range.slice(),classes:entry.classes.slice()});
+        return merged;
+      },[]);
+    const weightRanges=weightedRanges.map(entry=>entry.range);
+    const weightRangeClasses=weightedRanges.map(entry=>entry.classes);
+    const rawLower=Math.min(...rawRanges.map(entry=>entry.range[0]));
+    const rawUpper=Math.max(...rawRanges.map(entry=>entry.range[1]));
+    const transformLower=Math.min(...transformRanges.map(range=>range[0]));
+    const transformUpper=Math.max(...transformRanges.map(range=>range[1]));
+    if(heightExact&&weightExact){
+      const exactWeight=rawRanges[0].range[0],possible=weightRanges.length>0&&exactWeight>=.5&&exactWeight<=1.5;
+      return {
+        heightLower:heightAnalysis.normalizedLower,heightUpper:heightAnalysis.normalizedUpper,
+        heightExact:true,weightExact:true,weightLower:exactWeight,weightUpper:exactWeight,
+        weightRanges:possible?[[exactWeight,exactWeight]]:[],
+        weightRangeClasses:possible?[rawRanges[0].classes]:[],
+        rawLower:exactWeight,rawUpper:exactWeight,
+        transformLower,transformUpper,transformRanges,possible,
+        reason:possible?"":"The implied intrinsic-weight variate is outside the allowed range 0.5–1.5."
+      };
+    }
+    const possible=weightRanges.length>0;
+    return {
+      heightLower:heightAnalysis.normalizedLower,heightUpper:heightAnalysis.normalizedUpper,
+      heightExact,weightExact:false,
+      weightLower:possible?weightRanges[0][0]:Math.max(.5,rawLower),
+      weightUpper:possible?weightRanges[weightRanges.length-1][1]:Math.min(1.5,rawUpper),
+      weightRanges,weightRangeClasses,rawLower,rawUpper,transformLower,transformUpper,transformRanges,possible,
+      reason:possible?"":"The displayed height and weight intervals imply no intrinsic-weight variate in the allowed range 0.5–1.5."
+    };
   }
 
   function displayName(name){return name.toLowerCase().split("_").map(word=>word?word[0].toUpperCase()+word.slice(1):word).join(" ")}
@@ -669,9 +839,9 @@
     const classes=[["xxs","XXS"],["xs","XS"],["average","Average"],["xl","XL"],["xxl","XXL"]];
     const rows=classes.map(([key,label])=>{
       const height=heightClassSupport(pokemon,key),weight=weightSupport(pokemon,key);
-      return `<tr><th scope="row">${label}</th><td>${formatMeasurement(height[0]*pokemon.height)}–${formatMeasurement(height[1]*pokemon.height)} m</td><td>${formatMeasurement(weight[0]*pokemon.weight)}–${formatMeasurement(weight[1]*pokemon.weight)} kg</td></tr>`;
+      return `<tr><th scope="row">${label}</th><td>${formatMeasurement(weight[0]*pokemon.weight)}–${formatMeasurement(weight[1]*pokemon.weight)} kg</td><td>${formatMeasurement(height[0]*pokemon.height)}–${formatMeasurement(height[1]*pokemon.height)} m</td></tr>`;
     }).join("");
-    return `<div class="profile"><div class="profile-metrics"><div class="metric"><small>Mean height</small><b>${formatMeasurement(pokemon.height)} m</b></div><div class="metric"><small>Mean weight</small><b>${formatMeasurement(pokemon.weight)} kg</b></div><div class="metric"><small>XXL class</small><b>${formatMeasurement(pokemon.xxl)}× mean</b></div></div><table class="range-table"><caption>Possible ranges by size class</caption><thead><tr><th>Class</th><th>Height range</th><th>Weight range</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    return `<div class="profile"><div class="profile-metrics"><div class="metric"><small>Mean weight</small><b>${formatMeasurement(pokemon.weight)} kg</b></div><div class="metric"><small>Mean height</small><b>${formatMeasurement(pokemon.height)} m</b></div><div class="metric"><small>XXL class</small><b>${formatMeasurement(pokemon.xxl)}× mean</b></div></div><table class="range-table"><caption>Possible ranges by size class</caption><thead><tr><th>Class</th><th>Weight range</th><th>Height range</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   function displayExtremaNotes(pokemon){
     const entries=EXTREMA_BY_POKEMON.get(pokemon.index);
@@ -692,38 +862,78 @@
     const cleaned=text.trim(),upper=cleaned.toUpperCase();
     return POKEMON.find(p=>optionName(p)===cleaned||p.name===upper)||null;
   }
-  function renderResults(pokemon,measurement,rawValue,observed,upperTail,displayed){
-    const mean=measurement==="height"?pokemon.height:pokemon.weight,unit=measurement==="height"?"m":"kg";
-    const interpretation=interpretedObservation(rawValue,observed,displayed,upperTail,unit);
-    const normalized=interpretation.lookup/mean,normalizedLower=interpretation.lower/mean,normalizedUpper=interpretation.upper/mean,tailIndex=upperTail?1:0;
-    const overall=lookupTails(measurement,normalized,pokemon,"full")[tailIndex];
+  function renderVariates(pokemon,heightAnalysis,weightAnalysis){
+    const variates=impliedVariates(pokemon,heightAnalysis,weightAnalysis);
+    const format=value=>String(Number(value.toPrecision(12)));
+    const heightValue=variates.heightExact?format(variates.heightLower):`[${format(variates.heightLower)}, ${format(variates.heightUpper)})`;
+    const classLabels={xxs:"XXS",xs:"XS",average:"Average",xl:"XL",xxl:"XXL"};
+    let weightValue="Unavailable";
+    if(variates.possible)weightValue=variates.weightExact
+      ?format(variates.weightLower)
+      :variates.weightRanges.map((range,index)=>{
+        const classes=variates.weightRangeClasses[index].map(sizeClass=>classLabels[sizeClass]).join(" or ");
+        const qualifier=variates.weightRanges.length>1?`${classes}: `:"";
+        return `${qualifier}${format(range[0])}–${format(range[1])}`;
+      }).join("; ");
+    else if(variates.weightExact&&Number.isFinite(variates.weightLower))weightValue=format(variates.weightLower);
+    const hasDisplayedInput=heightAnalysis.displayed||weightAnalysis.displayed;
+    const explanation=hasDisplayedInput
+      ?`Intrinsic-weight ranges use ${weightAnalysis.displayed?"both displayed-weight endpoints":"the exact normalized weight"} and every compatible height, then are restricted to the allowed range 0.5–1.5. ${heightAnalysis.displayed?"The height variate is the normalized displayed-height interval.":"The height variate is the exact normalized height."} The h² branch for XXS through XL and the linear h branch for XXL are inverted separately, so a displayed height crossing the XL–XXL boundary may produce two distinct ranges.`
+      :"The intrinsic-weight variate reverses the height contribution: wᵥ = normalized weight − h² + 1, or wᵥ = normalized weight − h + 1 for XXL. The height variate is normalized height.";
+    const warning=variates.reason?`<div class="variate-note variate-warning">${variates.reason}</div>`:"";
+    return `<div class="variates"><h3>Implied generation variates</h3><div class="variate-grid"><div class="variate-value"><small>Intrinsic-weight variate wᵥ</small><b>${weightValue}</b></div><div class="variate-value"><small>Height variate h</small><b>${heightValue}</b></div></div><div class="variate-note">${explanation}</div>${warning}</div>`;
+  }
+  function renderProbabilitySection(pokemon,analysis,upperTail,heightSelectedClass=null){
+    const {measurement,observed,displayed,unit,interpretation,normalized,normalizedLower,normalizedUpper}=analysis;
+    const tailIndex=upperTail?1:0,overall=lookupTails(measurement,normalized,pokemon,"full")[tailIndex];
     const allClasses=[["xxs","XXS"],["xs","XS"],["average","Average"],["xl","XL"],["xxl","XXL"]];
     const heightClasses=measurement==="height"?allClasses.filter(([key])=>rangeIntersects(normalizedLower,normalizedUpper,heightClassSupport(pokemon,key))):[];
     const classes=measurement==="height"?heightClasses:allClasses;
     const relation=upperTail?"greater than or equal to":"less than or equal to";
     const rows=classes.map(([key,label])=>{
       const probability=lookupTails(measurement,normalized,pokemon,key)[tailIndex];
+      const matchesHeight=measurement==="weight"&&key===heightSelectedClass;
       let detail="Conditional distribution";
       let applicable=true;
       if(measurement==="height"){
         const bounds=heightBounds(pokemon.xxs,pokemon.xxl),ranges={xxs:[0,2],xs:[2,3],average:[3,4],xl:[4,5],xxl:[5,7]},range=ranges[key];
-        detail=`${(bounds[range[0]]*mean).toPrecision(5).replace(/\.?0+$/,"")}–${(bounds[range[1]]*mean).toPrecision(5).replace(/\.?0+$/,"")} ${unit}`;
+        detail=`${(bounds[range[0]]*analysis.mean).toPrecision(5).replace(/\.?0+$/,"")}–${(bounds[range[1]]*analysis.mean).toPrecision(5).replace(/\.?0+$/,"")} ${unit}`;
       }else{
         const support=weightSupport(pokemon,key);
         applicable=rangeIntersects(normalizedLower,normalizedUpper,support);
         detail=applicable?"Conditional distribution":`Outside possible ${label} weight range`;
       }
       const human=applicable?oneInText(probability,measurement,observed,upperTail,unit,`${label} Pokémon`):`Not applicable: a Pokémon in the ${label} class cannot have this weight.`;
-      return `<div class="class-row${applicable?"":" not-applicable"}"${applicable?"":' aria-disabled="true"'}><b>${label}</b><span>${measurement==="height"?"Observed size class · ":""}${detail}</span><output>${formatP(probability)}</output><div class="class-human">${human}</div></div>`;
+      const matchCue=matchesHeight?'<em class="class-match">Matches height</em>':"";
+      return `<div class="class-row${applicable?"":" not-applicable"}${matchesHeight?" observed-class":""}"${applicable?"":' aria-disabled="true"'}><b>${label}</b><span>${measurement==="height"?"Observed size class · ":""}${detail}${matchCue}</span><output>${formatP(probability)}</output><div class="class-human">${human}</div></div>`;
     }).join("");
     const conditional=rows||`<div class="class-note">This height is outside the modeled size range, so it has no conditional size class.</div>`;
     const sectionTitle=measurement==="height"&&heightClasses.length===1?`Conditional within ${heightClasses[0][1]} class`:measurement==="height"&&heightClasses.length>1?"Possible conditional size classes":measurement==="height"?"Conditional size class":"Conditional on size class";
     const roundingNote=interpretation.note?`<div class="rounding-note">${interpretation.note}</div>`:"";
-    document.getElementById("results").innerHTML=`
-      <div class="result-head"><div><h2>${displayName(pokemon.name)}</h2><p>#${String(pokemon.dex).padStart(4,"0")} · Probability of a ${measurement} ${relation} ${observed} ${unit}</p></div><div class="normalized">${displayed?"lookup ":""}normalized ${normalized.toPrecision(9)}</div></div>${roundingNote}${pokemonProfile(pokemon)}${displayExtremaNotes(pokemon)}
+    return `<section class="measurement-results"><h3>${measurement==="height"?"Height":"Weight"} probabilities</h3><p>Probability of a ${measurement} ${relation} ${observed} ${unit}</p>${roundingNote}
       <div class="overall"><div><small>Overall population</small><strong>${formatP(overall)}</strong></div><div class="percent">${formatPercent(overall)}</div><div class="one-in">${oneInText(overall,measurement,observed,upperTail,unit)}</div></div>
       <h3 class="section-title">${sectionTitle}</h3><div class="class-list">${conditional}</div>
-      `;
+      </section>`;
+  }
+  function renderResults(pokemon,observations,upperTail){
+    const analyses={};
+    for(const measurement of ["weight","height"]){
+      const observation=observations[measurement];
+      if(observation)analyses[measurement]=analyzeMeasurement(measurement,observation.rawValue,observation.observed,pokemon,upperTail,observation.displayed);
+    }
+    const active=Object.keys(analyses),description=active.length===2?"Weight and height tail probabilities":active.length===1?`${active[0]==="height"?"Height":"Weight"} tail probabilities`:"Species size model";
+    const normalized=active.map(measurement=>{
+      const analysis=analyses[measurement];
+      return `<div class="normalized">${measurement} ${analysis.displayed?"lookup ":""}normalized ${analysis.normalized.toPrecision(9)}</div>`;
+    }).join("");
+    const variates=analyses.height&&analyses.weight?renderVariates(pokemon,analyses.height,analyses.weight):"";
+    const compatibleClasses=analyses.height?compatibleHeightClasses(analyses.height.normalizedLower,analyses.height.normalizedUpper,pokemon):[];
+    const heightSelectedClass=compatibleClasses.length===1?compatibleClasses[0]:null;
+    const sections=active.map(measurement=>renderProbabilitySection(pokemon,analyses[measurement],upperTail,heightSelectedClass)).join("");
+    const empty=active.length?"":'<div class="class-note">Enter a height, a weight, or both to calculate tail probabilities.</div>';
+    document.getElementById("results").innerHTML=`
+      <div class="result-head"><div><h2>${displayName(pokemon.name)}</h2><p>#${String(pokemon.dex).padStart(4,"0")} · ${description}</p></div><div class="normalized-stack">${normalized}</div></div>
+      ${pokemonProfile(pokemon)}${displayExtremaNotes(pokemon)}${variates}${sections}${empty}`;
   }
 
   function initThemeSwitch(){
@@ -741,46 +951,77 @@
   }
 
   function initApp(){
-    const form=document.getElementById("calculator"),pokemonInput=document.getElementById("pokemon"),valueInput=document.getElementById("value"),options=document.getElementById("pokemon-options"),error=document.getElementById("error");
-    let interpretationWasManuallySet=false;
+    const form=document.getElementById("calculator"),pokemonInput=document.getElementById("pokemon"),pokemonClearButton=document.getElementById("clear-pokemon"),options=document.getElementById("pokemon-options"),error=document.getElementById("error");
+    const inputs={height:document.getElementById("height-value"),weight:document.getElementById("weight-value")};
+    const clearButtons={height:document.getElementById("clear-height"),weight:document.getElementById("clear-weight")};
+    const interpretationWasManuallySet={height:false,weight:false};
     for(const pokemon of POKEMON){const option=document.createElement("option");option.value=optionName(pokemon);options.appendChild(option)}
-    pokemonInput.value=optionName(POKEMON[0]);valueInput.value=POKEMON[0].height;
-    for(const input of [pokemonInput,valueInput])input.addEventListener("focus",()=>input.select());
-    function measurement(){return form.elements.measurement.value}
+    pokemonInput.value=optionName(POKEMON[0]);inputs.weight.value=POKEMON[0].weight;inputs.height.value=POKEMON[0].height;
+    for(const input of [pokemonInput,inputs.weight,inputs.height])input.addEventListener("focus",()=>input.select());
+    function updatePokemonClearButton(){pokemonClearButton.hidden=pokemonInput.value===""}
     function selectedPokemon(){return resolvePokemon(pokemonInput.value)}
-    function updateInterpretation(){
-      if(interpretationWasManuallySet)return;
-      const places=decimalPlaces(valueInput.value.trim()),displayed=places<=2;
-      form.elements.interpretation.value=displayed?"displayed":"exact";
-      document.getElementById("mode-hint").textContent=`${displayed?"Displayed":"Exact"} selected automatically from the entered decimal precision.`;
+    function interpretationGroup(measurement){return form.elements[`${measurement}-interpretation`]}
+    function updateClearButton(measurement){clearButtons[measurement].hidden=inputs[measurement].value===""}
+    function updateInterpretation(measurement){
+      if(interpretationWasManuallySet[measurement]||inputs[measurement].value.trim()==="")return;
+      const places=decimalPlaces(inputs[measurement].value.trim()),displayed=places<=2;
+      interpretationGroup(measurement).value=displayed?"displayed":"exact";
+      document.getElementById(`${measurement}-mode-hint`).textContent=`${displayed?"Displayed":"Exact"} selected automatically from the entered decimal precision.`;
     }
-    function updateMeasurement(resetValue=true){
-      const type=measurement(),pokemon=selectedPokemon();
-      document.getElementById("unit").textContent=type==="height"?"m":"kg";
-      document.getElementById("value-label").textContent=type==="height"?"Observed height":"Observed weight";
-      if(resetValue&&pokemon)valueInput.value=type==="height"?pokemon.height:pokemon.weight;
-      interpretationWasManuallySet=false;
-      updateInterpretation();
+    function resetMeasurements(){
+      const pokemon=selectedPokemon();
+      if(!pokemon)return;
+      inputs.weight.value=pokemon.weight;inputs.height.value=pokemon.height;
+      for(const measurement of ["weight","height"]){
+        interpretationWasManuallySet[measurement]=false;
+        updateInterpretation(measurement);
+        updateClearButton(measurement);
+      }
     }
     function calculate(event){
       if(event)event.preventDefault();
-      const pokemon=selectedPokemon(),rawValue=valueInput.value.trim(),observed=Number(rawValue);
+      const pokemon=selectedPokemon(),observations={};
       if(!pokemon){error.textContent="Choose a Pokémon from the list.";return}
-      if(rawValue===""||!Number.isFinite(observed)||observed<0){error.textContent="Enter a nonnegative measurement.";return}
+      for(const measurement of ["weight","height"]){
+        const rawValue=inputs[measurement].value.trim();
+        if(rawValue==="")continue;
+        const observed=Number(rawValue);
+        if(!Number.isFinite(observed)||observed<0){error.textContent=`Enter a nonnegative ${measurement}, or leave it blank.`;return}
+        observations[measurement]={rawValue,observed,displayed:interpretationGroup(measurement).value==="displayed"};
+      }
       error.textContent="";
-      renderResults(pokemon,measurement(),rawValue,observed,form.elements.tail.value==="upper",form.elements.interpretation.value==="displayed");
+      renderResults(pokemon,observations,form.elements.tail.value==="upper");
     }
     form.addEventListener("submit",calculate);
-    form.elements.measurement.forEach(input=>input.addEventListener("change",()=>{updateMeasurement();calculate()}));
     form.elements.tail.forEach(input=>input.addEventListener("change",calculate));
-    form.elements.interpretation.forEach(input=>input.addEventListener("change",()=>{interpretationWasManuallySet=true;document.getElementById("mode-hint").textContent="Interpretation selected manually.";calculate()}));
-    pokemonInput.addEventListener("change",()=>{updateMeasurement();calculate()});
-    valueInput.addEventListener("input",()=>{updateInterpretation();if(valueInput.value!=="")calculate()});
-    updateInterpretation();
+    for(const measurement of ["weight","height"]){
+      interpretationGroup(measurement).forEach(input=>input.addEventListener("change",()=>{
+        interpretationWasManuallySet[measurement]=true;
+        document.getElementById(`${measurement}-mode-hint`).textContent="Interpretation selected manually.";
+        calculate();
+      }));
+      inputs[measurement].addEventListener("input",()=>{updateInterpretation(measurement);updateClearButton(measurement);calculate()});
+      clearButtons[measurement].addEventListener("click",()=>{
+        inputs[measurement].value="";
+        updateClearButton(measurement);
+        inputs[measurement].focus();
+        calculate();
+      });
+      updateInterpretation(measurement);
+      updateClearButton(measurement);
+    }
+    pokemonInput.addEventListener("input",updatePokemonClearButton);
+    pokemonInput.addEventListener("change",()=>{resetMeasurements();calculate()});
+    pokemonClearButton.addEventListener("click",()=>{
+      pokemonInput.value="";
+      updatePokemonClearButton();
+      pokemonInput.focus();
+    });
+    updatePokemonClearButton();
     calculate();
   }
   if(typeof document!=="undefined"){initThemeSwitch();initApp()}
-  if(typeof module!=="undefined")module.exports={POKEMON,DISPLAY_EXTREMA,decodeTable,polynomialTails,heightTails,heightClass,heightClassSupport,weightTable,weightSupport,lookupTails,oneInText,pokemonProfile,displayExtremaNotes,nextDown,decimalPlaces,interpretedObservation,rangeIntersects};
+  if(typeof module!=="undefined")module.exports={POKEMON,DISPLAY_EXTREMA,decodeTable,polynomialTails,heightTails,heightClass,heightClassSupport,weightTable,weightSupport,lookupTails,oneInText,pokemonProfile,displayExtremaNotes,nextDown,nextUp,decimalPlaces,interpretedObservation,rangeIntersects,analyzeMeasurement,heightTransform,compatibleHeightClasses,transformedHeightBranches,transformedHeightRanges,transformedHeightRange,impliedVariates,renderVariates,renderProbabilitySection,renderResults};
   </script>
 </body>
 </html>

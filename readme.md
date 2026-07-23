@@ -63,6 +63,28 @@ maxima of `1.55`, `1.75`, and `2.00`. If a future Game Master introduces
 another class, the extractor and the distribution set must be updated rather
 than silently assigning it to an existing class.
 
+### Audit evolutions that change XXL height class
+
+To produce a TSV containing every direct evolution whose source and target
+have different XXL height classes, run:
+
+```console
+$ ./list_xxl_class_changing_evolutions.py GAME_MASTER.json \
+    > xxl_class_changing_evolutions.tsv
+```
+
+Each row includes the source and target Pokédex numbers, form names, mean
+heights, mean weights, XXL classes, and class-change direction. The script
+reads both `evolutionBranch` and `evolutionIds`, resolves `_NORMAL` and
+collapsed `_ALL` forms, and removes duplicate representations of the same
+evolution. Validation and unresolved-form warnings go to standard error;
+`--strict` makes any warning produce an unsuccessful exit status.
+
+Zorua is included because its Game Master XXL class can still be useful for
+an evolution audit even though Zorua is omitted from the probability app.
+Pumpkaboo and Gourgeist are ignored entirely: their special form-size system
+does not use the ordinary XXL height classes modeled by this report.
+
 ### 3. Audit float32 display extrema
 
 Generate the human-readable report with:

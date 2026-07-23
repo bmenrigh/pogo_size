@@ -97,6 +97,8 @@ def _collect_settings(
 
 def extract_pokemon_stats(
     game_master: object,
+    *,
+    skipped_pokemon: frozenset[str] = SKIPPED_POKEMON,
 ) -> tuple[list[PokemonStats], list[str]]:
     """Return all complete Pokémon rows and all validation problems."""
     if not isinstance(game_master, list):
@@ -108,7 +110,7 @@ def extract_pokemon_stats(
 
     for template_id, pokemon in standard.items():
         match = TEMPLATE_RE.fullmatch(template_id)
-        if match is None or pokemon.get("pokemonId") in SKIPPED_POKEMON:
+        if match is None or pokemon.get("pokemonId") in skipped_pokemon:
             continue
         pokedex_number = int(match.group("number"))
         variation_counts[pokedex_number] = variation_counts.get(pokedex_number, 0) + 1
@@ -121,7 +123,7 @@ def extract_pokemon_stats(
     for template_id in sorted(set(standard) & set(extended)):
         pokemon = standard[template_id]
         pokemon_id = pokemon.get("pokemonId")
-        if pokemon_id in SKIPPED_POKEMON:
+        if pokemon_id in skipped_pokemon:
             continue
 
         size_settings = extended[template_id].get("sizeSettings")

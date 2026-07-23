@@ -104,6 +104,33 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("<title>Pokémon Size Probability in Pokémon GO</title>", html)
         self.assertIn("<h1>Pokémon Size Probability in Pokémon GO</h1>", html)
         self.assertIn('<div class="eyebrow">Size prevalence lookup</div>', html)
+        self.assertIn('id="height-value"', html)
+        self.assertIn('id="weight-value"', html)
+        self.assertIn('id="clear-pokemon"', html)
+        self.assertIn('id="clear-height"', html)
+        self.assertIn('id="clear-weight"', html)
+        self.assertIn('aria-label="Clear selected Pokémon"', html)
+        self.assertIn('aria-label="Clear observed height"', html)
+        self.assertIn('aria-label="Clear observed weight"', html)
+        self.assertIn('id="clear-pokemon" type="button" tabindex="-1"', html)
+        self.assertIn('id="clear-weight" type="button" tabindex="-1"', html)
+        self.assertIn('id="clear-height" type="button" tabindex="-1"', html)
+        self.assertIn(
+            'name="weight-interpretation" value="displayed" tabindex="-1"', html
+        )
+        self.assertIn(
+            'name="height-interpretation" value="displayed" tabindex="-1"', html
+        )
+        self.assertIn("updateClearButton(measurement)", html)
+        self.assertLess(html.index('id="weight-value"'), html.index('id="height-value"'))
+        self.assertIn('name="height-interpretation"', html)
+        self.assertIn('name="weight-interpretation"', html)
+        self.assertNotIn('name="measurement"', html)
+        self.assertIn("Weight and height tail probabilities", html)
+        self.assertIn("Implied generation variates", html)
+        self.assertIn('class="normalized-stack"', html)
+        self.assertIn('analysis.displayed?"lookup ":""', html)
+        self.assertIn("Enter a height, a weight, or both", html)
         self.assertIn('id="theme-switch"', html)
         self.assertIn('aria-label="Switch to dark theme"', html)
         self.assertIn('html[data-theme="dark"]', html)
@@ -118,12 +145,42 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("Is this a traditional statistical p-value?", html)
         self.assertIn("one-sided tail probability", html)
         self.assertIn("Does everyone who catches the same Pokémon", html)
-        self.assertIn("its size class is shared", html)
-        self.assertIn("Around the introduction of PokéStop Showcases", html)
-        self.assertIn("date that is not known", html)
+        self.assertIn("its size class and intrinsic-weight variate", html)
+        self.assertIn("intrinsic-weight variate <i>w</i><sub>v</sub> are shared", html)
+        self.assertIn("strongly positively correlated between Trainers", html)
+        self.assertIn("when catching Rattata or Magikarp", html)
+        self.assertIn("10.17 kg and 0.41 m", html)
+        self.assertIn("16.99 kg and 0.50 m", html)
+        self.assertIn("[0.81, 0.83)", html)
+        self.assertIn("0.81935–0.85265", html)
+        self.assertIn("around the introduction of PokéStop Showcases", html)
+        self.assertIn("exact transition date is not known", html)
         self.assertIn("Does evolution reroll a Pokémon’s height or weight?", html)
         self.assertIn("new height = old height × (new mean height / old mean height)", html)
+        self.assertIn("different 1.55, 1.75, or 2.00 XXL height classes", html)
+        self.assertIn("The intrinsic-weight variate remains unchanged", html)
+        self.assertIn(
+            "<b>Evolution between different XXL height classes</b> section "
+            "in Technical Details",
+            html,
+        )
+        self.assertIn("This is deterministic, not a reroll", html)
         self.assertIn("display rounding, not new randomness during evolution", html)
+        self.assertIn("Evolution between different XXL height classes", html)
+        self.assertIn("H<sub>t</sub> = 1.5μ<sub>t</sub>", html)
+        self.assertIn("An XXL Skorupi measuring 1.22 m", html)
+        self.assertIn("H<sub>t</sub> = 1.95 + 0.1(2.015 − 1.95) = 1.9565 m", html)
+        self.assertIn("normalized height changes from 1.525 to 1.505", html)
+        self.assertIn("A measured Noibat evolution provides a useful check", html)
+        self.assertIn("between 115.55 and 117.01 kg", html)
+        self.assertIn("observed Noivern was 2.29 m and 115.93 kg", html)
+        self.assertIn(
+            "confirm that <i>w</i><sub>v</sub> is preserved rather than rerolled",
+            html,
+        )
+        self.assertNotIn(
+            "rounded measurements cannot prove exact preservation", html
+        )
         self.assertIn("Does trading reroll a Pokémon’s height or weight?", html)
         self.assertIn("Trading preserves the Pokémon’s existing height and weight", html)
         self.assertIn("trades formerly rerolled the intrinsic-weight variate", html)
@@ -141,7 +198,7 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("data and knowledge are up to date as of that build date", html)
         self.assertIn("does not dynamically load new Game Master data", html)
         self.assertIn("Pokémon or forms released after the build date", html)
-        self.assertIn("Why did I undertake this research?", html)
+        self.assertIn("Why did I (bmenrigh) undertake this research?", html)
         self.assertIn("Measuring Up Pokémon", html)
         self.assertIn("u/TheParadoxMuse", html)
         self.assertIn("intermediate weight = w + (h² − 1)", html)
@@ -171,6 +228,16 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("P(t) = (1 − t)y₀ + ty₁ + t(1 − t)Q(t)", html)
         self.assertIn("exponential search and then binary search", html)
         self.assertIn("Why both CDF and survival polynomials are stored", html)
+        self.assertLess(
+            html.index(
+                "<h3>Why both CDF and survival polynomials are stored</h3>"
+            ),
+            html.index("<h3>Why height needs no polynomial compression</h3>"),
+        )
+        self.assertLess(
+            html.index("<h3>Why height needs no polynomial compression</h3>"),
+            html.index("<h3>How this page performs a lookup</h3>"),
+        )
         self.assertIn("PDF density versus CDF probability", html)
         self.assertIn("piecewise smooth, not globally differentiable", html)
         self.assertIn("non-smooth breakpoint", html)
@@ -204,6 +271,18 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("replaces the <b>intrinsic-weight variate</b>", html)
         self.assertIn("½ erfc(2√2)", html)
         self.assertIn("0.003167124183311996%", html)
+        self.assertLess(
+            html.index("How the game generates height and weight"),
+            html.index("Exact probability at the weight clamps"),
+        )
+        self.assertLess(
+            html.index("Exact probability at the weight clamps"),
+            html.index("The XXS and XXL height-density steps"),
+        )
+        self.assertLess(
+            html.index("The XXS and XXL height-density steps"),
+            html.index("<h3>Evolution between different XXL height classes</h3>"),
+        )
         self.assertIn("Can float32 change", html)
         self.assertIn("This behavior is theorized, not verified in practice", html)
         self.assertIn("no real-world example has come forward", html)
@@ -232,7 +311,20 @@ class BuildPvalueWebappTests(unittest.TestCase):
             command = (
                 "const a=require(process.argv[1]);"
                 "const p=a.POKEMON.find(p=>p.name==='BULBASAUR_ALL');"
+                "const b=a.POKEMON.find(p=>p.name==='BIDOOF');"
                 "const k=a.POKEMON.find(p=>p.name==='KYOGRE');"
+                "const resultNode={innerHTML:''};"
+                "global.document={getElementById:()=>resultNode};"
+                "a.renderResults(p,{height:{rawValue:'0.700',observed:.7,displayed:false}},false);"
+                "const heightOnly=resultNode.innerHTML;"
+                "a.renderResults(p,{weight:{rawValue:'6.900',observed:6.9,displayed:false}},false);"
+                "const weightOnly=resultNode.innerHTML;"
+                "a.renderResults(p,{},false);"
+                "const neither=resultNode.innerHTML;"
+                "a.renderResults(p,{"
+                "height:{rawValue:'0.700',observed:.7,displayed:false},"
+                "weight:{rawValue:'6.900',observed:6.9,displayed:false}},false);"
+                "const both=resultNode.innerHTML;"
                 "console.log(JSON.stringify({"
                 "tails:a.polynomialTails('full175',1.234567),"
                 "classes:[.49,.5,.75,1.25,1.5,1.75].map(x=>a.heightClass(x,p)),"
@@ -240,6 +332,7 @@ class BuildPvalueWebappTests(unittest.TestCase):
                 "places:['2','2.4','2.41','2.410','2.41e0'].map(a.decimalPlaces),"
                 "displayedLower:a.interpretedObservation('2.41',2.41,true,false,'kg'),"
                 "displayedUpper:a.interpretedObservation('2.41',2.41,true,true,'kg'),"
+                "displayedZero:a.interpretedObservation('0',0,true,true,'kg'),"
                 "profile:a.pokemonProfile(p),"
                 "extremaCount:a.DISPLAY_EXTREMA.length,"
                 "kyogreNote:a.displayExtremaNotes(k),"
@@ -247,7 +340,37 @@ class BuildPvalueWebappTests(unittest.TestCase):
                 "a.rangeIntersects(.345/.7,.355/.7,a.heightClassSupport(p,c))),"
                 "oneIn:a.oneInText(.001,'weight',5,false,'kg'),"
                 "conditional:a.oneInText(a.heightTails(.4/p.height,p,'xs')[0],"
-                "'height',.4,false,'m','XS Pokémon')}))"
+                "'height',.4,false,'m','XS Pokémon'),"
+                "exactVariates:a.impliedVariates(p,"
+                "a.analyzeMeasurement('height','0.700',.7,p,false,false),"
+                "a.analyzeMeasurement('weight','8.280',8.28,p,false,false)),"
+                "xxlVariates:a.impliedVariates(p,"
+                "a.analyzeMeasurement('height','1.120',1.12,p,false,false),"
+                "a.analyzeMeasurement('weight','7.590',7.59,p,false,false)),"
+                "displayedVariates:a.impliedVariates(p,"
+                "a.analyzeMeasurement('height','0.70',.7,p,false,true),"
+                "a.analyzeMeasurement('weight','6.90',6.9,p,false,true)),"
+                "bidoofOne:a.impliedVariates(b,"
+                "a.analyzeMeasurement('height','0.41',.41,b,false,true),"
+                "a.analyzeMeasurement('weight','10.17',10.17,b,false,true)),"
+                "bidoofTwo:a.impliedVariates(b,"
+                "a.analyzeMeasurement('height','0.50',.5,b,false,true),"
+                "a.analyzeMeasurement('weight','16.99',16.99,b,false,true)),"
+                "singleRangeHtml:a.renderVariates(p,"
+                "a.analyzeMeasurement('height','0.70',.7,p,false,true),"
+                "a.analyzeMeasurement('weight','6.90',6.9,p,false,true)),"
+                "crossesXXL:a.transformedHeightRange(1.492857142857,1.507142857143,p),"
+                "crossesXXLRanges:a.transformedHeightRanges(1.492857142857,1.507142857143,p),"
+                "crossingVariates:a.impliedVariates(p,"
+                "a.analyzeMeasurement('height','1.05',1.05,p,false,true),"
+                "a.analyzeMeasurement('weight','12.42',12.42,p,false,true)),"
+                "crossingHtml:a.renderVariates(p,"
+                "a.analyzeMeasurement('height','1.05',1.05,p,false,true),"
+                "a.analyzeMeasurement('weight','12.42',12.42,p,false,true)),"
+                "heightOnly,heightOnlyHasWeight:heightOnly.includes('Weight probabilities'),"
+                "weightOnly,weightOnlyHasHeight:weightOnly.includes('Height probabilities'),"
+                "neither,both"
+                "}))"
             )
             result = json.loads(
                 subprocess.check_output(
@@ -273,6 +396,8 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertEqual(result["displayedLower"]["upper"], 2.415)
         self.assertEqual(result["displayedLower"]["lookup"], 2.4149999999999996)
         self.assertEqual(result["displayedUpper"]["lookup"], 2.405)
+        self.assertEqual(result["displayedZero"]["lower"], 0)
+        self.assertEqual(result["displayedZero"]["upper"], 0.005)
         self.assertIn(
             "using exact value 2.4149999999999996 kg (just below 2.415 kg)",
             result["displayedLower"]["note"],
@@ -283,6 +408,14 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertEqual(result["straddles"], ["xxs", "xs"])
         self.assertIn("Mean height", result["profile"])
         self.assertIn("Mean weight", result["profile"])
+        self.assertLess(
+            result["profile"].index("Mean weight"),
+            result["profile"].index("Mean height"),
+        )
+        self.assertLess(
+            result["profile"].index("Weight range"),
+            result["profile"].index("Height range"),
+        )
         self.assertIn("1.75× mean", result["profile"])
         self.assertIn("0.343–0.35 m", result["profile"])
         self.assertIn("7.33125–18.975 kg", result["profile"])
@@ -300,6 +433,64 @@ class BuildPvalueWebappTests(unittest.TestCase):
             result["conditional"],
             "About 1 in 3.5 XS Pokémon are shorter than or equal to 0.4 m.",
         )
+        self.assertTrue(result["exactVariates"]["possible"])
+        self.assertAlmostEqual(result["exactVariates"]["heightLower"], 1)
+        self.assertAlmostEqual(result["exactVariates"]["weightLower"], 1.2)
+        self.assertEqual(
+            result["exactVariates"]["weightLower"],
+            result["exactVariates"]["weightUpper"],
+        )
+        self.assertTrue(result["xxlVariates"]["possible"])
+        self.assertAlmostEqual(result["xxlVariates"]["heightLower"], 1.6)
+        self.assertAlmostEqual(result["xxlVariates"]["weightLower"], 0.5)
+        self.assertLess(result["displayedVariates"]["heightLower"], 1)
+        self.assertGreater(result["displayedVariates"]["heightUpper"], 1)
+        self.assertLess(
+            result["displayedVariates"]["weightLower"],
+            result["displayedVariates"]["weightUpper"],
+        )
+        self.assertAlmostEqual(result["bidoofOne"]["heightLower"], 0.81)
+        self.assertAlmostEqual(result["bidoofOne"]["heightUpper"], 0.83)
+        self.assertAlmostEqual(result["bidoofOne"]["weightLower"], 0.81935)
+        self.assertAlmostEqual(result["bidoofOne"]["weightUpper"], 0.85265)
+        self.assertAlmostEqual(result["bidoofTwo"]["heightLower"], 0.99)
+        self.assertAlmostEqual(result["bidoofTwo"]["heightUpper"], 1.01)
+        self.assertAlmostEqual(result["bidoofTwo"]["weightLower"], 0.82915)
+        self.assertAlmostEqual(result["bidoofTwo"]["weightUpper"], 0.86965)
+        self.assertIn("Intrinsic-weight variate", result["singleRangeHtml"])
+        self.assertNotIn("Average:", result["singleRangeHtml"])
+        self.assertAlmostEqual(result["crossesXXL"][0], 1.5000000000000002)
+        self.assertAlmostEqual(result["crossesXXL"][1], 2.25)
+        self.assertEqual(len(result["crossesXXLRanges"]), 2)
+        self.assertAlmostEqual(result["crossesXXLRanges"][0][1], 2.25)
+        self.assertAlmostEqual(result["crossesXXLRanges"][1][0], 1.5)
+        self.assertTrue(result["crossingVariates"]["possible"])
+        self.assertEqual(len(result["crossingVariates"]["weightRanges"]), 2)
+        self.assertEqual(
+            result["crossingVariates"]["weightRangeClasses"], [["xl"], ["xxl"]]
+        )
+        self.assertGreater(result["crossingVariates"]["weightRanges"][0][0], 0.54)
+        self.assertLess(result["crossingVariates"]["weightRanges"][0][1], 0.58)
+        self.assertGreater(result["crossingVariates"]["weightRanges"][1][0], 1.29)
+        self.assertLess(result["crossingVariates"]["weightRanges"][1][1], 1.31)
+        self.assertIn("XL: 0.", result["crossingHtml"])
+        self.assertIn("XXL: 1.", result["crossingHtml"])
+        self.assertIn("Height probabilities", result["heightOnly"])
+        self.assertFalse(result["heightOnlyHasWeight"])
+        self.assertIn("Weight probabilities", result["weightOnly"])
+        self.assertFalse(result["weightOnlyHasHeight"])
+        self.assertNotIn("Matches height", result["weightOnly"])
+        self.assertIn("Mean height", result["neither"])
+        self.assertIn(
+            "Enter a height, a weight, or both to calculate tail probabilities.",
+            result["neither"],
+        )
+        self.assertLess(
+            result["both"].index("Weight probabilities"),
+            result["both"].index("Height probabilities"),
+        )
+        self.assertEqual(result["both"].count("Matches height"), 1)
+        self.assertIn("class-row observed-class", result["both"])
 
 
 if __name__ == "__main__":
