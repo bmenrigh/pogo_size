@@ -205,6 +205,9 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("models the rounded height or weight shown for an individual Pokémon only", html)
         self.assertEqual(html.count('class="heavy-ball-side"'), 2)
         self.assertEqual(html.count('class="heavy-ball-dot"'), 2)
+        self.assertEqual(html.count('class="heavy-ball-upper-shell"'), 1)
+        self.assertEqual(html.count('class="heavy-ball-lower-shell"'), 1)
+        self.assertEqual(html.count('class="heavy-ball-band"'), 1)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js is required")
     def test_javascript_polynomial_lookup_matches_python(self):
