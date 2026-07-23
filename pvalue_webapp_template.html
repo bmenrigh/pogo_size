@@ -339,7 +339,7 @@
           <p>The higher a species’ mean weight, the smaller this interval is relative to its usual weight and the less likely the result becomes. At the extreme, Primal Groudon has a mean weight of 999.7 kg and only about a 1 in 50.6 million chance of displaying 0 kg!</p>
 
           <h3>Can float32 change an extreme displayed value?</h3>
-          <p>Possibly. Pokémon height and weight are transmitted to the game as IEEE-754 float32 values—the 32-bit single-precision floating-point format. Most decimal values cannot be represented exactly as float32. Usually the difference is far too small to affect a two-decimal display, but a theoretical minimum or maximum ending exactly at a half-cent rounding boundary can move just below that boundary.</p>
+          <p>Possibly. Pokémon height and weight are transmitted to the game as IEEE-754 single-precision values (the float32 format). Most decimal values cannot be represented exactly as float32. Usually the difference is far too small to affect a two-decimal display, but a theoretical minimum or maximum ending exactly at a half-cent rounding boundary can move just below that boundary.</p>
           <p>The current stats contain three kinds of changed display boundary:</p>
           <ol>
             <li><b>Minimum height displays lower:</b> Kyogre’s nominal minimum is 2.205 m, which would round to 2.21 m. Its exact float32 value is 2.2049999237060546875, which should round to 2.20 m.</li>
