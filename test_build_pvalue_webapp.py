@@ -133,9 +133,18 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("Why can more than one conditional height class appear?", html)
         self.assertIn("How does Displayed mode affect Lower and Upper results?", html)
         self.assertIn("Where do the species data come from?", html)
+        self.assertIn(
+            "Does this calculator apply to Pokémon caught before XXS and XXL?", html
+        )
+        self.assertIn("December 8, 2022", html)
+        self.assertIn("January 17, 2023", html)
         self.assertIn("data and knowledge are up to date as of that build date", html)
         self.assertIn("does not dynamically load new Game Master data", html)
         self.assertIn("Pokémon or forms released after the build date", html)
+        self.assertIn("Why did I undertake this research?", html)
+        self.assertIn("Measuring Up Pokémon", html)
+        self.assertIn("u/TheParadoxMuse", html)
+        self.assertIn("intermediate weight = w + (h² − 1)", html)
         self.assertIn("2.40625 kg", html)
         self.assertIn("1 in 8 Rattata", html)
         self.assertIn("13.125 kg", html)
