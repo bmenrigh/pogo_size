@@ -867,6 +867,8 @@ class BuildPvalueWebappTests(unittest.TestCase):
         ).lookup_tails(1.234567)
         self.assertEqual(result["gameDisplays"], ["0", "1", "1.1", "1.11"])
         self.assertEqual(tuple(result["tails"]), expected)
+        self.assertIn("<h2>Bulbasaur</h2>", result["both"])
+        self.assertNotIn("Bulbasaur All", result["both"])
         self.assertEqual(
             result["classes"],
             ["xxs", "xs", "average", "average", "xl", "xxl"],
