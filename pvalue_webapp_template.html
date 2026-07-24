@@ -143,6 +143,25 @@
     .variate-value b { display: block; margin-top: 4px; font: 750 .84rem ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
     .variate-note { margin: 9px 1px 0; color: #465f83; font-size: .74rem; line-height: 1.45; }
     .variate-warning { color: var(--red-dark); font-weight: 700; }
+    .temporary-evolution-notice { margin-top: 18px; padding: 15px 16px; border: 1px solid #d7b96f; border-radius: 14px; background: #fff8e6; color: #654c18; font-size: .8rem; line-height: 1.55; }
+    .temporary-evolution-notice strong { display: block; margin-bottom: 4px; color: #513908; font-size: .9rem; }
+    .temporary-evolution-notice p { margin: 0; }
+    .temporary-evolution-notice a { color: #72500b; font-weight: 800; }
+    .evolution-results { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+    .evolution-results > h3 { margin: 0; font-size: 1.05rem; }
+    .evolution-results > p { margin: 5px 0 13px; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+    .evolution-list { display: grid; gap: 9px; }
+    .evolution-card { padding: 13px 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.58); }
+    .evolution-card h4 { margin: 0; font-size: .88rem; }
+    .evolution-card h4 .muted { color: var(--muted); font-weight: 600; }
+    .evolution-path { margin: 3px 0 9px; color: var(--muted); font-size: .68rem; line-height: 1.4; }
+    .evolution-kind { display: inline-block; margin-left: 7px; padding: 2px 6px; border-radius: 999px; color: var(--blue); background: var(--blue-soft); font-size: .62rem; font-weight: 800; vertical-align: 1px; }
+    .evolution-branch + .evolution-branch { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); }
+    .evolution-branch strong { display: block; margin-bottom: 4px; color: var(--muted); font-size: .67rem; text-transform: uppercase; letter-spacing: .08em; }
+    .evolution-measurements { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .evolution-measurements div { padding: 8px 9px; border-radius: 9px; background: var(--blue-soft); }
+    .evolution-measurements small { display: block; color: var(--muted); font-size: .66rem; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; }
+    .evolution-measurements b { display: block; margin-top: 3px; font: 720 .78rem ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
     .section-title { margin: 0 0 10px; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
     .class-list { display: grid; gap: 7px; }
     .class-row { display: grid; grid-template-columns: 84px 1fr auto; gap: 10px; align-items: center; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.66); }
@@ -163,10 +182,19 @@
     details.info-panel[open] summary::after { transform: rotate(45deg); }
     .info-body { padding: 0 23px 23px; border-top: 1px solid var(--line); color: #465268; font-size: .88rem; line-height: 1.65; }
     .info-body h3 { margin: 21px 0 5px; color: var(--ink); font-size: .95rem; }
+    .info-body h4 { margin: 17px 0 5px; color: var(--ink); font-size: .86rem; }
+    .info-body :is(h3,h4)[id] { scroll-margin-top: 12px; }
+    .fragment-link { margin-left: .35em; color: var(--muted); opacity: .38; font-size: .74em; font-weight: 750; text-decoration: none; vertical-align: .08em; }
+    .fragment-link:hover, .fragment-link:focus-visible { color: var(--blue); opacity: 1; }
     .info-body p { margin: 0 0 10px; }
     .info-body ol, .info-body ul { margin: 7px 0 13px; padding-left: 22px; }
     .info-body li { margin: 5px 0; }
-    .equation { margin: 11px 0; padding: 10px 12px; border-left: 3px solid var(--blue); border-radius: 0 9px 9px 0; background: var(--blue-soft); color: #294c7d; font: .78rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .equation { margin: 11px 0; padding: 10px 12px; border-left: 3px solid var(--blue); border-radius: 0 9px 9px 0; background: var(--blue-soft); color: #294c7d; font: .78rem/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-x: auto; overflow-wrap: anywhere; }
+    .mathml { display: none; margin: 0; color: inherit; font: normal 1.14rem/1.4 "STIX Two Math", "Cambria Math", "Latin Modern Math", serif; }
+    .mathml .math-mu { font-size: 1.12em; }
+    .mathml .mean-symbol > :nth-child(2) { font-size: .86em; }
+    html.mathml-enabled .mathml { display: block; }
+    html.mathml-enabled .math-fallback { display: none; }
     .tech-note { padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.62); }
     .weights { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 7px; margin: 13px 0; }
     .weight-chip { padding: 10px 6px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.7); text-align: center; }
@@ -215,6 +243,9 @@
     html[data-theme="dark"] .equation { color: #c1d7ff; }
     html[data-theme="dark"] .extrema-alert { border-color: #85692f; background: #342b18; color: #ead29e; }
     html[data-theme="dark"] .extrema-alert strong, html[data-theme="dark"] .extrema-alert code { color: #f0d99f; }
+    html[data-theme="dark"] .temporary-evolution-notice { border-color: #806a37; background: #312a19; color: #e5d2a3; }
+    html[data-theme="dark"] .temporary-evolution-notice strong, html[data-theme="dark"] .temporary-evolution-notice a { color: #f0d99f; }
+    html[data-theme="dark"] .evolution-card { background: rgba(15,21,32,.54); }
     @media (max-width: 760px) {
       main { padding-top: 30px; }
       .workspace { grid-template-columns: 1fr; }
@@ -224,6 +255,8 @@
       .normalized { display: inline-block; margin-top: 12px; }
       .normalized-stack .normalized { margin-top: 0; }
       .variate-grid { grid-template-columns: 1fr; }
+      .evolution-measurements { grid-template-columns: 1fr; }
+      .mathml { font-size: 1.07rem; }
       .weights { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .profile-metrics { grid-template-columns: 1fr; }
       .metric + .metric { border-left: 0; border-top: 1px solid var(--line); }
@@ -321,7 +354,7 @@
       </section>
     </div>
     <div class="info-stack">
-      <details class="panel info-panel">
+      <details class="panel info-panel" id="faq">
         <summary>Frequently Asked Questions</summary>
         <div class="info-body">
           <h3>What does the overall probability mean?</h3>
@@ -342,33 +375,39 @@
           <p>These add to exactly 1. The average class therefore accounts for 94.2% of this model.</p>
 
           <h3>Does this mixture apply to every encounter?</h3>
-          <p>We don't know, but probably not. Raid, research, and Team GO Rocket encounters may use different class probabilities, and some events may adjust size rates. No exact data is available here for the class weights of non-wild encounters. The overall result should therefore be treated as a wild-catch estimate unless the encounter is known to use the same rates.</p>
+          <p>We don't know, but probably not. Raid, research, and Team GO Rocket encounters may use different class probabilities, and some events may adjust size rates. No known research data is available for the class weights of non-wild encounters. The overall result should therefore be treated as a wild-catch estimate unless the encounter is known to use the same rates.</p>
 
           <h3>Does this calculator apply to Pokémon caught before XXS and XXL?</h3>
           <p>No. This calculator models Pokémon generated under the current five-class XXS, XS, Average, XL, and XXL size system. <a href="https://pokemongo.com/post/different-sized-pokemon-in-pokemon-go-xxl-xxs?hl=en">XXS and XXL first appeared on December 8, 2022</a> for Poochyena, Mightyena, and Mawile. <a href="https://pokemongo.com/en/post/more-xxs-xxl-pokemon-in-pokemon-go">The system expanded to all Pokémon on January 17, 2023</a>, during the Season of Mythical Wishes. Those announcement dates are the best practical cutoffs; a precise server-side transition time was not published.</p>
-          <p>Under the older system, normalized height was drawn from a normal distribution and clamped to the range 0.5–1.5, much like the intrinsic-weight variate. The current system instead chooses a size class first and then draws height from that class’s uniform or two-piece distribution. An older Pokémon may appear to fall into the modern XS, Average, or XL height range, but that apparent class does not mean it was generated from the corresponding modern conditional distribution.</p>
-          <p>The difference affects weight prevalence too, because normalized height contributes to the weight formula and is generally squared. Consequently, neither the overall nor the conditional height and weight probabilities on this page are valid for Pokémon generated under the old system. Evolution or trading does not convert an older Pokémon to the new generator; applicability depends on when its original size values were generated.</p>
+          <p>Under the older system, the height variate <i>h</i><sub>v</sub> was drawn from a normal distribution and clamped to the range 0.5–1.5, much like the weight variate <i>w</i><sub>v</sub>. The current system instead chooses a size class first and then draws <i>h</i><sub>v</sub> from that class’s uniform or two-piece distribution. An older Pokémon may appear to fall into the modern XS, Average, or XL height range, but that apparent class does not mean it was generated from the corresponding modern conditional distribution.</p>
+          <p>The difference affects weight prevalence too, because <i>h</i><sub>v</sub> contributes to the weight formula and is generally squared. Consequently, neither the overall nor the conditional height and weight probabilities on this page are valid for Pokémon generated under the old system. Evolution or trading does not convert an older Pokémon to the new generator; applicability depends on when its original size values were generated.</p>
 
           <h3>Does everyone who catches the same Pokémon get the same height and weight?</h3>
-          <p>No. When multiple Trainers catch the same spawn, its size class and intrinsic-weight variate <i>w</i><sub>v</sub> are shared. The height variate is independently randomized for each Trainer within that size class, so the resulting height and weight can differ.</p>
-          <p>The resulting weights are nevertheless strongly positively correlated between Trainers. Weight is calculated from the shared intrinsic-weight variate plus the Trainer-specific height contribution. For example, when catching Rattata or Magikarp, an unusually low or high spawn <i>w</i><sub>v</sub>, respectively, makes a tiny Rattata or large Magikarp more likely for every Trainer. Each Trainer’s independently drawn height still affects whether an individual catch crosses the badge threshold.</p>
+          <p>No. When multiple Trainers catch the same spawn, its size class and weight variate <i>w</i><sub>v</sub> are shared. The height variate <i>h</i><sub>v</sub> is independently randomized for each Trainer within that size class, so the resulting height and weight can differ.</p>
+          <p>The resulting weights are nevertheless strongly positively correlated between Trainers. Weight is calculated from the shared <i>w</i><sub>v</sub> plus the Trainer-specific height contribution. For example, when catching Rattata or Magikarp, an unusually low or high spawn <i>w</i><sub>v</sub>, respectively, makes a tiny Rattata or large Magikarp more likely for every Trainer. Each Trainer’s independently drawn <i>h</i><sub>v</sub> still affects whether an individual catch crosses the badge threshold.</p>
           <p>For example, two Trainers caught the same Average Bidoof spawn and saw different measurements:</p>
           <ul>
-            <li><b>10.17 kg and 0.41 m</b> implies a height variate in [0.81, 0.83) and an intrinsic-weight variate range of 0.81935–0.85265.</li>
-            <li><b>16.99 kg and 0.50 m</b> implies a height variate in [0.99, 1.01) and an intrinsic-weight variate range of 0.82915–0.86965.</li>
+            <li><b>10.17 kg and 0.41 m</b> implies <i>h</i><sub>v</sub> in [0.81, 0.83) and <i>w</i><sub>v</sub> in 0.81935–0.85265.</li>
+            <li><b>16.99 kg and 0.5 m</b> implies <i>h</i><sub>v</sub> in [0.99, 1.01) and <i>w</i><sub>v</sub> in 0.82915–0.86965.</li>
           </ul>
-          <p>The height intervals do not overlap, as expected for independently randomized heights. The intrinsic-weight ranges overlap between 0.82915 and 0.85265, which is consistent with both catches sharing one exact <i>w</i><sub>v</sub>. These are ranges rather than exact values because each displayed height and weight hides an interval of values that round to it.</p>
-          <p>This behavior has changed over time. Originally, everyone catching the same spawn received the same height and weight. Per-Trainer variation appears to have begun around the introduction of PokéStop Showcases, but the exact transition date is not known. The present behavior is a shared size class and intrinsic-weight variate with independently randomized height.</p>
+          <p>The <i>h</i><sub>v</sub> intervals do not overlap, as expected for independently randomized heights. The <i>w</i><sub>v</sub> ranges overlap between 0.82915 and 0.85265, which is consistent with both catches sharing one exact <i>w</i><sub>v</sub>. These are ranges rather than exact values because each displayed height and weight hides an interval of values that round to it.</p>
+          <p>This behavior has changed over time. Originally, everyone catching the same spawn received the same height and weight. Per-Trainer variation appears to have begun around the introduction of PokéStop Showcases, but the exact transition date is not known. The present behavior is a shared size class and <i>w</i><sub>v</sub> with independently randomized <i>h</i><sub>v</sub>.</p>
 
           <h3>Does evolution reroll a Pokémon’s height or weight?</h3>
-          <p>No. Evolution does not draw new random values. It preserves the Pokémon’s size class and intrinsic-weight variate. Normally it also preserves normalized height, so the evolved height follows a simple ratio:</p>
-          <div class="equation">new height = old height × (new mean height / old mean height)</div>
-          <p>The height rule has one exception: when an XXL Pokémon evolves between species with different 1.55, 1.75, or 2.00 XXL height classes, the game maps its relative position in the old XXL range to the same relative position in the new range. This changes its normalized height while keeping it inside the target range. The intrinsic-weight variate remains unchanged. This is deterministic, not a reroll; the <b>Evolution between different XXL height classes</b> section in Technical Details gives the exact mapping.</p>
-          <p>The evolved weight is therefore predictable too, but it does not generally follow a simple mean ratio. It is recomputed from the preserved intrinsic-weight variate, the preserved or remapped height variate, the evolved species’ mean weight, and the applicable weight formula.</p>
-          <p>The practical obstacle is display rounding, not new randomness during evolution. The game shows only two decimal places, so the displayed height and weight hide the exact variates within rounding intervals. With the exact underlying values the evolved measurements would be deterministic; from displayed values alone, it may only be possible to predict a narrow range of outcomes.</p>
+          <p>No. Ordinary permanent evolution does not draw new random values. It preserves the Pokémon’s size class and <i>w</i><sub>v</sub>. Normally it also preserves <i>h</i><sub>v</sub> (and therefore normalized height <i>H</i><sub>n</sub>), so the evolved height follows a simple ratio:</p>
+          <div class="equation" data-tex="H_{\mathrm{new}} = H_{\mathrm{old}} \times \frac{\mu_{H,\mathrm{new}}}{\mu_{H,\mathrm{old}}}">H<sub>new</sub> = H<sub>old</sub> × (μ<sub>H,new</sub> / μ<sub>H,old</sub>)</div>
+          <p>The height rule has one exception: when an XXL Pokémon evolves between species with different 1.55, 1.75, or 2.00 XXL height classes, the game maps its relative position in the old XXL range to the same relative position in the new range. This changes <i>h</i><sub>v</sub> and <i>H</i><sub>n</sub> while keeping the height inside the target range. The weight variate <i>w</i><sub>v</sub> remains unchanged. This is deterministic, not a reroll; the <b>Evolution between different XXL height classes</b> section in Technical Details gives the exact mapping.</p>
+          <p>The evolved weight is therefore predictable too, but it does not generally follow a simple mean ratio. It is recomputed from the preserved <i>w</i><sub>v</sub>, the preserved or remapped <i>h</i><sub>v</sub>, the evolved species’ mean weight, and the applicable weight formula.</p>
+          <p>The practical obstacle is display rounding, not new randomness during evolution. The game rounds measurements to the nearest hundredth and shows up to two digits after the decimal point, so the displayed height and weight hide the exact variates within rounding intervals. With the exact underlying values the evolved measurements would be deterministic; from displayed values alone, it may only be possible to predict a narrow range of outcomes.</p>
+
+          <h3 id="faq-mega-evolution">Do Mega Evolution and Primal Reversion use the same height and weight rules as regular evolution?</h3>
+          <p>No. Mega Evolution and Primal Reversion use a separate deterministic height and weight transformation rather than the ordinary evolution rules. They do share that special transformation with each other, and neither rerolls the Pokémon. For brevity, the explanation below uses “Mega Evolution” to include both temporary mechanics.</p>
+          <p>The transformation is separate from ordinary permanent evolution and appears anomalous. A Pokémon’s position within its original size-class range is calculated first. XXS, XS, and Average heights are then mapped back into the original species’ range, leaving their heights unchanged. XXL is mapped normally into the temporary form’s XXL range. XL mixes the original XL lower boundary with the temporary form’s XL upper boundary, so part of the resulting height range can fall below the temporary form’s nominal XL range.</p>
+          <p>Temporary-evolution weight is calculated by removing a squared normalized-height contribution based on the original form and adding one based on the new height and temporary form’s means. This calculation squares normalized height in <em>every</em> class, including XXL. If the result would be below zero, the game uses the temporary form’s mean weight instead. The <b>Mega Evolution and Primal Reversion height and weight transformation</b> section in Technical Details gives the complete equations and a measured Mawile example.</p>
+          <p>Because this transformation does not produce the ordinary normalized height and weight distributions, this app does not report overall or conditional probabilities for Mega Evolutions or Primal Reversions. It still shows their means, class ranges, normalized measurements, and implied variates when those variates remain recoverable.</p>
 
           <h3>Does trading reroll a Pokémon’s height or weight?</h3>
-          <p>Not currently. Trading preserves the Pokémon’s existing height and weight. This was not always the case: trades formerly rerolled the intrinsic-weight variate, which could change the Pokémon’s weight while preserving its height. The date when trading changed to preserve weight is not known.</p>
+          <p>Not currently. Trading preserves the Pokémon’s existing height and weight. This was not always the case: trades formerly preserved the Pokémon’s size class and <i>w</i><sub>v</sub> but rerolled <i>h</i><sub>v</sub>. The rerolled height produced a new height measurement and, because height contributes to the weight formula, a new weight measurement. This followed the same shared-<i>w</i><sub>v</sub>, randomized-<i>h</i><sub>v</sub> pattern described above for catches. The date when trading changed to preserve both measurements is not known.</p>
 
           <h3>What are the conditional class results?</h3>
           <p>They answer a different question: given that a Pokémon belongs to a particular size class, how unusual is its measurement within that class? Height normally determines the class directly. Weight alone can be possible in several classes because height and weight both contribute to the weight distribution.</p>
@@ -377,13 +416,13 @@
           <p>No. A result such as “10% of XS Pokémon are this light or lighter” is P(weight ≤ observation | XS); it is not the probability that the observed Pokémon belongs to XS. Estimating class membership from weight would require combining every class’s prior frequency with the probability of observing that weight in each class. This app does not perform that reverse inference.</p>
 
           <h3>Why can more than one conditional height class appear?</h3>
-          <p>An exact height determines one size class under the game’s boundary convention. A displayed two-decimal height represents an interval of possible exact heights, however, and that interval can cross a class boundary. In that case this app shows every class compatible with the displayed value and gives the conditional result within each possible class.</p>
+          <p>An exact height determines one size class under the game’s boundary convention. A height displayed after nearest-hundredth rounding represents an interval of possible exact heights, however, and that interval can cross a class boundary. In that case this app shows every class compatible with the displayed value and gives the conditional result within each possible class.</p>
 
           <h3>Why are some conditional weight classes grey?</h3>
           <p>The entered weight lies outside those classes’ possible weight ranges, so a Pokémon with that weight cannot belong to those classes under this model.</p>
 
           <h3>What is the difference between Displayed and Exact?</h3>
-          <p>Pokémon GO displays height and weight rounded to two decimal places. Displayed mode treats an entered value as the full interval that rounds to it; Exact mode treats it as the underlying value. The calculator selects the mode independently for each input: Displayed automatically for values with two or fewer decimal places and Exact for values with more precision.</p>
+          <p>Pokémon GO rounds height and weight to the nearest hundredth but omits unnecessary trailing zeros: for example, values may appear as 1.11 kg, 1.1 kg, or 1 kg. Displayed mode treats an entered value as the full interval that rounds to it; Exact mode treats it as the underlying value. The calculator selects the mode independently for each input: Displayed automatically for values with two or fewer decimal places and Exact for values with more precision.</p>
 
           <h3>How does Displayed mode affect Lower and Upper results?</h3>
           <p>A displayed value of 2.41 represents exact values in the half-open interval [2.405, 2.415). A Lower result therefore counts values that would display as 2.41 or less by looking just below 2.415. An Upper result counts values that would display as 2.41 or more by looking at 2.405 inclusively. This is why the exact value used for a displayed lookup depends on the selected tail direction.</p>
@@ -393,21 +432,21 @@
           <p>This calculator’s <b>Displayed</b> treatment models the rounded height or weight shown for an individual Pokémon only. It does not model the Pokédex size-record display, so Pokédex record values should not be entered as though they were individual displayed measurements.</p>
 
           <h3>Can a Pokémon display a weight of 0 kg?</h3>
-          <p>Yes. Any actual weight from 0 kg up to, but not including, 0.005 kg rounds to a displayed weight of 0.00 kg. The modeled weight ranges of both the XXS and XS size classes extend below 0.005 kg, so every species can theoretically display a weight of 0 kg.</p>
-          <p>The higher a species’ mean weight, the smaller this interval is relative to its usual weight and the less likely the result becomes. At the extreme, Primal Groudon has a mean weight of 999.7 kg and only about a 1 in 50.6 million chance of displaying 0 kg!</p>
+          <p>Yes. Any actual weight from 0 kg up to, but not including, 0.005 kg rounds to a displayed weight of 0 kg. The modeled weight ranges of both the XXS and XS size classes extend below 0.005 kg, so every species can theoretically display a weight of 0 kg.</p>
+          <p>The higher a species’ mean weight, the smaller this interval is relative to its usual weight and the less likely the result becomes. At the extreme, Groudon has a mean weight of 950 kg and only about a 1 in 48.1 million chance of displaying 0 kg!</p>
 
           <h3>Can float32 change an extreme displayed value?</h3>
-          <p>Possibly. Pokémon height and weight are transmitted to the game as IEEE-754 single-precision values (the float32 format). Most decimal values cannot be represented exactly as float32. Usually the difference is far too small to affect a two-decimal display, but a theoretical minimum or maximum ending exactly at a half-cent rounding boundary can move just below that boundary.</p>
+          <p>Possibly. Pokémon height and weight are transmitted to the game as IEEE-754 single-precision values (the float32 format). Most decimal values cannot be represented exactly as float32. Usually the difference is far too small to affect the nearest-hundredth display, but a theoretical minimum or maximum ending exactly at a half-cent rounding boundary can move just below that boundary.</p>
           <p>The current stats contain three kinds of changed display boundary:</p>
           <ol>
-            <li><b>Minimum height displays lower:</b> Kyogre’s nominal minimum is 2.205 m, which would round to 2.21 m. Its exact float32 value is 2.2049999237060546875, which should round to 2.20 m.</li>
+            <li><b>Minimum height displays lower:</b> Kyogre’s nominal minimum is 2.205 m, which would round to 2.21 m. Its exact float32 value is 2.2049999237060546875, which should round to 2.2 m.</li>
             <li><b>Maximum height displays lower:</b> Kyogre’s nominal maximum is 6.975 m, which would round to 6.98 m. Its exact float32 value is 6.974999904632568359375, which should round to 6.97 m.</li>
             <li><b>Maximum weight displays lower:</b> Caterpie’s nominal maximum is 7.975 kg, which would round to 7.98 kg. Its exact float32 value is 7.974999904632568359375, which should round to 7.97 kg.</li>
           </ol>
           <p class="tech-note"><b>This behavior is theorized, not verified in practice.</b> Testing it requires finding a Pokémon at the true mathematical minimum or maximum height, or maximum possible weight. Landing exactly at one of those endpoints is so extraordinarily unlikely that no real-world example has come forward. The affected Pokémon are flagged in their result cards, but those notes should be treated as predictions until an endpoint specimen can test them.</p>
 
           <h3>How do displayed weights affect the Youngster and Fisher badges?</h3>
-          <p>For the <b>Youngster</b> badge (“tiny Rattata”), the maximum exact weight is 2.40625 kg for both Kanto and Alolan Rattata, even though Alolan Rattata has a higher mean weight. Every Rattata displayed as 2.40 kg or less qualifies, and every Rattata displayed as 2.42 kg or more does not. A displayed weight of 2.41 kg represents [2.405, 2.415) kg, so exactly 1 in 8 Rattata with that displayed weight qualify.</p>
+          <p>For the <b>Youngster</b> badge (“tiny Rattata”), the maximum exact weight is 2.40625 kg for both Kanto and Alolan Rattata, even though Alolan Rattata has a higher mean weight. Every Rattata displayed as 2.4 kg or less qualifies, and every Rattata displayed as 2.42 kg or more does not. A displayed weight of 2.41 kg represents [2.405, 2.415) kg, and approximately 1 in 8 Rattata in that interval qualify. The proportion is not exactly 1/8 because weight density is not uniform within the interval; the <a href="#technical-rattata-badge" data-open-panel="technical-details">Technical Details calculation</a> gives the model result for each form.</p>
           <p>For the <b>Fisher</b> badge (“big Magikarp”), the minimum exact weight is 13.125 kg. Therefore every Magikarp displayed as 13.13 kg or more qualifies.</p>
 
           <h3>Why is Zorua missing?</h3>
@@ -437,109 +476,144 @@
           <p>The Scatterbug family (Scatterbug, Spewpa, and Vivillon) uses a different XXS range from 0.25 to 0.50 times mean height. Its internal split occurs at 0.30 times the mean, and the calculator uses dedicated full and conditional XXS weight distributions for this family.</p>
 
           <h3>Why can XL Pokémon be heavier than XXL Pokémon?</h3>
-          <p>The weight formula squares normalized height for XXS through XL Pokémon, which greatly increases height’s contribution near the top of the XL range. XXL is a special case: its normalized height is not squared. As a result, XL Pokémon tend to be much heavier than XXL Pokémon, and an XXL Pokémon can have a lower weight than an XL Pokémon of the same species.</p>
+          <p>The weight formula squares the height variate <i>h</i><sub>v</sub> for XXS through XL Pokémon, which greatly increases height’s contribution near the top of the XL range. XXL is a special case: its <i>h</i><sub>v</sub> is not squared. As a result, XL Pokémon tend to be much heavier than XXL Pokémon, and an XXL Pokémon can have a lower weight than an XL Pokémon of the same species.</p>
 
           <h3>Where do the species data come from?</h3>
-          <p>Species names, forms, mean heights, mean weights, and size bounds were extracted from a Pokémon GO Game Master snapshot bundled with the build tools. This page was built on <time datetime="@@BUILD_DATE_ISO@@">@@BUILD_DATE_LONG@@</time>, and its data and knowledge are up to date as of that build date.</p>
+          <p>Species names, forms, mean heights, mean weights, and size bounds were extracted from the Pokémon GO Game Master snapshot used to generate this build’s stats table. This page was built on <time datetime="@@BUILD_DATE_ISO@@">@@BUILD_DATE_LONG@@</time>. The build script inserts the current local date automatically.</p>
+          <p>The build date records when this standalone page was generated; it does not verify that the Game Master snapshot or the documented knowledge was current. The person building the page is responsible for obtaining an up-to-date Game Master, regenerating the extracted data, and updating any changed mechanics or research before building.</p>
           <p>This is a standalone page and does not dynamically load new Game Master data or behavior updates. It will not reflect Pokémon or forms released after the build date, nor later changes to size mechanics, class rates, existing species data, or known game behavior, until the source data are updated and the page is rebuilt.</p>
 
           <h3>Why did I (bmenrigh) undertake this research?</h3>
           <p>On September 1, 2019, the Silph Research Group published <a href="https://web.archive.org/web/20221222204519/https://thesilphroad.com/science/big-magikarp-tiny-rattata/"><i>Measuring Up Pokémon</i></a>, an impressive study based on nearly 50,000 hand-collected measurements. Its second footnote highlighted a remarkable observation posted by Reddit user <a href="https://www.reddit.com/r/TheSilphRoad/comments/8x7t1m/lightest_squirtle_ever/">u/TheParadoxMuse: a Squirtle displayed as weighing only 0.01 kg</a>. The Silph researchers could not reproduce that result in more than 500 million simulations using their proposed model.</p>
-          <p>That model multiplied an independently sampled random weight by the square of random height. When I calculated the likelihood of producing such a light Squirtle under that formula, the result was so remote that the observation was effectively impossible:</p>
-          <div class="equation">Silph model: intermediate weight = w × h²</div>
+          <p>That model multiplied an independently sampled random weight by the square of random height. In the notation defined in Technical Details, its proposed transformation was:</p>
+          <div class="equation" data-tex="\text{Silph model:}\quad W_n = w_v \times h_v^2">Silph model: W<sub>n</sub> = w<sub>v</sub> × h<sub>v</sub>²</div>
+          <p>When I calculated the likelihood of producing such a light Squirtle under that formula, the result was so remote that the observation was effectively impossible.</p>
           <p>The article cautiously suggested that the weight distribution might have “slightly heavier tails than a standard normal distribution.” Statistically, that is not a minor adjustment to an otherwise complete model. For a smooth distribution extending from negative to positive infinity, its behavior in the tails determines the prevalence of its most extreme values. An unknown tail shape therefore leaves exactly the rare outcomes of greatest interest unexplained.</p>
-          <p>After much more data gathering and analysis, I found that the problem was not a slightly different normal-like distribution. It was the transformation itself. Height’s contribution is added to the intrinsic-weight variate rather than multiplied by it:</p>
-          <div class="equation">Corrected model: intermediate weight = w + (h² − 1)</div>
-          <p>This additive formula explains the 0.01 kg Squirtle and matches the observed distribution of wild-caught Pokémon weights far more accurately. Later analysis also revealed that the normally distributed intrinsic-weight variate is clamped to the range 0.5–1.5.</p>
+          <p>After much more data gathering and analysis, I found that the problem was not a slightly different normal-like distribution. It was the transformation itself. Height’s contribution is added to the weight variate rather than multiplied by it:</p>
+          <div class="equation" data-tex="\text{Corrected model:}\quad W_n = w_v + (h_v^2 - 1)">Corrected model: W<sub>n</sub> = w<sub>v</sub> + (h<sub>v</sub>² − 1)</div>
+          <p>This additive formula explains the 0.01 kg Squirtle and matches the observed distribution of wild-caught Pokémon weights far more accurately. Later analysis also revealed that the normally distributed weight variate <i>w</i><sub>v</sub> is clamped to the range 0.5–1.5. Under the old size system, the height variate <i>h</i><sub>v</sub> was generated in the same way and separately clamped to that same range.</p>
           <p>With fewer than 50,000 hand-recorded samples, detecting those clamps would have been extraordinarily difficult. The original data contained hints that the proposed formula was incomplete, but probably not enough evidence to identify how. Had the researchers dismissed the 0.01 kg Squirtle as a bug instead of documenting it, the discrepancy might never have prompted this investigation. I commend the Silph Research Group for preserving the anomalous result in a footnote: that is how good science moves forward.</p>
         </div>
       </details>
 
-      <details class="panel info-panel">
+      <details class="panel info-panel" id="technical-details">
         <summary>Technical Details</summary>
         <div class="info-body">
-          <h3>Normalized variables</h3>
-          <p>The distributions are species-independent after normalization. A Pokémon’s observed height and weight are divided by the mean height and mean weight for that form:</p>
-          <div class="equation">h = observed height / mean height<br>w = observed weight / mean weight</div>
-          <p>A normalized value of 1 therefore means that species’ average. The calculator performs all probability lookups in normalized coordinates and converts class ranges back to metres and kilograms for display.</p>
+          <h3>Notation and normalization</h3>
+          <p>Throughout this section, <i>H</i> is height in metres and <i>W</i> is weight in kilograms. The species means are μ<sub>H</sub> and μ<sub>W</sub>. Dividing each measurement by its species mean gives normalized height <i>H</i><sub>n</sub> and normalized weight <i>W</i><sub>n</sub>:</p>
+          <div class="equation" data-tex="H_n = \frac{H}{\mu_H} \\ W_n = \frac{W}{\mu_W}">H<sub>n</sub> = H / μ<sub>H</sub><br>W<sub>n</sub> = W / μ<sub>W</sub></div>
+          <p>A normalized value of 1 therefore means that species’ average. The calculator performs all probability lookups in <i>H</i><sub>n</sub> or <i>W</i><sub>n</sub> and converts class ranges back to metres and kilograms for display.</p>
+          <p>The subscript <i>v</i> identifies the two generation variates. The <b>height variate</b> <i>h</i><sub>v</sub> is the generated normalized height, so <i>h</i><sub>v</sub> = <i>H</i><sub>n</sub>. Using both names distinguishes the generation parameter <i>h</i><sub>v</sub> from a normalized measurement <i>H</i><sub>n</sub>, even though their values are equal. The independently drawn <b>weight variate</b> <i>w</i><sub>v</sub> is one input to the weight formula; it is not the final normalized weight <i>W</i><sub>n</sub>.</p>
 
           <h3>How the game generates height and weight</h3>
           <p>The generation order matters. The game does not draw a height and then infer a size class from it; it chooses the size class first and samples from that class’s height range:</p>
           <ol>
-            <li><b>Choose a size class.</b> The modeled wild class probabilities are 1/250 for XXS, 1/40 for XS, 471/500 for Average, 1/40 for XL, and 1/250 for XXL. These weights have a common denominator of 500, but the game’s exact random-selection implementation is not known; only the resulting class probabilities matter to this model.</li>
-            <li><b>Draw normalized height <i>h</i>.</b> XS is uniform on [0.5, 0.75], Average on [0.75, 1.25], and XL on [1.25, 1.5]. XXS and XXL use the two-piece distributions described below. Multiplying <i>h</i> by the species’ mean height produces its actual height.</li>
-            <li><b>Draw the intrinsic-weight variate <i>w</i><sub>v</sub>.</b> Draw <i>Z</i> from a standard normal distribution, form <i>w</i><sub>v,raw</sub> = 1 + <i>Z</i>/8, and clamp the result to [0.5, 1.5]. This draw is independent of height.</li>
-            <li><b>Combine the variates.</b> For XXS through XL, the height contribution is <i>t</i> = <i>h</i>². For XXL only, it is <i>t</i> = <i>h</i>. The provisional normalized weight is <i>w</i><sub>0</sub> = <i>w</i><sub>v</sub> + <i>t</i> − 1, and actual weight is the species’ mean weight multiplied by the resulting normalized <i>w</i>.</li>
+            <li><b>Choose a size class.</b> The modeled wild class probabilities are 1/250 for XXS, 1/40 for XS, 471/500 for Average, 1/40 for XL, and 1/250 for XXL. Their least common denominator is 1,000: the equivalent integer weights are 4, 25, 942, 25, and 4. The game’s exact random-selection implementation is not known; only the resulting class probabilities matter to this model.</li>
+            <li><b>Draw the height variate <i>h</i><sub>v</sub>.</b> XS is uniform on [0.5, 0.75], Average on [0.75, 1.25], and XL on [1.25, 1.5]. XXS and XXL use the two-piece distributions described below. Actual height is <i>H</i> = μ<sub>H</sub><i>h</i><sub>v</sub>.</li>
+            <li><b>Draw the weight variate <i>w</i><sub>v</sub>.</b> Draw <i>Z</i> from a standard normal distribution, form <i>w</i><sub>v,raw</sub> = 1 + <i>Z</i>/8, and clamp the result to [0.5, 1.5]. This draw is independent of <i>h</i><sub>v</sub>.</li>
+            <li><b>Combine the variates.</b> Define the transformed-height contribution <i>T</i><sub>H</sub> = <i>h</i><sub>v</sub>² for XXS through XL, but <i>T</i><sub>H</sub> = <i>h</i><sub>v</sub> for XXL. The provisional normalized weight is <i>W</i><sub>n,0</sub> = <i>w</i><sub>v</sub> + <i>T</i><sub>H</sub> − 1. Actual weight is <i>W</i> = μ<sub>W</sub><i>W</i><sub>n</sub>.</li>
           </ol>
-          <div class="equation">XXS–XL: w₀ = w<sub>v</sub> + h² − 1<br>XXL: w₀ = w<sub>v</sub> + h − 1</div>
-          <p>If <i>w</i><sub>0</sub> is zero or negative, the implemented generator does not resample. It replaces the <b>intrinsic-weight variate</b> <i>w</i><sub>v</sub> with 1.0, making the final normalized weight <i>w</i> = <i>t</i>.</p>
+          <div class="equation" data-tex="\text{XXS–XL:}\quad W_{n,0} = w_v + h_v^2 - 1 \\ \text{XXL:}\quad W_{n,0} = w_v + h_v - 1">XXS–XL: W<sub>n,0</sub> = w<sub>v</sub> + h<sub>v</sub>² − 1<br>XXL: W<sub>n,0</sub> = w<sub>v</sub> + h<sub>v</sub> − 1</div>
+          <p>If <i>W</i><sub>n,0</sub> is zero or negative, the implemented generator does not resample. It replaces <i>w</i><sub>v</sub> with 1.0, making the final normalized weight <i>W</i><sub>n</sub> = <i>T</i><sub>H</sub>.</p>
 
           <h3>Exact probability at the weight clamps</h3>
           <p>Before clamping, <i>w</i><sub>v,raw</sub> has mean 1 and standard deviation 1/8. Both clamp boundaries are exactly four standard deviations from the mean. All draws at or below 0.5 become exactly 0.5, and all draws at or above 1.5 become exactly 1.5. Symmetry gives the same discrete probability mass at both endpoints:</p>
-          <div class="equation">P(w<sub>v</sub> = 0.5) = P(Z ≤ −4) = Φ(−4) = ½ erfc(2√2)<br>P(w<sub>v</sub> = 1.5) = P(Z ≥ 4) = Φ(−4) = ½ erfc(2√2)</div>
+          <div class="equation" data-tex="P(w_v = 0.5) = P(Z \le -4) = \Phi(-4) = \frac{1}{2}\operatorname{erfc}(2\sqrt{2}) \\ P(w_v = 1.5) = P(Z \ge 4) = \Phi(-4) = \frac{1}{2}\operatorname{erfc}(2\sqrt{2})">P(w<sub>v</sub> = 0.5) = P(Z ≤ −4) = Φ(−4) = ½ erfc(2√2)<br>P(w<sub>v</sub> = 1.5) = P(Z ≥ 4) = Φ(−4) = ½ erfc(2√2)</div>
           <p>Each endpoint therefore has probability 0.00003167124183311996, or 0.003167124183311996%, about 1 in 31,574.4 weight-variate draws. Together the two clamp masses account for 0.00006334248366623993, or 0.006334248366623993% (about 1 in 15,787.2); the remaining 99.99366575163338% is continuous between the endpoints. The convolution carries these two exact point masses separately from the continuous normal density.</p>
 
           <h3>The XXS and XXL height-density steps</h3>
           <p>XXS and XXL are not uniform across their complete height ranges. Each is made by first choosing one of two adjacent subranges and then drawing uniformly within the chosen subrange. There is no gap and no discrete mass at the boundary, but the PDF is a step function: its height changes abruptly while its CDF remains continuous.</p>
-          <p>Let <i>d</i><sub>small</sub> = 0.5 − <i>h</i><sub>min</sub>. For XXS, 1/20 of the class lands uniformly in the lowest 20% of its range, while 19/20 lands uniformly in the upper 80%:</p>
-          <div class="equation">5%: [h<sub>min</sub>, h<sub>min</sub> + 0.2d<sub>small</sub>]<br>95%: [h<sub>min</sub> + 0.2d<sub>small</sub>, 0.5]</div>
+          <p>Let <i>d</i><sub>small</sub> = 0.5 − <i>h</i><sub>v,min</sub>. For XXS, 1/20 of the class lands uniformly in the lowest 20% of its <i>h</i><sub>v</sub> range, while 19/20 lands uniformly in the upper 80%:</p>
+          <div class="equation" data-tex="5\%:\quad [h_{v,\mathrm{min}}, h_{v,\mathrm{min}} + 0.2d_{\mathrm{small}}] \\ 95\%:\quad [h_{v,\mathrm{min}} + 0.2d_{\mathrm{small}}, 0.5]">5%: [h<sub>v,min</sub>, h<sub>v,min</sub> + 0.2d<sub>small</sub>]<br>95%: [h<sub>v,min</sub> + 0.2d<sub>small</sub>, 0.5]</div>
           <p>The density is therefore 0.25/<i>d</i><sub>small</sub> below the split and 1.1875/<i>d</i><sub>small</sub> above it: an upward jump by a factor of 4.75. For ordinary species the split is at 0.492; for the Scatterbug family it is at 0.30.</p>
-          <p>XXL reverses the arrangement. Let <i>d</i><sub>large</sub> = <i>h</i><sub>max</sub> − 1.5. The first 80% of the range receives 19/20 of XXL Pokémon and the final 20% receives 1/20:</p>
-          <div class="equation">95%: [1.5, 1.5 + 0.8d<sub>large</sub>]<br>5%: [1.5 + 0.8d<sub>large</sub>, h<sub>max</sub>]</div>
+          <p>XXL reverses the arrangement. Let <i>d</i><sub>large</sub> = <i>h</i><sub>v,max</sub> − 1.5. The first 80% of the <i>h</i><sub>v</sub> range receives 19/20 of XXL Pokémon and the final 20% receives 1/20:</p>
+          <div class="equation" data-tex="95\%:\quad [1.5, 1.5 + 0.8d_{\mathrm{large}}] \\ 5\%:\quad [1.5 + 0.8d_{\mathrm{large}}, h_{v,\mathrm{max}}]">95%: [1.5, 1.5 + 0.8d<sub>large</sub>]<br>5%: [1.5 + 0.8d<sub>large</sub>, h<sub>v,max</sub>]</div>
           <p>Its density consequently steps downward by the same factor of 4.75. The split points are 1.54, 1.70, and 1.90 for the 1.55, 1.75, and 2.00 XXL classes.</p>
 
           <h3>Evolution between different XXL height classes</h3>
-          <p>Ordinary evolution can preserve normalized height because multiplying by the ratio of the new and old mean heights leaves <i>h</i> unchanged. That rule is insufficient for an XXL evolution when the two species have different XXL upper bounds. A normalized height valid in a 1.75 or 2.00 class could otherwise lie beyond the maximum of a target species in the 1.55 class.</p>
-          <p>The game instead preserves the Pokémon’s relative position through the complete XXL interval. Let <i>H</i><sub>s</sub> be the source height, μ<sub>s</sub> and μ<sub>t</sub> the source and target mean heights, and <i>c</i><sub>s</sub> and <i>c</i><sub>t</sub> their XXL upper-bound classes. First calculate the source fraction <i>q</i>, where 0 is the common 1.5× lower boundary and 1 is the source maximum. Apply that same fraction between the target boundaries:</p>
-          <div class="equation">q = (H<sub>s</sub> − 1.5μ<sub>s</sub>) / ((c<sub>s</sub> − 1.5)μ<sub>s</sub>)<br>H<sub>t</sub> = 1.5μ<sub>t</sub> + q(c<sub>t</sub> − 1.5)μ<sub>t</sub></div>
-          <p>Equivalently, the normalized height is linearly remapped from [1.5, <i>c</i><sub>s</sub>] to [1.5, <i>c</i><sub>t</sub>]. Both endpoints and the internal 80% density-step boundary map exactly to their counterparts in the target class.</p>
+          <p>Ordinary evolution preserves <i>h</i><sub>v</sub>, so multiplying <i>H</i> by the ratio of the new and old mean heights leaves normalized height <i>H</i><sub>n</sub> unchanged. That rule is insufficient for an XXL evolution when the two species have different XXL upper bounds. An <i>h</i><sub>v</sub> valid in a 1.75 or 2.00 class could otherwise lie beyond the maximum of a target species in the 1.55 class.</p>
+          <p>The game instead preserves the Pokémon’s relative position through the complete XXL interval. Let <i>H</i><sub>s</sub> be the source height, μ<sub>H,s</sub> and μ<sub>H,t</sub> the source and target mean heights, and <i>c</i><sub>s</sub> and <i>c</i><sub>t</sub> their XXL upper-bound classes. First calculate the source fraction <i>q</i>, where 0 is the common 1.5× lower boundary and 1 is the source maximum. Apply that same fraction between the target boundaries:</p>
+          <div class="equation" data-tex="q = \frac{H_s - 1.5\mu_{H,s}}{(c_s - 1.5)\mu_{H,s}} \\ H_t = 1.5\mu_{H,t} + q(c_t - 1.5)\mu_{H,t}">q = (H<sub>s</sub> − 1.5μ<sub>H,s</sub>) / ((c<sub>s</sub> − 1.5)μ<sub>H,s</sub>)<br>H<sub>t</sub> = 1.5μ<sub>H,t</sub> + q(c<sub>t</sub> − 1.5)μ<sub>H,t</sub></div>
+          <p>Equivalently, <i>h</i><sub>v</sub> (and therefore <i>H</i><sub>n</sub>) is linearly remapped from [1.5, <i>c</i><sub>s</sub>] to [1.5, <i>c</i><sub>t</sub>]. Both endpoints and the internal 80% density-step boundary map exactly to their counterparts in the target class.</p>
           <p>For example, Skorupi has mean height 0.8 m and uses the 1.75 XXL class. An XXL Skorupi measuring 1.22 m is 10% of the way from its 1.20 m XXL minimum to its 1.40 m maximum. Drapion has mean height 1.3 m and uses the 1.55 class, whose XXL interval is 1.95–2.015 m. Placing the evolved Pokémon 10% through that interval gives:</p>
-          <div class="equation">q = (1.22 − 1.20) / (1.40 − 1.20) = 0.1<br>H<sub>t</sub> = 1.95 + 0.1(2.015 − 1.95) = 1.9565 m</div>
-          <p>The evolved Drapion therefore displays as 1.96 m. Its normalized height changes from 1.525 to 1.505. Its intrinsic-weight variate remains unchanged: the target’s XXL weight equation uses the preserved <i>w</i><sub>v</sub>, the remapped height, and Drapion’s mean weight.</p>
-          <p>A measured Noibat evolution provides a useful check. Noibat has mean height 0.5 m and a 1.75 XXL class; Noivern has mean height 1.5 m and a 1.55 class. Taking the displayed 0.82 m as the center gives a source normalized height of 1.64, 56% through the XXL range. Remapping gives 1.528 for Noivern, or 2.292 m, which displays as 2.29 m. Because the source measurements were displayed as 0.82 m and 11.84 kg rather than known exactly, preserving <i>w</i><sub>v</sub> predicts an evolved displayed weight between 115.55 and 117.01 kg. The observed Noivern was 2.29 m and 115.93 kg, matching both the height remapping and preservation of <i>w</i><sub>v</sub>. Additional checked evolutions, including significant intrinsic-weight-variate outliers, confirm that <i>w</i><sub>v</sub> is preserved rather than rerolled.</p>
+          <div class="equation" data-tex="q = \frac{1.22 - 1.20}{1.40 - 1.20} = 0.1 \\ H_t = 1.95 + 0.1(2.015 - 1.95) = 1.9565\,\mathrm{m}">q = (1.22 − 1.20) / (1.40 − 1.20) = 0.1<br>H<sub>t</sub> = 1.95 + 0.1(2.015 − 1.95) = 1.9565 m</div>
+          <p>The evolved Drapion therefore displays as 1.96 m. Its <i>h</i><sub>v</sub> and <i>H</i><sub>n</sub> change from 1.525 to 1.505. Its <i>w</i><sub>v</sub> remains unchanged: the target’s XXL weight equation uses the preserved <i>w</i><sub>v</sub>, the remapped <i>h</i><sub>v</sub>, and Drapion’s mean weight.</p>
+          <p>A measured Noibat evolution provides a useful check. Noibat has mean height 0.5 m and a 1.75 XXL class; Noivern has mean height 1.5 m and a 1.55 class. Taking the displayed 0.82 m as the center gives a source <i>h</i><sub>v</sub> of 1.64, 56% through the XXL range. Remapping gives <i>h</i><sub>v</sub> = 1.528 for Noivern, or <i>H</i> = 2.292 m, which displays as 2.29 m. Because the source measurements were displayed as 0.82 m and 11.84 kg rather than known exactly, preserving <i>w</i><sub>v</sub> predicts an evolved displayed weight between 115.55 and 117.01 kg. The observed Noivern was 2.29 m and 115.93 kg, matching both the height remapping and preservation of <i>w</i><sub>v</sub>. Additional checked evolutions, including significant <i>w</i><sub>v</sub> outliers, confirm that <i>w</i><sub>v</sub> is preserved rather than rerolled.</p>
+
+          <h3 id="technical-mega-evolution">Mega Evolution and Primal Reversion height and weight transformation</h3>
+          <p>Mega Evolution and Primal Reversion use the same mechanics. For brevity, this section calls the resulting temporary form “Mega” and uses subscript <i>M</i> for either kind. Neither uses the ordinary evolution formulas above. Observed results instead show a deterministic class-position mapping followed by a separate weight correction. Let [<i>L</i><sub>o</sub>, <i>U</i><sub>o</sub>] be the original form’s height interval for the Pokémon’s size class, and [<i>L</i><sub>M</sub>, <i>U</i><sub>M</sub>] the corresponding temporary-form interval. The game first calculates the original height’s fractional position <i>q</i> through its class:</p>
+          <div class="equation" data-tex="q = \frac{H_o - L_o}{U_o - L_o}">q = (H<sub>o</sub> − L<sub>o</sub>) / (U<sub>o</sub> − L<sub>o</sub>)</div>
+          <p>The mapping back to height depends on the class:</p>
+          <div class="equation" data-tex="\text{XXS, XS, Average:}\quad H_M = L_o + q(U_o - L_o) = H_o \\ \text{XL:}\quad H_M = L_o + q(U_M - L_o) \\ \text{XXL:}\quad H_M = L_M + q(U_M - L_M)">XXS, XS, Average: H<sub>M</sub> = L<sub>o</sub> + q(U<sub>o</sub> − L<sub>o</sub>) = H<sub>o</sub><br>XL: H<sub>M</sub> = L<sub>o</sub> + q(U<sub>M</sub> − L<sub>o</sub>)<br>XXL: H<sub>M</sub> = L<sub>M</sub> + q(U<sub>M</sub> − L<sub>M</sub>)</div>
+          <p>Thus XXS, XS, and Average Pokémon retain their original absolute height even when the Mega form has a different mean. XXL behaves as an ordinary proportional remapping between the complete source and target intervals. XL is asymmetric: it uses the <em>original</em> XL lower boundary but the <em>Mega</em> XL upper boundary. It does not use <i>L</i><sub>M</sub>, so the lower part of the mapped range may not lie in the Mega form’s nominal XL interval. At the upper end, this malformed XL range can cross into the temporary form’s XXL height range. An originally XL Pokémon can therefore appear to change into the XXL class, and its displayed size label changes to XXL for the duration of the Mega Evolution or Primal Reversion. The no-change mappings and especially this mixed-boundary XL formula appear unintended, but the game’s intent is not known.</p>
+          <p>After obtaining <i>H</i><sub>M</sub>, the game first calculates a raw Mega weight from the original measurements and both forms’ means. With subscripts <i>o</i> and <i>M</i> denoting the original and Mega forms:</p>
+          <div class="equation" data-tex="W_{M,\mathrm{raw}} = \left(\frac{H_M}{\mu_{H,M}}\right)^2\mu_{W,M} + W_o - \left(\frac{H_o}{\mu_{H,o}}\right)^2\mu_{W,o}">W<sub>M,raw</sub> = (H<sub>M</sub> / μ<sub>H,M</sub>)² μ<sub>W,M</sub> + W<sub>o</sub> − (H<sub>o</sub> / μ<sub>H,o</sub>)² μ<sub>W,o</sub></div>
+          <p>If this raw result is below zero, observed results show that the game replaces it with the Mega form’s mean weight. Positive raw results retain their calculated weight. The behavior at exactly zero has not been observed:</p>
+          <div class="equation" data-tex="W_M = \mu_{W,M}\quad\text{if}\quad W_{M,\mathrm{raw}} &lt; 0 \\ W_M = W_{M,\mathrm{raw}}\quad\text{if}\quad W_{M,\mathrm{raw}} &gt; 0">W<sub>M</sub> = μ<sub>W,M</sub> if W<sub>M,raw</sub> &lt; 0<br>W<sub>M</sub> = W<sub>M,raw</sub> if W<sub>M,raw</sub> &gt; 0</div>
+          <p>This fallback matters primarily for some XL transformations, where the mixed-boundary height mapping can make the subtracted original contribution larger than the other two terms combined. It creates a discontinuity between negative raw results close to zero, which become the mean weight, and positive raw results close to zero, which remain close to zero. What happens at exactly zero remains untested, and finding a specimen at that precise boundary is extraordinarily unlikely. The prediction code must choose a boundary convention, so it treats exact zero as zero and checks the raw formula’s zero crossings explicitly; an input interval that straddles one can produce both near-zero weights and the mean-weight fallback.</p>
+          <p>The raw formula subtracts a squared normalized-height weight contribution calculated from the original form, then adds the corresponding contribution calculated from the mapped Mega height and Mega means. Unlike initial weight generation, this transformation squares normalized height for every size class (including XXL), whose original generation formula uses an unsquared height contribution. It does not simply preserve <i>w</i><sub>v</sub> across the two forms.</p>
+
+          <h4>A speculative interpretation of the weight formula</h4>
+          <p>The game’s intent is not documented, but the algebra suggests a coherent original design. Define a height-derived baseline weight <i>B</i> for any form:</p>
+          <div class="equation" data-tex="B(H;\mu_H,\mu_W) = \mu_W\left(\frac{H}{\mu_H}\right)^2">B(H; μ<sub>H</sub>, μ<sub>W</sub>) = μ<sub>W</sub>(H / μ<sub>H</sub>)²</div>
+          <p>Before applying the negative-weight fallback, the temporary-evolution formula can be rewritten as a baseline replacement:</p>
+          <div class="equation" data-tex="W_{M,\mathrm{raw}} = B_M(H_M) + [W_o - B_o(H_o)] \\ = W_o + [B_M(H_M) - B_o(H_o)]">W<sub>M,raw</sub> = B<sub>M</sub>(H<sub>M</sub>) + [W<sub>o</sub> − B<sub>o</sub>(H<sub>o</sub>)]<br>= W<sub>o</sub> + [B<sub>M</sub>(H<sub>M</sub>) − B<sub>o</sub>(H<sub>o</sub>)]</div>
+          <p>In this interpretation, the bracketed term <i>W</i><sub>o</sub> − <i>B</i><sub>o</sub> is the individual Pokémon’s residual weight above or below the source form’s height-derived baseline. The game removes the old baseline, preserves that residual as an absolute number of kilograms, and adds the temporary form’s new baseline. Unless the result invokes the mean-weight fallback, a Pokémon exactly on the old baseline remains exactly on the new baseline; one 5 kg above or below it remains 5 kg above or below it.</p>
+          <p>For an ordinary XXS-through-XL Pokémon, <i>H</i><sub>n,o</sub> = <i>h</i><sub>v</sub> and the generation formula makes the preserved residual especially clear:</p>
+          <div class="equation" data-tex="W_o = \mu_{W,o}(w_{v,o} + h_{v,o}^2 - 1) \\ W_o - B_o = \mu_{W,o}(w_{v,o} - 1) \\ W_{M,\mathrm{raw}} = \mu_{W,M}H_{n,M}^2 + \mu_{W,o}(w_{v,o} - 1)">W<sub>o</sub> = μ<sub>W,o</sub>(w<sub>v,o</sub> + h<sub>v,o</sub>² − 1)<br>W<sub>o</sub> − B<sub>o</sub> = μ<sub>W,o</sub>(w<sub>v,o</sub> − 1)<br>W<sub>M,raw</sub> = μ<sub>W,M</sub>H<sub>n,M</sub>² + μ<sub>W,o</sub>(w<sub>v,o</sub> − 1)</div>
+          <p>This preserves an absolute weight residual, not the dimensionless weight variate. If a nonnegative raw result is interpreted through the ordinary squared-height formula, its effective temporary-form variate is:</p>
+          <div class="equation" data-tex="w_{v,M} = 1 + \frac{\mu_{W,o}}{\mu_{W,M}}(w_{v,o} - 1)">w<sub>v,M</sub> = 1 + (μ<sub>W,o</sub> / μ<sub>W,M</sub>)(w<sub>v,o</sub> − 1)</div>
+          <p>True preservation of <i>w</i><sub>v</sub> would instead scale the old residual by μ<sub>W,M</sub>/μ<sub>W,o</sub> before adding it to the new baseline. The implemented formula omits that ratio. Preserving kilograms may have been intentional, or the residual may have been treated as though it were already normalized; observations reveal the operation but cannot distinguish those design motives.</p>
+          <p>XXL is the strongest evidence that this may be legacy behavior. Modern XXL generation uses the unsquared contribution <i>h</i><sub>v</sub>, yet temporary evolution still subtracts and adds squared-height baselines. Its preserved residual is therefore μ<sub>W,o</sub>(<i>w</i><sub>v,o</sub> + <i>h</i><sub>v,o</sub> − 1 − <i>h</i><sub>v,o</sub>²), which still contains a height-dependent term and no longer cleanly represents independent weight variation. <a href="https://pokemongo.com/en/post/megaevolution-launch">Mega Evolution launched on August 27, 2020</a>, while <a href="https://pokemongo.com/post/different-sized-pokemon-in-pokemon-go-xxl-xxs?hl=en">XXS and XXL first appeared on December 8, 2022</a>. A plausible (but unconfirmed) explanation is that the weight transform was designed for Mega Evolution under the older universally squared-height system, left unchanged when the special XXL rule was added, and later reused for Primal Reversion.</p>
+
+          <p>For example, Mawile’s XXL range is 0.915–1.0675 m and Mega Mawile’s is 1.5–1.75 m. An XXL Mawile displayed as 0.96 m and 17.18 kg represents exact inputs <i>H</i><sub>o</sub> in [0.955, 0.965) m and <i>W</i><sub>o</sub> in [17.175, 17.185) kg. Applying the XXL position mapping and weight equation gives <i>H</i><sub>M</sub> in [1.56557, 1.58197) m and <i>W</i><sub>M</sub> in approximately [46.5873, 47.2164) kg. The observed Mega Mawile displayed as 1.58 m and 47.2 kg, which lies within both predicted ranges.</p>
+          <p>When both temporary-form height and weight are supplied, this page normally reverses the applicable class mapping to recover <i>H</i><sub>o</sub>, then reverses the weight correction:</p>
+          <div class="equation" data-tex="W_o = W_M - \left(\frac{H_M}{\mu_{H,M}}\right)^2\mu_{W,M} + \left(\frac{H_o}{\mu_{H,o}}\right)^2\mu_{W,o}">W<sub>o</sub> = W<sub>M</sub> − (H<sub>M</sub> / μ<sub>H,M</sub>)² μ<sub>W,M</sub> + (H<sub>o</sub> / μ<sub>H,o</sub>)² μ<sub>W,o</sub></div>
+          <p>The original <i>h</i><sub>v</sub> is <i>H</i><sub>o</sub>/μ<sub>H,o</sub>. Substituting <i>H</i><sub>o</sub> and <i>W</i><sub>o</sub> into the ordinary generation formula recovers the original <i>w</i><sub>v</sub>, using the squared-height branch for XXS through XL and the linear-height branch for XXL. Displayed measurements are reversed as intervals, so the page reports every compatible class and variate range rather than pretending the rounded inputs are exact. The exception is a temporary-form weight equal to (or whose displayed interval includes) the form’s mean: it may have come from the negative-weight fallback, which discards the raw result and makes the original <i>w</i><sub>v</sub> impossible to recover uniquely. The page flags that ambiguity instead of reporting a misleading inverse.</p>
+          <p>The embedded height distributions and weight CDFs describe Pokémon generated directly by the ordinary five-class model. Applying them to a Mega or Primal form as though its measurements had been freshly generated from the temporary form’s means and bounds would give invalid probabilities. Mega and Primal entries therefore retain descriptive range and variate calculations, but all overall and conditional probability lookups are deliberately disabled.</p>
 
           <h3>Why the weight distribution is not estimated by random sampling</h3>
-          <p>A Monte Carlo simulation is straightforward: randomly choose a size class, draw a height variate, draw an intrinsic-weight variate, combine them, and count the result in a weight bucket. It is not precise enough for this job. A sampled PDF is visibly noisy even after hundreds of billions of generated Pokémon.</p>
-          <p>The difficulty is that the PDF is divided into buckets only 0.000001 normalized-weight units wide. Many individual buckets (especially in the tails) have tiny probabilities. If a bucket has probability <i>p</i> and the simulation makes <i>N</i> draws, it receives only <i>Np</i> samples on average, and its relative sampling noise is roughly proportional to 1/√(<i>Np</i>). Increasing an already enormous simulation reduces noise only by the square root of the extra work. Rare-tail buckets remain noisy, and accumulating those errors damages the p-values this tool is intended to measure.</p>
+          <p>A Monte Carlo simulation is straightforward: randomly choose a size class, draw <i>h</i><sub>v</sub>, draw <i>w</i><sub>v</sub>, combine them, and count the resulting <i>W</i><sub>n</sub> in a bucket. It is not precise enough for this job. A sampled PDF is visibly noisy even after hundreds of billions of generated Pokémon.</p>
+          <p>The difficulty is that the PDF is divided into buckets only 0.000001 normalized-weight units wide. Many individual buckets (especially in the tails) have tiny probabilities. If a bucket has probability <i>p</i> and the simulation makes <i>N</i> draws, it receives only <i>Np</i> samples on average, and its relative sampling noise is roughly proportional to 1/√(<i>Np</i>). Increasing an already enormous simulation reduces noise only by the square root of the extra work. Rare-tail buckets remain noisy, and accumulating those errors damages the tail probabilities this tool is intended to measure.</p>
           <p class="tech-note">The generated tables therefore contain no Monte Carlo sampling noise. They come from deterministic numerical convolution of the input distributions.</p>
 
           <h3>The exact input distributions</h3>
-          <p>The normalized height distribution is known analytically. Each size class is uniform over one or two fixed intervals. The overall wild model mixes those intervals using the XXS, XS, Average, XL, and XXL probabilities listed in the FAQ. XXS and XXL have their internal 1-to-19 splits, and the outer endpoints come from the species’ XXS and XXL classes.</p>
-          <p>The intrinsic-weight variate is known analytically as well. Its continuous bucket probabilities are calculated from differences of the normal CDF (the error function), while the exact masses created by clamping at 0.5 and 1.5 are handled explicitly. The squared or linear height transformation and the nonpositive-result rule are then applied exactly as described above. These transformations explain both the shape of the weight PDF and why the XXL weight range can begin below the XL range.</p>
+          <p>The <i>h</i><sub>v</sub> distribution is known analytically. Each size class is uniform over one or two fixed intervals. The overall wild model mixes those intervals using the XXS, XS, Average, XL, and XXL probabilities listed in the FAQ. XXS and XXL have their internal 1-to-19 splits, and the outer endpoints come from the species’ XXS and XXL classes.</p>
+          <p>The <i>w</i><sub>v</sub> distribution is known analytically as well. Its continuous bucket integrals are calculated from differences of the normal CDF (the error function), while the exact masses created by clamping at 0.5 and 1.5 are handled explicitly. The squared or linear transformation from <i>h</i><sub>v</sub> to <i>T</i><sub>H</sub> is evaluated analytically before discretization, and the nonpositive-result rule is applied during convolution at the grid’s finite resolution. These transformations explain both the shape of the <i>W</i><sub>n</sub> PDF and why the XXL weight range can begin below the XL range.</p>
 
           <h3>High-resolution numerical convolution</h3>
-          <p>The height and intrinsic-weight inputs are first converted into exact bucket probabilities on a grid with width Δx = 10<sup>−6</sup>. This is done by subtracting their analytic CDF values at the two edges of each bucket, not by sampling. The height calculation applies the inverse square-root transformation where height was squared and the linear inverse transformation for XXL.</p>
-          <p>The two independent distributions are then convolved. Let <i>a</i> = <i>t</i> − 1 be the transformed-height offset. For every possible offset <i>a</i> and intrinsic-weight variate <i>w</i><sub>v</sub>, their probabilities are multiplied and added to the bucket for <i>a</i> + <i>w</i><sub>v</sub>:</p>
-          <div class="equation">f<sub>W</sub>(w) = ∫ f<sub>A</sub>(a) f<sub>Wv</sub>(w − a) da</div>
-          <p>The implementation performs the discrete high-resolution equivalent, including the clamped endpoint masses and splitting contributions across neighboring buckets to retain the left-edge alignment. Because each input bucket probability is derived from an analytic CDF, the result is a deterministic numerical integration rather than a random estimate.</p>
-          <p>The resulting normalized weight PDF spans 0 through 2.75 and contains 2,750,001 rows at millionth-unit spacing for each distribution. Separate convolutions produce the three full XXL variants, the Scatterbug-family mixture, and the conditional XXS, XS, Average, XL, and XXL distributions.</p>
+          <p>The <i>T</i><sub>H</sub> and <i>w</i><sub>v</sub> distributions are first integrated over a grid with width Δx = 10<sup>−6</sup>. Each bucket integral comes from subtracting analytic CDF values at its two edges, not from sampling. The implementation stores transformed-height bucket mass and the corresponding average weight density; the factor of Δx relating mass and density is accounted for by the discrete convolution. Constructing <i>T</i><sub>H</sub> applies the inverse square-root transformation where <i>h</i><sub>v</sub> was squared and the linear inverse transformation for XXL.</p>
+          <p>Away from the nonpositive-result fallback, the two independent distributions are then convolved. Let <i>A</i> = <i>T</i><sub>H</sub> − 1 be the transformed-height offset. For every possible offset <i>a</i> and weight variate <i>w</i><sub>v</sub>, their contributions are multiplied and added to the bucket for <i>W</i><sub>n</sub> = <i>a</i> + <i>w</i><sub>v</sub>:</p>
+          <div class="equation" data-tex="f_{W_n}(x) = \int f_A(a)f_{w_v}(x-a)\,\mathrm{d}a">f<sub>Wₙ</sub>(x) = ∫ f<sub>A</sub>(a) f<sub>wᵥ</sub>(x − a) da</div>
+          <p>Combinations whose provisional <i>W</i><sub>n,0</sub> is nonpositive are routed instead to <i>W</i><sub>n</sub> = <i>T</i><sub>H</sub>, as required by the weight-variate reset. The implementation performs this convolution and routing at high resolution, handles the clamped endpoint masses separately, and splits contributions across neighboring output buckets to retain left-edge alignment. Because every input bucket integral is derived from an analytic CDF, the result is a deterministic numerical integration rather than a random estimate.</p>
+          <p>The resulting <i>W</i><sub>n</sub> PDF spans 0 through 2.75 and contains 2,750,001 rows at millionth-unit spacing for each distribution. Separate convolutions produce the three full XXL variants, the Scatterbug-family mixture, and the conditional XXS, XS, Average, XL, and XXL distributions.</p>
 
           <h3>PDF density versus CDF probability</h3>
-          <p>The direct result of convolution is a probability density function (PDF), written <i>f(w)</i>. A PDF value describes how concentrated probability is near a weight; it is not itself the probability of observing that exact weight. In the continuous parts of the model, probability comes from the <i>area</i> under the PDF across an interval. The intrinsic-weight input also has discrete boundary masses introduced by clamping; those are carried through the convolution explicitly rather than being mistaken for ordinary density.</p>
-          <div class="equation">P(a ≤ W ≤ b) = ∫<sub>a</sub><sup>b</sup> f(w) dw</div>
+          <p>The direct result of convolution is the probability density function (PDF) <i>f</i><sub>Wₙ</sub>(<i>x</i>). A PDF value describes how concentrated probability is near a normalized weight <i>W</i><sub>n</sub>; it is not itself the probability of observing that exact weight. In the continuous parts of the model, probability comes from the <i>area</i> under the PDF across an interval. The <i>w</i><sub>v</sub> input also has discrete boundary masses introduced by clamping; those are carried through the convolution explicitly rather than being mistaken for ordinary density.</p>
+          <div class="equation" data-tex="P(\alpha \le W_n \le \beta) = \int_{\alpha}^{\beta} f_{W_n}(x)\,\mathrm{d}x">P(α ≤ W<sub>n</sub> ≤ β) = ∫<sub>α</sub><sup>β</sup> f<sub>Wₙ</sub>(x) dx</div>
           <p>This distinction matters for interpretation. A large density says that nearby weights are locally common, but it does not answer “How many Pokémon are this light or lighter?” or “How many are this heavy or heavier?” Those are cumulative, one-sided tail questions.</p>
           <p>The resulting PDF is piecewise smooth, not globally differentiable. Three parts of the generation algorithm create non-smooth features:</p>
           <ul>
-            <li>Clamping <i>w</i><sub>v</sub> creates point masses at 0.5 and 1.5. Convolution with the continuous height distribution spreads each mass into a shifted copy of the transformed-height density, including its edges and density steps.</li>
-            <li>The XXS and XXL height PDFs change density abruptly at their internal 5%/95% boundaries. Their transformed contributions carry those step changes into the weight PDF.</li>
-            <li>When a provisional weight is nonpositive, replacing <i>w</i><sub>v</sub> with 1 concentrates all such outcomes onto <i>w</i> = <i>t</i>. This adds another component shaped by the transformed-height distribution, with its own sharp boundaries.</li>
+            <li>Clamping <i>w</i><sub>v</sub> creates point masses at 0.5 and 1.5. Convolution with the continuous <i>T</i><sub>H</sub> distribution spreads each mass into a shifted copy of that density, including its edges and density steps.</li>
+            <li>The XXS and XXL <i>h</i><sub>v</sub> PDFs change density abruptly at their internal 5%/95% boundaries. Their transformed <i>T</i><sub>H</sub> contributions carry those step changes into the <i>W</i><sub>n</sub> PDF.</li>
+            <li>When <i>W</i><sub>n,0</sub> is nonpositive, replacing <i>w</i><sub>v</sub> with 1 concentrates all such outcomes onto <i>W</i><sub>n</sub> = <i>T</i><sub>H</sub>. This adds another component shaped by the <i>T</i><sub>H</sub> distribution, with its own sharp boundaries.</li>
           </ul>
           <p>Depending on how these components meet, the weight PDF can have jump discontinuities (the density itself changes instantly) or kinks (the density is continuous but its slope changes instantly). “Discontinuity” is correct for the former, but <b>non-smooth breakpoint</b> is the useful general term covering both.</p>
-          <p>The lower cumulative distribution function (CDF) integrates all PDF area from the minimum possible weight through <i>x</i>. The survival function integrates in the opposite direction:</p>
-          <div class="equation">F(x) = ∫<sub>−∞</sub><sup>x</sup> f(w) dw = P(W ≤ x)<br>S(x) = ∫<sub>x</sub><sup>∞</sup> f(w) dw = P(W ≥ x)</div>
+          <p>The lower cumulative distribution function (CDF) integrates all PDF area from the minimum possible <i>W</i><sub>n</sub> through <i>x</i>. The survival function integrates in the opposite direction:</p>
+          <div class="equation" data-tex="F_{W_n}(x) = \int_{-\infty}^{x} f_{W_n}(z)\,\mathrm{d}z = P(W_n \le x) \\ S_{W_n}(x) = \int_{x}^{\infty} f_{W_n}(z)\,\mathrm{d}z = P(W_n \ge x)">F<sub>Wₙ</sub>(x) = ∫<sub>−∞</sub><sup>x</sup> f<sub>Wₙ</sub>(z) dz = P(W<sub>n</sub> ≤ x)<br>S<sub>Wₙ</sub>(x) = ∫<sub>x</sub><sup>∞</sup> f<sub>Wₙ</sub>(z) dz = P(W<sub>n</sub> ≥ x)</div>
           <p>Integration smooths these features but does not erase them. The final-weight distribution has no point masses because height remains continuously distributed, so its CDF is continuous. A jump in the PDF becomes an abrupt change in CDF slope, making the CDF nondifferentiable at that point; a PDF kink appears as a change in the CDF’s curvature. The survival function has the same non-smooth locations.</p>
           <p class="tech-note">The expensive convolution builds the high-resolution PDF, but that large PDF is not included in this page. It is integrated once during the build process, and this page stores compact polynomial representations of the resulting CDF and survival functions. This app therefore answers tail-probability questions, not point-density questions.</p>
 
           <h3>Converting the PDF into accurate lower and upper tails</h3>
-          <p>Every raw PDF value is aligned to the left edge of its bucket. Its probability mass is the density multiplied by the distance to the next coordinate. All bucket masses are summed and normalized so that the total area is exactly 1 at output precision.</p>
+          <p>Every raw <i>W</i><sub>n</sub> PDF value is aligned to the left edge of its bucket. Its probability mass is the density multiplied by the distance to the next coordinate. All bucket masses are summed and normalized so that the total area is exactly 1 at output precision.</p>
           <p>The lower-tail CDF is accumulated from left to right. The survival function (the upper-tail probability) is accumulated independently from right to left. Both directions use compensated floating-point summation. Computing the survival tail independently is important: obtaining a tiny upper-tail probability by subtracting a CDF near 1 would discard many significant digits.</p>
-          <div class="equation">CDF(x) = P(W ≤ x)<br>Survival(x) = P(W ≥ x) = 1 − CDF(x)</div>
+          <div class="equation" data-tex="F_{W_n}(x) = P(W_n \le x) \\ S_{W_n}(x) = P(W_n \ge x) = 1 - F_{W_n}(x)">F<sub>Wₙ</sub>(x) = P(W<sub>n</sub> ≤ x)<br>S<sub>Wₙ</sub>(x) = P(W<sub>n</sub> ≥ x) = 1 − F<sub>Wₙ</sub>(x)</div>
           <p>The uncompressed table stores the coordinate, CDF, and survival value with 17 significant decimal digits. This is highly accurate but far too large to embed directly in a small offline page.</p>
 
           <h3>Compressing millions of CDF points into fifth-order polynomials</h3>
-          <p>The compressor replaces long runs of table rows with best-fit degree-5 polynomial segments. For a candidate segment from <i>x₀</i> to <i>x₁</i>, the coordinate is first rescaled to <i>t</i> in [0, 1]. The polynomial is represented in an endpoint-constrained form:</p>
-          <div class="equation">t = (x − x₀) / (x₁ − x₀)<br>P(t) = (1 − t)y₀ + ty₁ + t(1 − t)Q(t)</div>
-          <p>Here <i>y₀</i> and <i>y₁</i> are the exact table values at the segment endpoints and <i>Q(t)</i> is a cubic. Multiplying the cubic by <i>t(1−t)</i> produces a polynomial of degree at most five. That factor is zero at both endpoints, so every fitted segment is forced to reproduce <i>y₀</i> and <i>y₁</i> exactly.</p>
+          <p>The compressor replaces long runs of table rows with best-fit degree-5 polynomial segments. For a candidate segment from <i>x₀</i> to <i>x₁</i>, the coordinate is first rescaled to <i>u</i> in [0, 1]. The polynomial is represented in an endpoint-constrained form:</p>
+          <div class="equation" data-tex="u = \frac{x-x_0}{x_1-x_0} \\ P(u) = (1-u)y_0 + uy_1 + u(1-u)Q(u)">u = (x − x₀) / (x₁ − x₀)<br>P(u) = (1 − u)y₀ + uy₁ + u(1 − u)Q(u)</div>
+          <p>Here <i>y₀</i> and <i>y₁</i> are the exact table values at the segment endpoints and <i>Q(u)</i> is a cubic. Multiplying the cubic by <i>u(1−u)</i> produces a polynomial of degree at most five. That factor is zero at both endpoints, so every fitted segment is forced to reproduce <i>y₀</i> and <i>y₁</i> exactly.</p>
           <p>Adjacent segments share their endpoint. Fixing both endpoint values therefore prevents jumps at segment boundaries; the representation guarantees value continuity even though it does not require equal derivatives on the two sides.</p>
 
           <h3>Fitting, validation, and segment selection</h3>
@@ -551,7 +625,7 @@
             <li>The polynomial remains monotone over the entire continuous segment, checked from the derivative and its interior extrema.</li>
             <li>A small safety margin remains for coefficient serialization and evaluation by this page.</li>
           </ul>
-          <p>Starting at each endpoint, the compressor uses exponential search and then binary search to find the furthest future point that still passes every test. That greedy process repeats until the entire table is covered. Thus each segment spans as much of the distribution as possible under the error and monotonicity constraints.</p>
+          <p>Starting at each endpoint, the compressor uses exponential probes to find a failing bound and then binary search to select a long passing endpoint within that bracket. That greedy process repeats until the entire table is covered. Acceptance of a fitted segment is not mathematically guaranteed to be monotone as its endpoint moves, so this search is a compression heuristic rather than proof of the globally longest possible segment. This can affect the number of stored segments, but not their accuracy: every segment that is actually emitted has independently passed all pointwise-error and continuous-monotonicity checks above.</p>
           <p>This exhaustive point-by-point validation is what preserves the non-smooth CDF features. The compressor does not need to know their locations beforehand. A candidate polynomial that stretches across a sharp slope or curvature change will normally exceed the error bound, causing the accepted segment to end at or immediately beside that breakpoint. The next polynomial then starts from the same exact source value, and independent derivatives on the two sides allow it to represent the abrupt change. If one polynomial can cross a milder feature, it is accepted only after reproducing every millionth-spaced source value within the 10<sup>−9</sup> bound. A feature is therefore captured either by a polynomial boundary or by a segment that has been explicitly verified across it.</p>
 
           <h3>Why both CDF and survival polynomials are stored</h3>
@@ -560,16 +634,22 @@
           <p>The 10<sup>−9</sup> relative-error requirement is applied to whichever tail is smaller and therefore numerically sensitive. This keeps both the displayed probability and its reciprocal “1 in N” interpretation within the target error across the tails. The requirement is checked at every millionth-spaced source point; monotonicity prevents unphysical oscillations between those points.</p>
 
           <h3>Why height needs no polynomial compression</h3>
-          <p>The height distribution is well behaved and can be evaluated directly. Its PDF is constant within each of the class subranges described above, so integrating it produces an exact piecewise-linear CDF. For a height lookup, this app locates the containing subrange, adds the complete probability of every preceding subrange, and adds the appropriate linear fraction of the current one. The upper tail is computed from the same exact interval probabilities.</p>
+          <p>The <i>H</i><sub>n</sub> distribution (equivalently, the <i>h</i><sub>v</sub> distribution) is well behaved and can be evaluated directly. Its PDF is constant within each of the class subranges described above, so integrating it produces an exact piecewise-linear CDF. For a height lookup, this app converts <i>H</i> to <i>H</i><sub>n</sub>, locates the containing subrange, adds the complete probability of every preceding subrange, and adds the appropriate linear fraction of the current one. The upper tail is computed from the same exact interval probabilities.</p>
           <p>No numerical convolution, millionth-spaced table, or fitted polynomial is needed for height. The complex PDF construction and degree-5 CDF/survival compression described above apply only to weight.</p>
 
           <h3>How this page performs a lookup</h3>
           <p>The finished page embeds @@CDF_SEGMENT_COUNT@@ polynomial segments across @@CDF_DISTRIBUTION_COUNT@@ distributions. Their markers, endpoints, and coefficients are stored as compact base64-encoded float64 records, preserving the values written by the compressor without verbose decimal text.</p>
-          <p>For a lookup, JavaScript selects the full or conditional distribution from the Pokémon’s XXS and XXL classes, uses binary search to locate the segment containing the normalized weight, rescales the coordinate to <i>t</i>, and evaluates the polynomial with Horner’s method. A segment marked C stores the CDF; a segment marked S stores survival. In either half, the smaller and more sensitive tail is stored directly; the larger complementary tail can then be calculated safely as 1 minus that small value.</p>
+          <p>For a lookup, JavaScript converts <i>W</i> to <i>W</i><sub>n</sub>, selects the full or conditional distribution from the Pokémon’s XXS and XXL classes, uses binary search to locate the segment containing <i>W</i><sub>n</sub>, rescales that coordinate to <i>u</i>, and evaluates the polynomial with Horner’s method. A segment marked C stores the CDF; a segment marked S stores survival. In either half, the smaller and more sensitive tail is stored directly; the larger complementary tail can then be calculated safely as 1 minus that small value.</p>
 
           <h3>Distribution selection and displayed values</h3>
           <p>The Pokémon’s XXL class selects the 1.55, 1.75, or 2.00 full and conditional XXL distributions. Scatterbug, Spewpa, and Vivillon use their dedicated 0.25 XXS distributions and the 1.75 XXL distribution.</p>
           <p>A displayed value such as 2.41 represents the half-open interval [2.405, 2.415). Lower-tail calculations use the greatest representable value below 2.415; upper-tail calculations use 2.405 inclusively.</p>
+
+          <h3 id="technical-rattata-badge">The 2.41 kg Rattata badge calculation</h3>
+          <p>The Youngster cutoff is 2.40625 kg, while a displayed weight of 2.41 kg represents [2.405, 2.415) kg. The qualifying fraction among Rattata displaying 2.41 kg must therefore be calculated from CDF differences, not from the fraction of the interval’s width. If <i>F</i> is the applicable full-distribution CDF and μ<sub>W</sub> is the form’s mean weight:</p>
+          <div class="equation" data-tex="P(\text{qualifies}\mid\text{displays}\,2.41\,\mathrm{kg}) = \frac{F(2.40625/\mu_W)-F(2.405/\mu_W)}{F(2.415/\mu_W)-F(2.405/\mu_W)}">P(qualifies | displays 2.41 kg) = [F(2.40625 / μ<sub>W</sub>) − F(2.405 / μ<sub>W</sub>)] / [F(2.415 / μ<sub>W</sub>) − F(2.405 / μ<sub>W</sub>)]</div>
+          <p>Using the uncompressed numerical CDF, Kanto Rattata (μ<sub>W</sub> = 3.5 kg) has qualifying probability mass 0.000338992407044381 within a complete displayed 2.41 interval of probability mass 0.00271769332803123. Their ratio is <b>0.124735342118220</b>, or <b>12.4735342118220%</b> (about <b>1 in 8.01697404295</b>).</p>
+          <p>For Alolan Rattata (μ<sub>W</sub> = 3.8 kg), the corresponding masses are 0.000274127877442298 and 0.00220090590529395. Their ratio is <b>0.124552293118449</b>, or <b>12.4552293118449%</b> (about <b>1 in 8.02875623533</b>). The two proportions differ because the same absolute-weight interval occupies different normalized-weight locations for the two forms. These figures are “exact” within the uncompressed millionth-grid numerical model; the model’s discretization and floating-point limitations still apply.</p>
 
           <h3>Accuracy and model limitations</h3>
           <p>Every practical care has been taken to make this calculator as accurate as possible: the input distributions are evaluated analytically, the weight PDF is built by deterministic high-resolution convolution, the two tails are accumulated separately with compensated summation, polynomial endpoints are fixed exactly, and every source point is checked against a strict error bound. These measures are intended to make error introduced by this page negligible compared with the limitations of the source data and the game itself.</p>
@@ -578,11 +658,79 @@
           <p>Numerical precision is also different from model accuracy. Results assume that the Game Master means and size bounds are correct and that the documented height and weight transformations are used. The <b>Overall population</b> result additionally assumes the modeled wild mixture: 1/250 XXS, 1/40 XS, 471/500 Average, 1/40 XL, and 1/250 XXL. If an encounter type (such as research, raids, Team GO Rocket, or an event) uses different or unknown class weights, the Overall population result will not describe that encounter population correctly. In that case, only the per-class conditional probability is meaningful once the Pokémon’s actual size class is known, because that result does not depend on how frequently the different classes occur.</p>
           <p>Data mistakes, encounter-specific behavior, event bonuses, or future game changes can matter far more than polynomial-fitting error.</p>
           <p>The weight distributions model continuously valued height and weight before transmission. They do not quantize every generated outcome onto the complete float32 value lattice. Some species’ possible height or weight ranges contain fewer than one billion distinct float32 values, so “one in a billion” numerical accuracy cannot literally correspond to a billion independently distinguishable in-game measurements in those ranges. The 10<sup>−9</sup> target is still useful as a conservative fitting tolerance: it ensures that polynomial compression contributes far less error than the game’s own numerical resolution.</p>
-          <p>Displayed mode accounts for the two-decimal interval represented by an individual measurement, and this page flags theorized float32 changes at exact extrema, but the full CDF tables do not model every tiny probability change that float32 quantization could introduce. The result is as accurate as practically achievable under the documented model, but finite numerical resolution, discretization, imperfect source data, and unknown or changing game behavior prevent perfect accuracy from being possible.</p>
+          <p>Displayed mode accounts for the nearest-hundredth interval represented by an individual measurement, and this page flags theorized float32 changes at exact extrema, but the full CDF tables do not model every tiny probability change that float32 quantization could introduce. The result is as accurate as practically achievable under the documented model, but finite numerical resolution, discretization, imperfect source data, and unknown or changing game behavior prevent perfect accuracy from being possible.</p>
 
           <h3>Offline and reproducible</h3>
           <p>Pokémon statistics and polynomial coefficients are embedded directly in this file. The calculator makes no network requests and performs every lookup locally in your browser. The standalone page is generated from the stats table and compressed CDF files, so it can be rebuilt whenever either source changes.</p>
           <p>The source code and data-processing tools needed to reproduce this application are available at <a href="https://github.com/bmenrigh/pogo_size">github.com/bmenrigh/pogo_size</a>.</p>
+        </div>
+      </details>
+      <details class="panel info-panel" id="bugs">
+        <summary>Bugs and Suspected Bugs</summary>
+        <div class="info-body">
+          <p>This section collects the apparent game bugs, data problems, and unverified edge cases discussed elsewhere on this page. “Suspected” means that observed behavior or published data appear internally inconsistent; it does not mean the issue has been acknowledged by the game’s developers.</p>
+
+          <h3>Mega Evolution and Primal Reversion height mapping</h3>
+          <p><b>Observed behavior; intent unknown.</b> XXL correctly maps a Pokémon’s relative position from the original form’s complete XXL range into the temporary form’s XXL range. The other classes are inconsistent with that pattern. XXS, XS, and Average map back into the original form’s range, leaving absolute height unchanged even when the temporary form has a different mean. XL combines the original form’s lower boundary with the temporary form’s upper boundary, which can place the result outside the temporary form’s nominal XL range. The no-change mappings appear to be an oversight, while the mixed-boundary XL mapping appears to be a bug.</p>
+
+          <h3>Mega Evolution and Primal Reversion weight transformation</h3>
+          <p><b>Observed behavior; likely legacy logic.</b> The temporary-evolution weight calculation subtracts and adds squared normalized-height contributions in every class. That conflicts with modern XXL generation, which uses an unsquared height contribution. A plausible explanation is that the weight transform predates XXS and XXL and was never updated for the special XXL rule. The calculation can also produce a negative raw weight; the game replaces any negative result with the temporary form’s mean weight, creating a discontinuity and discarding information needed to reverse the transformation. These mechanics are why this page does not report probabilities for Mega Evolutions or Primal Reversions.</p>
+
+          <h3>Contradictory Game Master form data</h3>
+          <p><b>Likely data oversights.</b> Several Game Master templates are missing the records needed to interpret them or contain mutually incompatible means and size bounds. The affected records are excluded unless another complete, consistent template describes the same form.</p>
+
+          <h4>Extended settings without matching Pokémon settings</h4>
+          <ul>
+            <li><code>V0902_POKEMON_BASCULEGION</code>, <code>V0902_POKEMON_BASCULEGION_FEMALE</code>, and <code>V0902_POKEMON_BASCULEGION_NORMAL</code> have extended settings but no matching <code>pokemonSettings</code> record from which to obtain the required mean weight and other base data.</li>
+            <li><code>V999_POKEMON_GIMMIGHOUL</code> likewise has no matching <code>pokemonSettings</code> record. This unmatched template is ignored; Gimmighoul remains available through its separate valid records.</li>
+          </ul>
+
+          <h4>Ordinary-form mean-height contradictions</h4>
+          <p>Four alternate forms have a Pokédex mean height that disagrees with the mean implied by their extended size-class bounds:</p>
+          <ul>
+            <li>Hisuian Lilligant: 1.2 m Pokédex mean versus 1.1 m size-class mean.</li>
+            <li>Hisuian Avalugg: 1.4 m Pokédex mean versus 2.0 m size-class mean.</li>
+            <li>Black Kyurem: 3.3 m Pokédex mean versus 3.0 m size-class mean.</li>
+            <li>White Kyurem: 3.6 m Pokédex mean versus 3.0 m size-class mean.</li>
+          </ul>
+          <p>These bounds appear to have been copied from the ordinary forms without being adjusted for the alternate forms’ heights.</p>
+
+          <h4>Mega settings contradictions</h4>
+          <ul>
+            <li>Mega Dragonite’s size settings imply a mean height of 3.36875 m, but its <code>averageHeightM</code> is 2.2 m. Its implied XXS ratio is 0.56 rather than an allowed 0.25 or 0.49, and its implied XXL ratio is approximately 1.71428571429 rather than 1.55, 1.75, or 2.00.</li>
+            <li>Mega Skarmory’s extended size settings are missing or invalid.</li>
+            <li>Mega Sharpedo’s size settings imply a mean height of 2.5 m, but its <code>averageHeightM</code> is 1.8 m.</li>
+            <li>Mega Falinks’s size settings imply a mean height of 3.0 m, but its <code>averageHeightM</code> is 1.6 m.</li>
+          </ul>
+          <p>This page omits each incomplete or contradictory form rather than guessing which value or size class the game actually uses.</p>
+
+          <h3>Zorua’s broken size measurements</h3>
+          <p><b>Known anomalous behavior.</b> Zorua has multiple in-game problems involving recorded height and weight, so its measurements do not reliably follow the ordinary size system. Zorua is omitted rather than presenting probabilities for data that may be meaningless.</p>
+
+          <h3>Pumpkaboo and Gourgeist’s nonstandard size system</h3>
+          <p><b>Special case; not necessarily a bug.</b> Pumpkaboo and Gourgeist use form and size-class behavior that does not match the ordinary five-class model, and their Game Master bounds cannot be interpreted by the same rules as other species. They and all their forms are omitted until their separate mechanics can be modeled correctly.</p>
+
+          <h3>Display rounding and float32 endpoints</h3>
+          <p><b>Theorized and not yet observed in practice.</b> Height and weight are transmitted as float32 values. At a mathematical endpoint that lies exactly on a nearest-hundredth rounding boundary, float32 representation can move the value just below that boundary and lower the expected display. The predicted categories are minimum height, maximum height, and maximum weight; Kyogre and Caterpie provide examples elsewhere in the FAQ. Testing requires an extraordinarily unlikely specimen at an exact endpoint, so these predictions remain unverified. The Pokédex also uses a different rounding convention from the measurement shown for an individual Pokémon, but it is not known whether that difference is intentional.</p>
+
+          <h3>Unusual behavior not classified as a bug</h3>
+          <p>Some surprising results are internally consistent with the documented model. XXL uses an unsquared height contribution during ordinary weight generation, so XL Pokémon can be heavier than XXL Pokémon. The Scatterbug family has a distinct XXS height range, and species use three different XXL upper bounds. Ordinary evolution between different XXL classes proportionally remaps height into the target range. This page models those behaviors as rules rather than treating them as data errors.</p>
+        </div>
+      </details>
+      <details class="panel info-panel" id="acknowledgements">
+        <summary>Thanks and Acknowledgements</summary>
+        <div class="info-body">
+          <p>Thank you to the <b>Silph Research Group</b> for its pioneering work uncovering the mechanics behind much of the game’s original height and weight design.</p>
+
+          <p>Thank you to <b>DrThod</b> for extended discussions about statistical distributions and the tests needed to get to the bottom of the mysterious 0.01 kg Squirtle.</p>
+
+          <p>Thank you to an <b>anonymous donor</b> (you know who you are!) for providing extensive encounter data that made it possible to crack the original size-system mechanics, then the Pumpkaboo mechanics, and finally the new XXS/XXL system. Without those datasets, the inner workings of these systems would likely remain unknown even today.</p>
+
+          <p>Thank you to <b>Riff</b>, <b>FlyFunner</b>, <b>0ShadowNo1</b>, <b>mynameisjuan</b>, and all the other members of the <a href="https://discord.com/invite/muPSd9EwUb">No Floats Left Research Group</a>. Some of the formulas and edge cases described here would still be unknown, if not for all of your hard work!</p>
+
+          <p>Thank you to <b>SellyMe</b> for motivating me to build the original probability distribution tables and for their dedication to uncovering every bizarre anomaly in the PokeDex rouding mechanics.</p>
+
+          <p>Thank you to everyone I have left out who has been involved in uncovering the true mechanics underlying this game.</p>
         </div>
       </details>
     </div>
@@ -595,11 +743,18 @@
   "use strict";
   const POKEMON_NAMES=@@POKEMON_NAMES@@.split("\n");
   const STAT_COLUMNS=@@POKEMON_COLUMNS@@;
+  const EVOLUTION_PAIRS=@@EVOLUTIONS@@;
+  const EVOLUTION_COUNT=@@EVOLUTION_COUNT@@;
   const DISPLAY_EXTREMA=@@DISPLAY_EXTREMA@@;
   const CDF_PACKED=@@CDF_TABLES@@;
   const [HEIGHT_VALUES,WEIGHT_VALUES,DEX_NUMBERS,HEIGHT_INDEXES,WEIGHT_INDEXES,XXS_CODES,XXL_CODES]=STAT_COLUMNS;
   const XXL_VALUES=[1.55,1.75,2];
   const POKEMON=POKEMON_NAMES.map((name,i)=>({index:i,dex:DEX_NUMBERS[i],name,height:HEIGHT_VALUES[HEIGHT_INDEXES[i]],weight:WEIGHT_VALUES[WEIGHT_INDEXES[i]],xxs:XXS_CODES[i]==="1"?.25:.49,xxl:XXL_VALUES[+XXL_CODES[i]]}));
+  const EVOLUTIONS_BY_SOURCE=new Map();
+  for(const [sourceIndex,targetIndex] of EVOLUTION_PAIRS){
+    if(!EVOLUTIONS_BY_SOURCE.has(sourceIndex))EVOLUTIONS_BY_SOURCE.set(sourceIndex,[]);
+    EVOLUTIONS_BY_SOURCE.get(sourceIndex).push(POKEMON[targetIndex]);
+  }
   const EXTREMA_BY_POKEMON=new Map();
   for(const entry of DISPLAY_EXTREMA){if(!EXTREMA_BY_POKEMON.has(entry[0]))EXTREMA_BY_POKEMON.set(entry[0],[]);EXTREMA_BY_POKEMON.get(entry[0]).push(entry)}
   const RECORD_SIZE=65;
@@ -813,7 +968,7 @@
         weightRangeClasses:possible?[rawRanges[0].classes]:[],
         rawLower:exactWeight,rawUpper:exactWeight,
         transformLower,transformUpper,transformRanges,possible,
-        reason:possible?"":"The implied intrinsic-weight variate is outside the allowed range 0.5–1.5."
+        reason:possible?"":"The implied weight variate wᵥ is outside the allowed range 0.5–1.5."
       };
     }
     const possible=weightRanges.length>0;
@@ -823,7 +978,7 @@
       weightLower:possible?weightRanges[0][0]:Math.max(.5,rawLower),
       weightUpper:possible?weightRanges[weightRanges.length-1][1]:Math.min(1.5,rawUpper),
       weightRanges,weightRangeClasses,rawLower,rawUpper,transformLower,transformUpper,transformRanges,possible,
-      reason:possible?"":"The displayed height and weight intervals imply no intrinsic-weight variate in the allowed range 0.5–1.5."
+      reason:possible?"":"The displayed H and W intervals imply no weight variate wᵥ in the allowed range 0.5–1.5."
     };
   }
 
@@ -838,17 +993,20 @@
   function pokemonProfile(pokemon){
     const classes=[["xxs","XXS"],["xs","XS"],["average","Average"],["xl","XL"],["xxl","XXL"]];
     const rows=classes.map(([key,label])=>{
-      const height=heightClassSupport(pokemon,key),weight=weightSupport(pokemon,key);
-      return `<tr><th scope="row">${label}</th><td>${formatMeasurement(weight[0]*pokemon.weight)}–${formatMeasurement(weight[1]*pokemon.weight)} kg</td><td>${formatMeasurement(height[0]*pokemon.height)}–${formatMeasurement(height[1]*pokemon.height)} m</td></tr>`;
+      const temporary=isTemporaryEvolution(pokemon);
+      const height=temporary?temporaryHeightSupport(pokemon,key):heightClassSupport(pokemon,key).map(value=>value*pokemon.height);
+      const weight=temporary?temporaryWeightSupport(pokemon,key):weightSupport(pokemon,key).map(value=>value*pokemon.weight);
+      return `<tr><th scope="row">${label}</th><td>${formatMeasurement(weight[0])}–${formatMeasurement(weight[1])} kg</td><td>${formatMeasurement(height[0])}–${formatMeasurement(height[1])} m</td></tr>`;
     }).join("");
-    return `<div class="profile"><div class="profile-metrics"><div class="metric"><small>Mean weight</small><b>${formatMeasurement(pokemon.weight)} kg</b></div><div class="metric"><small>Mean height</small><b>${formatMeasurement(pokemon.height)} m</b></div><div class="metric"><small>XXL class</small><b>${formatMeasurement(pokemon.xxl)}× mean</b></div></div><table class="range-table"><caption>Possible ranges by size class</caption><thead><tr><th>Class</th><th>Weight range</th><th>Height range</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    const caption=isTemporaryEvolution(pokemon)?"Possible post-transformation ranges by size class":"Possible ranges by size class";
+    return `<div class="profile"><div class="profile-metrics"><div class="metric"><small>Mean weight</small><b>${formatMeasurement(pokemon.weight)} kg</b></div><div class="metric"><small>Mean height</small><b>${formatMeasurement(pokemon.height)} m</b></div><div class="metric"><small>XXL class</small><b>${formatMeasurement(pokemon.xxl)}× mean</b></div></div><table class="range-table"><caption>${caption}</caption><thead><tr><th>Class</th><th>Weight range</th><th>Height range</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   function displayExtremaNotes(pokemon){
     const entries=EXTREMA_BY_POKEMON.get(pokemon.index);
     if(!entries)return "";
     const labels=["Minimum height","Maximum height","Maximum weight"],units=["m","m","kg"];
     const rows=entries.map(([,kind,nominal,float32,expected,actual])=>`<li><b>${labels[kind]}:</b> nominal boundary ${nominal} ${units[kind]} would display as ${expected} ${units[kind]}; its exact float32 value is <code>${float32}</code> ${units[kind]}, predicted to display as ${actual} ${units[kind]}.</li>`).join("");
-    return `<div class="extrema-alert"><strong>Theorized float32 display-boundary difference</strong><p>This Pokémon has one or more extreme values whose two-decimal display may change after float32 transmission. This has not been verified with an actual endpoint specimen.</p><ul>${rows}</ul></div>`;
+    return `<div class="extrema-alert"><strong>Theorized float32 display-boundary difference</strong><p>This Pokémon has one or more extreme values whose nearest-hundredth display may change after float32 transmission. This has not been verified with an actual endpoint specimen.</p><ul>${rows}</ul></div>`;
   }
   function oneInText(probability,measurement,observed,upperTail,unit,population="Pokémon caught"){
     const relation=upperTail?"greater than or equal to":"less than or equal to";
@@ -861,6 +1019,583 @@
   function resolvePokemon(text){
     const cleaned=text.trim(),upper=cleaned.toUpperCase();
     return POKEMON.find(p=>optionName(p)===cleaned||p.name===upper)||null;
+  }
+  function isTemporaryEvolution(pokemon){return /_(?:MEGA(?:_[XY])?|PRIMAL)$/.test(pokemon.name)}
+  function temporaryEvolutionBase(pokemon){
+    const baseName=pokemon.name.replace(/_(?:MEGA(?:_[XY])?|PRIMAL)$/,"");
+    for(const name of [baseName,`${baseName}_ALL`,`${baseName}_NORMAL`]){
+      const base=POKEMON.find(candidate=>candidate.dex===pokemon.dex&&candidate.name===name);
+      if(base)return base;
+    }
+    return null;
+  }
+  function temporaryHeightSupport(pokemon,sizeClass){
+    const base=temporaryEvolutionBase(pokemon);
+    if(!base)return heightClassSupport(pokemon,sizeClass).map(value=>value*pokemon.height);
+    const source=heightClassSupport(base,sizeClass).map(value=>value*base.height);
+    if(sizeClass==="xl")return [source[0],1.5*pokemon.height];
+    if(sizeClass==="xxl")return [1.5*pokemon.height,pokemon.xxl*pokemon.height];
+    return source;
+  }
+  function temporarySourceHeight(pokemon,base,sizeClass,height){
+    const source=heightClassSupport(base,sizeClass).map(value=>value*base.height);
+    const target=temporaryHeightSupport(pokemon,sizeClass);
+    if(target[1]===target[0])return source[0];
+    const q=(height-target[0])/(target[1]-target[0]);
+    return source[0]+q*(source[1]-source[0]);
+  }
+  function temporaryWeightAfterFallback(rawWeight,meanWeight){
+    return rawWeight<0?meanWeight:rawWeight;
+  }
+  function temporaryFallbackRange(rawRange,meanWeight){
+    if(rawRange[1]<0)return [meanWeight,meanWeight];
+    if(rawRange[0]<0)return [0,Math.max(meanWeight,rawRange[1])];
+    return rawRange;
+  }
+  function temporaryMeasurementsAt(pokemon,base,sizeClass,q,weightVariate){
+    const sourceSupport=heightClassSupport(base,sizeClass).map(value=>value*base.height);
+    const temporarySupport=temporaryHeightSupport(pokemon,sizeClass);
+    const sourceHeight=sourceSupport[0]+q*(sourceSupport[1]-sourceSupport[0]);
+    const height=temporarySupport[0]+q*(temporarySupport[1]-temporarySupport[0]);
+    const sourceNormalized=sourceHeight/base.height;
+    const temporaryNormalized=height/pokemon.height;
+    const sourceHeightTerm=sizeClass==="xxl"?sourceNormalized:sourceNormalized*sourceNormalized;
+    const provisional=weightVariate+sourceHeightTerm-1;
+    const sourceWeight=base.weight*(provisional<=0?sourceHeightTerm:provisional);
+    const rawWeight=temporaryNormalized*temporaryNormalized*pokemon.weight+sourceWeight-
+      sourceNormalized*sourceNormalized*base.weight;
+    const weight=temporaryWeightAfterFallback(rawWeight,pokemon.weight);
+    return {height,weight,rawWeight,sourceNormalized,sourceHeightTerm};
+  }
+  function temporaryWeightSupport(pokemon,sizeClass){
+    const base=temporaryEvolutionBase(pokemon);
+    if(!base)return weightSupport(pokemon,sizeClass).map(value=>value*pokemon.weight);
+    const candidates=[];
+    const addRange=(rawFn,lower=0,upper=1)=>{
+      if(upper<lower)return;
+      const range=temporaryFallbackRange(
+        quadraticRange(rawFn,lower,upper),
+        pokemon.weight
+      );
+      candidates.push(range[0],range[1]);
+    };
+    addRange(q=>temporaryMeasurementsAt(pokemon,base,sizeClass,q,1.5).rawWeight);
+    if(sizeClass==="xxl"){
+      addRange(q=>temporaryMeasurementsAt(pokemon,base,sizeClass,q,.5).rawWeight);
+    }else{
+      const source=heightClassSupport(base,sizeClass);
+      const thresholdNormalized=Math.sqrt(.5);
+      const threshold=(thresholdNormalized-source[0])/(source[1]-source[0]);
+      const fallbackEnd=Math.max(0,Math.min(1,threshold));
+      if(threshold>0){
+        addRange(q=>temporaryMeasurementsAt(pokemon,base,sizeClass,q,.5).rawWeight,0,fallbackEnd);
+        addRange(q=>{
+          const values=temporaryMeasurementsAt(pokemon,base,sizeClass,q,.5);
+          const temporaryNormalized=values.height/pokemon.height;
+          return temporaryNormalized*temporaryNormalized*pokemon.weight-
+            values.sourceNormalized*values.sourceNormalized*base.weight;
+        },0,fallbackEnd);
+      }
+      if(threshold<1)addRange(q=>temporaryMeasurementsAt(pokemon,base,sizeClass,q,.5).weight,Math.max(0,threshold),1);
+    }
+    return [Math.min(...candidates),Math.max(...candidates)];
+  }
+  function temporaryWeightVariateAt(pokemon,base,sizeClass,height,weight){
+    const sourceHeight=temporarySourceHeight(pokemon,base,sizeClass,height);
+    const sourceNormalized=sourceHeight/base.height;
+    const temporaryNormalized=height/pokemon.height;
+    const sourceWeight=weight-temporaryNormalized*temporaryNormalized*pokemon.weight+
+      sourceNormalized*sourceNormalized*base.weight;
+    const sourceHeightTerm=sizeClass==="xxl"?sourceNormalized:sourceNormalized*sourceNormalized;
+    return sourceWeight/base.weight-sourceHeightTerm+1;
+  }
+  function quadraticRange(functionAtHeight,lower,upper){
+    if(lower===upper){const value=functionAtHeight(lower);return [value,value]}
+    const middle=(lower+upper)/2;
+    const y0=functionAtHeight(lower),ym=functionAtHeight(middle),y1=functionAtHeight(upper);
+    const a=2*(y1+y0-2*ym),b=y1-y0-a;
+    const values=[y0,y1];
+    if(Math.abs(a)>1e-15){
+      const position=-b/(2*a);
+      if(position>0&&position<1)values.push(functionAtHeight(lower+position*(upper-lower)));
+    }
+    return [Math.min(...values),Math.max(...values)];
+  }
+  function temporaryImpliedVariates(pokemon,heightAnalysis,weightAnalysis){
+    const base=temporaryEvolutionBase(pokemon);
+    if(!base)return {base:null,branches:[]};
+    const heightLower=heightAnalysis.interpretation.lower;
+    const heightUpper=heightAnalysis.interpretation.upper;
+    const weightLower=weightAnalysis.interpretation.lower;
+    const weightUpper=weightAnalysis.interpretation.upper;
+    const weightExact=weightLower===weightUpper;
+    const fallbackAmbiguous=weightExact
+      ?weightLower===pokemon.weight
+      :weightLower<=pokemon.weight&&weightUpper>pokemon.weight;
+    const branches=[];
+    for(const sizeClass of ["xxs","xs","average","xl","xxl"]){
+      const support=temporaryHeightSupport(pokemon,sizeClass);
+      if(!rangeIntersects(heightLower,heightUpper,support))continue;
+      const lower=Math.max(heightLower,support[0]),upper=Math.min(heightUpper,support[1]);
+      if(upper<lower)continue;
+      const sourceLower=temporarySourceHeight(pokemon,base,sizeClass,lower)/base.height;
+      const sourceUpper=temporarySourceHeight(pokemon,base,sizeClass,upper)/base.height;
+      const heightRange=[Math.min(sourceLower,sourceUpper),Math.max(sourceLower,sourceUpper)];
+      const heightContribution=height=>temporaryWeightVariateAt(pokemon,base,sizeClass,height,0);
+      const contributionRange=quadraticRange(heightContribution,lower,upper);
+      const rawWeightRange=[
+        contributionRange[0]+weightLower/base.weight,
+        contributionRange[1]+weightUpper/base.weight
+      ];
+      const weightRange=[
+        Math.max(.5,rawWeightRange[0]),
+        Math.min(1.5,rawWeightRange[1])
+      ];
+      branches.push({
+        sizeClass,heightRange,rawWeightRange,
+        weightRange:weightRange[0]<=weightRange[1]?weightRange:null
+      });
+    }
+    return {base,branches,fallbackAmbiguous};
+  }
+  function renderTemporaryVariates(pokemon,heightAnalysis,weightAnalysis){
+    const result=temporaryImpliedVariates(pokemon,heightAnalysis,weightAnalysis);
+    if(!result.base)return `<div class="variates"><h3>Implied pre-evolution generation variates</h3><div class="variate-note variate-warning">The corresponding original form is unavailable, so its generation variates cannot be recovered.</div></div>`;
+    const format=value=>String(Number(value.toPrecision(12)));
+    const labels={xxs:"XXS",xs:"XS",average:"Average",xl:"XL",xxl:"XXL"};
+    const qualify=result.branches.length>1;
+    const formatRange=(range,exact)=>exact&&range[0]===range[1]?format(range[0]):`${format(range[0])}–${format(range[1])}`;
+    const heightExact=!heightAnalysis.displayed;
+    const weightExact=!heightAnalysis.displayed&&!weightAnalysis.displayed;
+    const heightValue=result.branches.length
+      ?result.branches.map(branch=>`${qualify?`${labels[branch.sizeClass]}: `:""}${formatRange(branch.heightRange,heightExact)}`).join("; ")
+      :"Unavailable";
+    const usable=result.fallbackAmbiguous?[]:result.branches.filter(branch=>branch.weightRange);
+    const weightValue=result.fallbackAmbiguous
+      ?"Not uniquely recoverable"
+      :usable.length
+      ?usable.map(branch=>`${qualify?`${labels[branch.sizeClass]}: `:""}${formatRange(branch.weightRange,weightExact)}`).join("; ")
+      :"Unavailable";
+    const warnings=result.branches.filter(branch=>!branch.weightRange);
+    const warning=result.fallbackAmbiguous
+      ?`<div class="variate-note variate-warning">The entered temporary-form weight includes its mean. A negative raw Mega/Primal weight is replaced by that mean, destroying the information needed to recover a unique original wᵥ.</div>`
+      :warnings.length?`<div class="variate-note variate-warning">The entered measurements imply no allowed wᵥ in ${warnings.map(branch=>labels[branch.sizeClass]).join(" or ")}.</div>`:"";
+    const explanation=result.fallbackAmbiguous
+      ?`The original ${displayName(result.base.name)} hᵥ is recovered by reversing the shared Mega/Primal height mapping. The mean-weight fallback prevents a unique reverse calculation of wᵥ.`
+      :`These are the original ${displayName(result.base.name)} variates recovered by reversing the shared Mega/Primal height mapping and weight correction. Displayed measurements produce ranges because their exact pre-rounded values are unknown.`;
+    return `<div class="variates"><h3>Implied pre-evolution generation variates</h3><div class="variate-grid"><div class="variate-value"><small>Weight variate wᵥ</small><b>${weightValue}</b></div><div class="variate-value"><small>Height variate hᵥ</small><b>${heightValue}</b></div></div><div class="variate-note">${explanation}</div>${warning}</div>`;
+  }
+  function evolvedNormalizedHeight(source,target,sizeClass,sourceNormalizedHeight){
+    if(sizeClass!=="xxl"||source.xxl===target.xxl)return sourceNormalizedHeight;
+    const q=(sourceNormalizedHeight-1.5)/(source.xxl-1.5);
+    return 1.5+q*(target.xxl-1.5);
+  }
+  function evolutionHeightBranches(source,target,heightAnalysis){
+    const exact=heightAnalysis.interpretation.lower===heightAnalysis.interpretation.upper;
+    const sourceLower=heightAnalysis.interpretation.lower/source.height;
+    const sourceUpper=heightAnalysis.interpretation.upper/source.height;
+    const classes=exact
+      ?[heightClass(sourceLower,source)].filter(Boolean)
+      :compatibleHeightClasses(sourceLower,sourceUpper,source);
+    return classes.map(sizeClass=>{
+      const support=heightClassSupport(source,sizeClass);
+      const lower=Math.max(sourceLower,support[0]);
+      const upper=Math.min(sourceUpper,support[1]);
+      const targetLower=evolvedNormalizedHeight(source,target,sizeClass,lower);
+      const targetUpper=evolvedNormalizedHeight(source,target,sizeClass,upper);
+      return {
+        sizeClass,
+        sourceRange:[lower,upper],
+        targetNormalizedRange:[
+          Math.min(targetLower,targetUpper),
+          Math.max(targetLower,targetUpper)
+        ],
+        heightRange:[
+          Math.min(targetLower,targetUpper)*target.height,
+          Math.max(targetLower,targetUpper)*target.height
+        ]
+      };
+    }).filter(branch=>branch.sourceRange[1]>=branch.sourceRange[0]);
+  }
+  function evolutionHeightTerm(normalizedHeight,sizeClass){
+    return sizeClass==="xxl"?normalizedHeight:normalizedHeight*normalizedHeight;
+  }
+  function evolutionDifference(source,target,branch,sourceNormalizedHeight){
+    const targetNormalized=evolvedNormalizedHeight(source,target,branch.sizeClass,sourceNormalizedHeight);
+    return evolutionHeightTerm(targetNormalized,branch.sizeClass)-
+      evolutionHeightTerm(sourceNormalizedHeight,branch.sizeClass);
+  }
+  function quadraticRoots(functionAtValue,lower,upper){
+    if(lower===upper)return [];
+    const middle=(lower+upper)/2;
+    const y0=functionAtValue(lower),ym=functionAtValue(middle),y1=functionAtValue(upper);
+    const a=2*(y1+y0-2*ym),b=y1-y0-a,c=y0;
+    const positions=[];
+    if(Math.abs(a)<1e-14){
+      if(Math.abs(b)>1e-14)positions.push(-c/b);
+    }else{
+      const discriminant=b*b-4*a*c;
+      if(discriminant>=0){
+        const root=Math.sqrt(discriminant);
+        positions.push((-b-root)/(2*a),(-b+root)/(2*a));
+      }
+    }
+    return positions
+      .filter(position=>position>0&&position<1)
+      .map(position=>lower+position*(upper-lower));
+  }
+  function evolvedWeightRange(source,target,branch,weightAnalysis){
+    const [heightLower,heightUpper]=branch.sourceRange;
+    const weightLower=weightAnalysis.interpretation.lower;
+    const weightUpper=weightAnalysis.interpretation.upper;
+    const provisional=(height,weight)=>weight/source.weight+
+      evolutionDifference(source,target,branch,height);
+    const targetTerm=height=>{
+      const targetHeight=evolvedNormalizedHeight(source,target,branch.sizeClass,height);
+      return target.weight*evolutionHeightTerm(targetHeight,branch.sizeClass);
+    };
+    const normalWeight=(height,weight)=>target.weight*provisional(height,weight);
+    const exactWeight=(height,weight)=>{
+      const value=provisional(height,weight);
+      return value<=0?targetTerm(height):target.weight*value;
+    };
+    const points=[heightLower,heightUpper];
+    points.push(...quadraticRoots(height=>provisional(height,weightLower),heightLower,heightUpper));
+    points.push(...quadraticRoots(height=>provisional(height,weightUpper),heightLower,heightUpper));
+    points.sort((a,b)=>a-b);
+    const breaks=points.filter((value,index)=>index===0||Math.abs(value-points[index-1])>1e-12);
+    const values=[];
+    for(const height of breaks){
+      values.push(exactWeight(height,weightLower),exactWeight(height,weightUpper));
+    }
+    for(let index=0;index+1<breaks.length;index++){
+      const lower=breaks[index],upper=breaks[index+1],middle=(lower+upper)/2;
+      const lowerProvisional=provisional(middle,weightLower);
+      const upperProvisional=provisional(middle,weightUpper);
+      if(upperProvisional<=0){
+        const range=quadraticRange(targetTerm,lower,upper);
+        values.push(...range);
+      }else if(lowerProvisional>0){
+        values.push(...quadraticRange(height=>normalWeight(height,weightLower),lower,upper));
+        values.push(...quadraticRange(height=>normalWeight(height,weightUpper),lower,upper));
+      }else{
+        values.push(0);
+        values.push(...quadraticRange(targetTerm,lower,upper));
+        values.push(...quadraticRange(height=>normalWeight(height,weightUpper),lower,upper));
+      }
+    }
+    return [Math.min(...values),Math.max(...values)];
+  }
+  function temporaryEvolvedHeight(source,target,sizeClass,sourceNormalizedHeight){
+    const sourceSupport=heightClassSupport(source,sizeClass);
+    const q=(sourceNormalizedHeight-sourceSupport[0])/
+      (sourceSupport[1]-sourceSupport[0]);
+    const sourceLower=sourceSupport[0]*source.height;
+    if(sizeClass==="xl"){
+      return sourceLower+q*(1.5*target.height-sourceLower);
+    }
+    if(sizeClass==="xxl"){
+      return 1.5*target.height+q*(target.xxl-1.5)*target.height;
+    }
+    return sourceNormalizedHeight*source.height;
+  }
+  function temporaryEvolutionHeightBranches(source,target,heightAnalysis){
+    const exact=heightAnalysis.interpretation.lower===heightAnalysis.interpretation.upper;
+    const sourceLower=heightAnalysis.interpretation.lower/source.height;
+    const sourceUpper=heightAnalysis.interpretation.upper/source.height;
+    const classes=exact
+      ?[heightClass(sourceLower,source)].filter(Boolean)
+      :compatibleHeightClasses(sourceLower,sourceUpper,source);
+    return classes.map(sizeClass=>{
+      const support=heightClassSupport(source,sizeClass);
+      const lower=Math.max(sourceLower,support[0]);
+      const upper=Math.min(sourceUpper,support[1]);
+      const targetLower=temporaryEvolvedHeight(source,target,sizeClass,lower);
+      const targetUpper=temporaryEvolvedHeight(source,target,sizeClass,upper);
+      return {
+        sizeClass,
+        sourceRange:[lower,upper],
+        heightRange:[
+          Math.min(targetLower,targetUpper),
+          Math.max(targetLower,targetUpper)
+        ]
+      };
+    }).filter(branch=>branch.sourceRange[1]>=branch.sourceRange[0]);
+  }
+  function temporaryEvolvedWeightRange(source,target,branch,weightAnalysis){
+    const weightLower=weightAnalysis.interpretation.lower;
+    const weightUpper=weightAnalysis.interpretation.upper;
+    const transformed=(sourceNormalizedHeight,sourceWeight)=>{
+      const targetHeight=temporaryEvolvedHeight(
+        source,target,branch.sizeClass,sourceNormalizedHeight
+      );
+      const targetNormalizedHeight=targetHeight/target.height;
+      return targetNormalizedHeight*targetNormalizedHeight*target.weight+
+        sourceWeight-sourceNormalizedHeight*sourceNormalizedHeight*source.weight;
+    };
+    const lowerRawRange=quadraticRange(
+      height=>transformed(height,weightLower),
+      branch.sourceRange[0],
+      branch.sourceRange[1]
+    );
+    const upperRawRange=quadraticRange(
+      height=>transformed(height,weightUpper),
+      branch.sourceRange[0],
+      branch.sourceRange[1]
+    );
+    return temporaryFallbackRange([
+      Math.min(lowerRawRange[0],upperRawRange[0]),
+      Math.max(lowerRawRange[1],upperRawRange[1])
+    ],target.weight);
+  }
+  function evolutionPaths(source){
+    const paths=[];
+    const visit=(current,path,seen)=>{
+      for(const target of EVOLUTIONS_BY_SOURCE.get(current.index)||[]){
+        if(seen.has(target.index))continue;
+        const nextPath=[...path,target];
+        paths.push(nextPath);
+        if(!isTemporaryEvolution(target)){
+          const nextSeen=new Set(seen);
+          nextSeen.add(target.index);
+          visit(target,nextPath,nextSeen);
+        }
+      }
+    };
+    visit(source,[],new Set([source.index]));
+    return paths;
+  }
+  function evolutionOriginBranches(source,heightAnalysis){
+    const exact=heightAnalysis.interpretation.lower===heightAnalysis.interpretation.upper;
+    const sourceLower=heightAnalysis.interpretation.lower/source.height;
+    const sourceUpper=heightAnalysis.interpretation.upper/source.height;
+    const classes=exact
+      ?[heightClass(sourceLower,source)].filter(Boolean)
+      :compatibleHeightClasses(sourceLower,sourceUpper,source);
+    return classes.map(sizeClass=>{
+      const support=heightClassSupport(source,sizeClass);
+      return {
+        sizeClass,
+        sourceRange:[
+          Math.max(sourceLower,support[0]),
+          Math.min(sourceUpper,support[1])
+        ]
+      };
+    }).filter(branch=>branch.sourceRange[1]>=branch.sourceRange[0]);
+  }
+  function linearCompose(scale,offset,[slope,intercept]){
+    return [scale*slope,scale*intercept+offset];
+  }
+  function linearSquare([slope,intercept]){
+    return [slope*slope,2*slope*intercept,intercept*intercept];
+  }
+  function polynomialAdd(left,right){
+    return [left[0]+right[0],left[1]+right[1],left[2]+right[2]];
+  }
+  function polynomialScale(polynomial,scale){
+    return polynomial.map(value=>value*scale);
+  }
+  function heightTermPolynomial(height,sizeClass){
+    return sizeClass==="xxl"?[0,height[0],height[1]]:linearSquare(height);
+  }
+  function polynomialRootsInRange([a,b,c],lower,upper){
+    const roots=[];
+    const scale=Math.max(1,Math.abs(a),Math.abs(b),Math.abs(c));
+    if(Math.abs(a)<=1e-14*scale){
+      if(Math.abs(b)>1e-14*scale)roots.push(-c/b);
+    }else{
+      const discriminant=b*b-4*a*c;
+      if(discriminant>=0){
+        const root=Math.sqrt(discriminant);
+        roots.push((-b-root)/(2*a),(-b+root)/(2*a));
+      }
+    }
+    return roots
+      .filter(value=>value>lower&&value<upper)
+      .sort((left,right)=>left-right)
+      .filter((value,index,values)=>index===0||Math.abs(value-values[index-1])>1e-12);
+  }
+  function polynomialValue([a,b,c],value){
+    return (a*value+b)*value+c;
+  }
+  function polynomialRange(polynomial,lower,upper){
+    const values=[polynomialValue(polynomial,lower),polynomialValue(polynomial,upper)];
+    if(Math.abs(polynomial[0])>1e-14){
+      const turning=-polynomial[1]/(2*polynomial[0]);
+      if(turning>lower&&turning<upper)values.push(polynomialValue(polynomial,turning));
+    }
+    return [Math.min(...values),Math.max(...values)];
+  }
+  function ordinaryPathHeight(current,target,sizeClass,height){
+    if(sizeClass!=="xxl"||current.xxl===target.xxl)return height;
+    const scale=(target.xxl-1.5)/(current.xxl-1.5);
+    return linearCompose(scale,1.5*(1-scale),height);
+  }
+  function temporaryPathHeight(current,target,sizeClass,height){
+    const support=heightClassSupport(current,sizeClass);
+    if(sizeClass==="xxl"){
+      const scale=(target.xxl-1.5)/(support[1]-support[0]);
+      return linearCompose(scale,1.5-scale*support[0],height);
+    }
+    if(sizeClass==="xl"){
+      const sourceLower=support[0]*current.height;
+      const actualScale=(1.5*target.height-sourceLower)/(support[1]-support[0]);
+      return linearCompose(
+        actualScale/target.height,
+        (sourceLower-actualScale*support[0])/target.height,
+        height
+      );
+    }
+    return linearCompose(current.height/target.height,0,height);
+  }
+  function ordinaryPathStep(pieces,current,target,sizeClass){
+    const result=[];
+    for(const piece of pieces){
+      const targetHeight=ordinaryPathHeight(current,target,sizeClass,piece.height);
+      const sourceTerm=heightTermPolynomial(piece.height,sizeClass);
+      const targetTerm=heightTermPolynomial(targetHeight,sizeClass);
+      const provisional=polynomialAdd(
+        polynomialScale(piece.weight,1/current.weight),
+        polynomialAdd(targetTerm,polynomialScale(sourceTerm,-1))
+      );
+      const cuts=[
+        piece.lower,
+        ...polynomialRootsInRange(provisional,piece.lower,piece.upper),
+        piece.upper
+      ];
+      for(let index=0;index+1<cuts.length;index++){
+        const lower=cuts[index],upper=cuts[index+1];
+        const normal=polynomialValue(provisional,(lower+upper)/2)>0;
+        result.push({
+          lower,upper,height:targetHeight,
+          weight:polynomialScale(normal?provisional:targetTerm,target.weight)
+        });
+      }
+    }
+    return result;
+  }
+  function temporaryPathStep(pieces,current,target,sizeClass){
+    const result=[];
+    for(const piece of pieces){
+      const targetHeight=temporaryPathHeight(current,target,sizeClass,piece.height);
+      const rawWeight=polynomialAdd(
+        piece.weight,
+        polynomialAdd(
+          polynomialScale(linearSquare(targetHeight),target.weight),
+          polynomialScale(linearSquare(piece.height),-current.weight)
+        )
+      );
+      const cuts=[
+        piece.lower,
+        ...polynomialRootsInRange(rawWeight,piece.lower,piece.upper),
+        piece.upper
+      ];
+      for(let index=0;index+1<cuts.length;index++){
+        const lower=cuts[index],upper=cuts[index+1];
+        const fallback=polynomialValue(rawWeight,(lower+upper)/2)<0;
+        result.push({
+          ...piece,lower,upper,height:targetHeight,
+          weight:fallback?[0,0,target.weight]:rawWeight,
+          temporaryWeightFallback:fallback
+        });
+      }
+    }
+    return result;
+  }
+  function evolutionPathPieces(source,path,branch,originalWeight){
+    let pieces=[{
+      lower:branch.sourceRange[0],
+      upper:branch.sourceRange[1],
+      height:[1,0],
+      weight:[0,0,originalWeight]
+    }];
+    let current=source;
+    for(const target of path){
+      pieces=isTemporaryEvolution(target)
+        ?temporaryPathStep(pieces,current,target,branch.sizeClass)
+        :ordinaryPathStep(pieces,current,target,branch.sizeClass);
+      current=target;
+    }
+    return pieces;
+  }
+  function evolutionPathRanges(source,path,branch,weightAnalysis=null){
+    const target=path[path.length-1];
+    const heightPieces=evolutionPathPieces(source,path,branch,0);
+    const heightValues=[];
+    for(const piece of heightPieces){
+      heightValues.push(
+        polynomialValue([0,...piece.height],piece.lower)*target.height,
+        polynomialValue([0,...piece.height],piece.upper)*target.height
+      );
+    }
+    let weightRange=null;
+    if(weightAnalysis){
+      const values=[];
+      let sawFallback=false,sawRawWeight=false;
+      for(const originalWeight of [
+        weightAnalysis.interpretation.lower,
+        weightAnalysis.interpretation.upper
+      ]){
+        for(const piece of evolutionPathPieces(source,path,branch,originalWeight)){
+          values.push(...polynomialRange(piece.weight,piece.lower,piece.upper));
+          if(piece.temporaryWeightFallback)sawFallback=true;
+          else sawRawWeight=true;
+        }
+      }
+      if(sawFallback&&sawRawWeight)values.push(0);
+      weightRange=[Math.min(...values),Math.max(...values)];
+    }
+    return {
+      heightRange:[Math.min(...heightValues),Math.max(...heightValues)],
+      weightRange
+    };
+  }
+  function roundedDisplay(value){
+    const rounded=Math.round((value+Number.EPSILON)*100)/100;
+    return String(Object.is(rounded,-0)?0:rounded);
+  }
+  function evolutionDisplayName(pokemon){
+    const mega=pokemon.name.match(/^(.+)_MEGA(?:_([XY]))?$/);
+    if(mega)return `Mega ${displayName(mega[1])}${mega[2]?` ${mega[2]}`:""}`;
+    const primal=pokemon.name.match(/^(.+)_PRIMAL$/);
+    if(primal)return `Primal ${displayName(primal[1])}`;
+    const all=pokemon.name.match(/^(.+)_ALL$/);
+    if(all)return displayName(all[1]);
+    return displayName(pokemon.name);
+  }
+  function evolutionRangeText(range,unit,exact){
+    if(exact||Math.abs(range[1]-range[0])<1e-12)return `${formatMeasurement(range[0])} ${unit} exact`;
+    const displayedLower=roundedDisplay(range[0]);
+    const displayedUpper=roundedDisplay(nextDown(range[1]));
+    const displayed=displayedLower===displayedUpper?displayedLower:`${displayedLower}–${displayedUpper}`;
+    return `${displayed} ${unit} displayed · [${formatMeasurement(range[0])}, ${formatMeasurement(range[1])}) ${unit} exact`;
+  }
+  function renderEvolutionPredictions(source,analyses){
+    const paths=evolutionPaths(source);
+    if(!paths.length)return "";
+    if(!analyses.height){
+      return `<section class="evolution-results"><h3>Evolution predictions</h3><p>Enter a height to predict evolved height; enter both height and weight to predict both measurements.</p></section>`;
+    }
+    const labels={xxs:"XXS",xs:"XS",average:"Average",xl:"XL",xxl:"XXL"};
+    const heightExact=!analyses.height.displayed;
+    const weightExact=heightExact&&analyses.weight&&!analyses.weight.displayed;
+    const originBranches=evolutionOriginBranches(source,analyses.height);
+    const cards=paths.map(path=>{
+      const target=path[path.length-1];
+      const temporaryTarget=isTemporaryEvolution(target);
+      const qualify=originBranches.length>1;
+      const rendered=originBranches.map(branch=>{
+        const ranges=evolutionPathRanges(source,path,branch,analyses.weight);
+        return `<div class="evolution-branch">${qualify?`<strong>If ${labels[branch.sizeClass]}</strong>`:""}<div class="evolution-measurements"><div><small>Predicted weight</small><b>${ranges.weightRange?evolutionRangeText(ranges.weightRange,"kg",weightExact):"Enter weight to predict"}</b></div><div><small>Predicted height</small><b>${evolutionRangeText(ranges.heightRange,"m",heightExact)}</b></div></div></div>`;
+      }).join("")||'<div class="class-note">The entered height is outside this species’ modeled size ranges.</div>';
+      const kind=temporaryTarget?'<span class="evolution-kind">Temporary evolution</span>':"";
+      const pathText=[source,...path].map(evolutionDisplayName).join(" → ");
+      return `<article class="evolution-card"><h4>${evolutionDisplayName(target)} <span class="muted">#${String(target.dex).padStart(4,"0")}</span>${kind}</h4><div class="evolution-path">${pathText}</div>${rendered}</article>`;
+    }).join("");
+    return `<section class="evolution-results"><h3>Evolution predictions</h3><p>Each range is predicted to the best precision available from the currently entered measurements.</p><div class="evolution-list">${cards}</div></section>`;
+  }
+  function renderTemporaryEvolutionNotice(){
+    return `<div class="temporary-evolution-notice"><strong>Probability estimates are unavailable for Mega Evolutions and Primal Reversions</strong><p>These temporary forms use a separate height and weight transformation, so the ordinary height distributions and weight CDFs do not apply. Descriptive ranges and normalized measurements remain available; when both height and weight are entered, the page reverses the transformation wherever it retains enough information to recover the original generation variates. See <a href="#faq-mega-evolution" data-open-panel="faq">Do Mega Evolution and Primal Reversion use the same height and weight rules as regular evolution?</a> in the FAQ and <a href="#technical-mega-evolution" data-open-panel="technical-details">Mega Evolution and Primal Reversion height and weight transformation</a> in Technical Details.</p></div>`;
   }
   function renderVariates(pokemon,heightAnalysis,weightAnalysis){
     const variates=impliedVariates(pokemon,heightAnalysis,weightAnalysis);
@@ -878,10 +1613,10 @@
     else if(variates.weightExact&&Number.isFinite(variates.weightLower))weightValue=format(variates.weightLower);
     const hasDisplayedInput=heightAnalysis.displayed||weightAnalysis.displayed;
     const explanation=hasDisplayedInput
-      ?`Intrinsic-weight ranges use ${weightAnalysis.displayed?"both displayed-weight endpoints":"the exact normalized weight"} and every compatible height, then are restricted to the allowed range 0.5–1.5. ${heightAnalysis.displayed?"The height variate is the normalized displayed-height interval.":"The height variate is the exact normalized height."} The h² branch for XXS through XL and the linear h branch for XXL are inverted separately, so a displayed height crossing the XL–XXL boundary may produce two distinct ranges.`
-      :"The intrinsic-weight variate reverses the height contribution: wᵥ = normalized weight − h² + 1, or wᵥ = normalized weight − h + 1 for XXL. The height variate is normalized height.";
+      ?`The reported hᵥ and wᵥ ranges include every value consistent with the precision of the entered measurements. If the height could be either XL or XXL, the classes’ different weight formulas may produce separate wᵥ ranges.`
+      :"The weight formula is inverted as wᵥ = Wₙ − hᵥ² + 1, or wᵥ = Wₙ − hᵥ + 1 for XXL. The height variate is hᵥ = Hₙ.";
     const warning=variates.reason?`<div class="variate-note variate-warning">${variates.reason}</div>`:"";
-    return `<div class="variates"><h3>Implied generation variates</h3><div class="variate-grid"><div class="variate-value"><small>Intrinsic-weight variate wᵥ</small><b>${weightValue}</b></div><div class="variate-value"><small>Height variate h</small><b>${heightValue}</b></div></div><div class="variate-note">${explanation}</div>${warning}</div>`;
+    return `<div class="variates"><h3>Implied generation variates</h3><div class="variate-grid"><div class="variate-value"><small>Weight variate wᵥ</small><b>${weightValue}</b></div><div class="variate-value"><small>Height variate hᵥ</small><b>${heightValue}</b></div></div><div class="variate-note">${explanation}</div>${warning}</div>`;
   }
   function renderProbabilitySection(pokemon,analysis,upperTail,heightSelectedClass=null){
     const {measurement,observed,displayed,unit,interpretation,normalized,normalizedLower,normalizedUpper}=analysis;
@@ -921,19 +1656,21 @@
       const observation=observations[measurement];
       if(observation)analyses[measurement]=analyzeMeasurement(measurement,observation.rawValue,observation.observed,pokemon,upperTail,observation.displayed);
     }
-    const active=Object.keys(analyses),description=active.length===2?"Weight and height tail probabilities":active.length===1?`${active[0]==="height"?"Height":"Weight"} tail probabilities`:"Species size model";
+    const active=Object.keys(analyses),temporaryEvolution=isTemporaryEvolution(pokemon),description=temporaryEvolution?"Temporary-evolution measurements":active.length===2?"Weight and height tail probabilities":active.length===1?`${active[0]==="height"?"Height":"Weight"} tail probabilities`:"Species size model";
     const normalized=active.map(measurement=>{
       const analysis=analyses[measurement];
-      return `<div class="normalized">${measurement} ${analysis.displayed?"lookup ":""}normalized ${analysis.normalized.toPrecision(9)}</div>`;
+      const symbol=measurement==="height"?"Hₙ":"Wₙ";
+      return `<div class="normalized">${symbol}${analysis.displayed?" lookup":""} = ${analysis.normalized.toPrecision(9)}</div>`;
     }).join("");
-    const variates=analyses.height&&analyses.weight?renderVariates(pokemon,analyses.height,analyses.weight):"";
+    const variates=analyses.height&&analyses.weight?(temporaryEvolution?renderTemporaryVariates(pokemon,analyses.height,analyses.weight):renderVariates(pokemon,analyses.height,analyses.weight)):"";
     const compatibleClasses=analyses.height?compatibleHeightClasses(analyses.height.normalizedLower,analyses.height.normalizedUpper,pokemon):[];
     const heightSelectedClass=compatibleClasses.length===1?compatibleClasses[0]:null;
-    const sections=active.map(measurement=>renderProbabilitySection(pokemon,analyses[measurement],upperTail,heightSelectedClass)).join("");
-    const empty=active.length?"":'<div class="class-note">Enter a height, a weight, or both to calculate tail probabilities.</div>';
+    const sections=temporaryEvolution?renderTemporaryEvolutionNotice():active.map(measurement=>renderProbabilitySection(pokemon,analyses[measurement],upperTail,heightSelectedClass)).join("");
+    const evolutions=renderEvolutionPredictions(pokemon,analyses);
+    const empty=active.length||temporaryEvolution?"":'<div class="class-note">Enter a height, a weight, or both to calculate tail probabilities.</div>';
     document.getElementById("results").innerHTML=`
       <div class="result-head"><div><h2>${displayName(pokemon.name)}</h2><p>#${String(pokemon.dex).padStart(4,"0")} · ${description}</p></div><div class="normalized-stack">${normalized}</div></div>
-      ${pokemonProfile(pokemon)}${displayExtremaNotes(pokemon)}${variates}${sections}${empty}`;
+      ${pokemonProfile(pokemon)}${displayExtremaNotes(pokemon)}${variates}${sections}${empty}${evolutions}`;
   }
 
   function initThemeSwitch(){
@@ -948,6 +1685,56 @@
     }
     setTheme(root.dataset.theme==="dark"?"dark":"light",false);
     button.addEventListener("click",()=>setTheme(root.dataset.theme==="dark"?"light":"dark",true));
+  }
+  function initInfoLinks(){
+    const collapsePanels=()=>document.querySelectorAll("details.info-panel").forEach(panel=>panel.open=false);
+    for(const panel of document.querySelectorAll("#faq,#technical-details,#bugs")){
+      const prefix=panel.id==="technical-details"?"technical":panel.id;
+      for(const heading of panel.querySelectorAll(".info-body h3,.info-body h4")){
+        if(!heading.id){
+          const slug=heading.textContent.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"section";
+          let id=`${prefix}-${slug}`,suffix=2;
+          while(document.getElementById(id))id=`${prefix}-${slug}-${suffix++}`;
+          heading.id=id;
+        }
+        const label=heading.textContent.trim();
+        const link=document.createElement("a");
+        link.className="fragment-link";
+        link.href=`#${heading.id}`;
+        link.textContent="#";
+        link.title="Link to this section";
+        link.setAttribute("aria-label",`Link to “${label}”`);
+        heading.append(" ",link);
+      }
+    }
+    const revealFragment=()=>{
+      let target=null;
+      if(location.hash)try{target=document.getElementById(decodeURIComponent(location.hash.slice(1)))}catch{}
+      if(!target){collapsePanels();return}
+      const panel=target.closest("details.info-panel");
+      if(panel)panel.open=true;
+      requestAnimationFrame(()=>target.scrollIntoView({block:"start"}));
+    };
+    revealFragment();
+    window.addEventListener("pageshow",revealFragment,{once:true});
+    window.addEventListener("hashchange",revealFragment);
+  }
+
+  function nativeMathMLSupported(){
+    const probe=document.createElement("div");
+    probe.setAttribute("aria-hidden","true");
+    probe.style.cssText="position:absolute;visibility:hidden;font-size:0;inset:auto auto 0 0";
+    probe.innerHTML='<math><mspace width="77px" height="23px"></mspace></math>';
+    document.body.appendChild(probe);
+    const bounds=probe.firstElementChild.firstElementChild.getBoundingClientRect();
+    probe.remove();
+    return Math.abs(bounds.width-77)<=1&&Math.abs(bounds.height-23)<=1;
+  }
+  function initMathML(){
+    if(!nativeMathMLSupported())return;
+    document.documentElement.classList.add("mathml-enabled");
+    document.querySelectorAll("math.mathml").forEach(math=>math.removeAttribute("aria-hidden"));
+    document.querySelectorAll(".math-fallback").forEach(fallback=>fallback.setAttribute("aria-hidden","true"));
   }
 
   function initApp(){
@@ -1020,8 +1807,8 @@
     updatePokemonClearButton();
     calculate();
   }
-  if(typeof document!=="undefined"){initThemeSwitch();initApp()}
-  if(typeof module!=="undefined")module.exports={POKEMON,DISPLAY_EXTREMA,decodeTable,polynomialTails,heightTails,heightClass,heightClassSupport,weightTable,weightSupport,lookupTails,oneInText,pokemonProfile,displayExtremaNotes,nextDown,nextUp,decimalPlaces,interpretedObservation,rangeIntersects,analyzeMeasurement,heightTransform,compatibleHeightClasses,transformedHeightBranches,transformedHeightRanges,transformedHeightRange,impliedVariates,renderVariates,renderProbabilitySection,renderResults};
+  if(typeof document!=="undefined"){initMathML();initThemeSwitch();initInfoLinks();initApp()}
+  if(typeof module!=="undefined")module.exports={POKEMON,EVOLUTION_PAIRS,EVOLUTION_COUNT,EVOLUTIONS_BY_SOURCE,DISPLAY_EXTREMA,decodeTable,polynomialTails,heightTails,heightClass,heightClassSupport,weightTable,weightSupport,lookupTails,oneInText,pokemonProfile,displayExtremaNotes,nextDown,nextUp,decimalPlaces,interpretedObservation,rangeIntersects,analyzeMeasurement,heightTransform,compatibleHeightClasses,transformedHeightBranches,transformedHeightRanges,transformedHeightRange,impliedVariates,isTemporaryEvolution,temporaryEvolutionBase,temporaryHeightSupport,temporaryWeightSupport,temporaryImpliedVariates,renderVariates,renderTemporaryVariates,evolvedNormalizedHeight,evolutionHeightBranches,evolvedWeightRange,temporaryEvolvedHeight,temporaryEvolutionHeightBranches,temporaryEvolvedWeightRange,evolutionPaths,evolutionOriginBranches,evolutionPathRanges,roundedDisplay,evolutionDisplayName,renderEvolutionPredictions,renderProbabilitySection,renderTemporaryEvolutionNotice,renderResults};
   </script>
 </body>
 </html>

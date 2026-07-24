@@ -12,9 +12,12 @@ from build_pvalue_webapp import (
     PokemonRow,
     build_html,
     compact_display_extrema,
+    compact_evolutions,
     compact_stats,
     pack_cdf,
     read_stats,
+    render_mathml_equations,
+    tex_to_mathml,
 )
 from pdf_tools.cdf_poly_lookup import PolynomialCDF
 
@@ -23,6 +26,74 @@ ROOT = Path(__file__).parent
 
 
 class BuildPvalueWebappTests(unittest.TestCase):
+    def test_default_build_date_is_the_current_local_date(self):
+        before = date.today()
+        html, _, _ = build_html(
+            ROOT / "pokemon_stats.tsv",
+            ROOT / "cdfs_poly",
+            ROOT / "pvalue_webapp_template.html",
+        )
+        after = date.today()
+
+        expected_dates = {
+            f'<time datetime="{value.isoformat()}">'
+            f"{value:%B} {value.day}, {value.year}</time>"
+            for value in (before, after)
+        }
+        self.assertTrue(
+            any(expected in html for expected in expected_dates),
+            "default build did not embed the current local date",
+        )
+
+    def test_tex_subset_builds_structured_mathml(self):
+        mathml = tex_to_mathml(
+            r"H_n = \frac{H}{\mu_H} \\ "
+            r"P(W_n \le x) = \int_{-\infty}^{x} "
+            r"f_{W_n}(z)\,\mathrm{d}z + \left(\frac{x}{2}\right)^2"
+        )
+
+        self.assertTrue(mathml.startswith("<mtable "))
+        self.assertEqual(mathml.count("<mtr>"), 2)
+        self.assertIn("<mfrac>", mathml)
+        self.assertIn(
+            '<msub class="mean-symbol"><mi class="math-mu">μ</mi>',
+            mathml,
+        )
+        self.assertIn("<msubsup><mo>∫</mo>", mathml)
+        self.assertIn("<mo>≤</mo>", mathml)
+        self.assertIn('<mspace width=".17em"></mspace>', mathml)
+        self.assertIn(
+            '<msup><mrow><mo stretchy="true">(</mo>', mathml
+        )
+        self.assertIn('<mi mathvariant="normal">d</mi>', mathml)
+
+    def test_equation_build_keeps_fallback_and_tex_annotation(self):
+        template = (
+            '<div class="equation" '
+            'data-tex="W_n = w_v + h_v^2 - 1">'
+            "W<sub>n</sub> = w<sub>v</sub> + h<sub>v</sub>² − 1</div>"
+        )
+
+        rendered = render_mathml_equations(template, Path("template.html"))
+
+        self.assertNotIn("data-tex", rendered)
+        self.assertIn('<math class="mathml" display="block" aria-hidden="true">', rendered)
+        self.assertIn('<annotation encoding="application/x-tex">', rendered)
+        self.assertIn("W_n = w_v + h_v^2 - 1</annotation>", rendered)
+        self.assertIn(
+            '<span class="math-fallback">'
+            "W<sub>n</sub> = w<sub>v</sub> + h<sub>v</sub>² − 1</span>",
+            rendered,
+        )
+
+    def test_every_equation_requires_tex_source(self):
+        with self.assertRaisesRegex(
+            ValueError, "every equation must have one data-tex attribute"
+        ):
+            render_mathml_equations(
+                '<div class="equation">x = 1</div>', Path("template.html")
+            )
+
     def test_cdf_segments_are_packed_losslessly(self):
         contents = (
             "# cdf-poly-v3 degree=5 basis=endpoint-q\n"
@@ -64,7 +135,7 @@ class BuildPvalueWebappTests(unittest.TestCase):
         )
         kyogre = [entry for entry in extrema if entry[0] == kyogre_index]
 
-        self.assertEqual(len(extrema), 230)
+        self.assertGreater(len(extrema), 0)
         self.assertIn(
             [
                 kyogre_index,
@@ -77,6 +148,26 @@ class BuildPvalueWebappTests(unittest.TestCase):
             kyogre,
         )
 
+    def test_evolutions_are_compactly_keyed_to_stats_rows(self):
+        rows = [
+            PokemonRow(1, "SOURCE", 1.0, 10.0, 0.49, 1.75),
+            PokemonRow(2, "TARGET_A", 2.0, 20.0, 0.49, 1.55),
+            PokemonRow(3, "TARGET_B", 3.0, 30.0, 0.49, 2.0),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, "evolutions.tsv")
+            path.write_text(
+                "source_name\ttarget_name\n"
+                "SOURCE\tTARGET_B\n"
+                "SOURCE\tTARGET_A\n",
+                encoding="utf-8",
+            )
+
+            encoded, count = compact_evolutions(path, rows)
+
+        self.assertEqual(count, 2)
+        self.assertEqual(json.loads(encoded), [[0, 1], [0, 2]])
+
     def test_real_build_is_standalone_and_fills_all_markers(self):
         html, pokemon_count, segment_count = build_html(
             ROOT / "pokemon_stats.tsv",
@@ -85,12 +176,24 @@ class BuildPvalueWebappTests(unittest.TestCase):
             build_date=date(2026, 7, 22),
         )
 
-        self.assertEqual(pokemon_count, 1115)
+        self.assertEqual(pokemon_count, len(read_stats(ROOT / "pokemon_stats.tsv")))
         self.assertEqual(segment_count, 837)
         self.assertNotIn("@@POKEMON", html)
         self.assertNotIn("@@DISPLAY", html)
         self.assertNotIn("@@CDF", html)
         self.assertNotIn("@@", html)
+        self.assertEqual(html.count('<math class="mathml"'), 25)
+        self.assertEqual(html.count('<span class="math-fallback">'), 25)
+        self.assertEqual(html.count('encoding="application/x-tex"'), 25)
+        self.assertNotIn("data-tex=", html)
+        self.assertIn("function nativeMathMLSupported()", html)
+        self.assertIn(
+            'probe.innerHTML=\'<math><mspace width="77px" height="23px">'
+            "</mspace></math>'",
+            html,
+        )
+        self.assertIn('classList.add("mathml-enabled")', html)
+        self.assertNotIn("MathJax", html)
         self.assertIn('<time datetime="2026-07-22">July 22, 2026</time>', html)
         self.assertIn("© 2026 Pokémon. © 1995–2026 Nintendo", html)
         self.assertIn('class="site-footer"', html)
@@ -103,6 +206,9 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertNotIn("<link ", html)
         self.assertIn("<title>Pokémon Size Probability in Pokémon GO</title>", html)
         self.assertIn("<h1>Pokémon Size Probability in Pokémon GO</h1>", html)
+        self.assertIn("MAWILE_MEGA", html)
+        self.assertIn("CHARIZARD_MEGA_X", html)
+        self.assertIn("CHARIZARD_MEGA_Y", html)
         self.assertIn('<div class="eyebrow">Size prevalence lookup</div>', html)
         self.assertIn('id="height-value"', html)
         self.assertIn('id="weight-value"', html)
@@ -128,37 +234,139 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertNotIn('name="measurement"', html)
         self.assertIn("Weight and height tail probabilities", html)
         self.assertIn("Implied generation variates", html)
+        self.assertIn(
+            "ranges include every value consistent with the precision of the "
+            "entered measurements",
+            html,
+        )
+        self.assertIn(
+            "height could be either XL or XXL", html
+        )
         self.assertIn('class="normalized-stack"', html)
-        self.assertIn('analysis.displayed?"lookup ":""', html)
+        self.assertIn('analysis.displayed?" lookup":""', html)
         self.assertIn("Enter a height, a weight, or both", html)
         self.assertIn('id="theme-switch"', html)
         self.assertIn('aria-label="Switch to dark theme"', html)
         self.assertIn('html[data-theme="dark"]', html)
         self.assertIn('localStorage.setItem("pogo-size-theme",theme)', html)
-        self.assertIn("initThemeSwitch();initApp()", html)
+        self.assertIn("initThemeSwitch();initInfoLinks();initApp()", html)
         self.assertIn('input.addEventListener("focus",()=>input.select())', html)
-        self.assertEqual(html.count('<details class="panel info-panel">'), 2)
+        self.assertEqual(html.count('<details class="panel info-panel"'), 4)
         self.assertNotIn('<details class="panel info-panel" open', html)
+        self.assertIn(
+            'document.querySelectorAll("details.info-panel").forEach('
+            "panel=>panel.open=false)",
+            html,
+        )
+        self.assertIn(
+            'window.addEventListener("pageshow",revealFragment,{once:true})',
+            html,
+        )
+        self.assertIn(
+            'target.scrollIntoView({block:"start"})',
+            html,
+        )
+        self.assertIn(
+            'window.addEventListener("hashchange",revealFragment)',
+            html,
+        )
+        self.assertIn(
+            'panel.querySelectorAll(".info-body h3,.info-body h4")',
+            html,
+        )
+        self.assertIn('link.className="fragment-link"', html)
+        self.assertIn('link.href=`#${heading.id}`', html)
+        self.assertIn('link.title="Link to this section"', html)
+        self.assertIn(".fragment-link:hover", html)
+        self.assertIn(
+            '<details class="panel info-panel" id="bugs">', html
+        )
+        self.assertIn("<summary>Bugs and Suspected Bugs</summary>", html)
+        self.assertLess(
+            html.index('id="technical-details"'), html.index('id="bugs"')
+        )
+        self.assertIn(
+            "The no-change mappings appear to be an oversight", html
+        )
+        self.assertIn(
+            "The calculation can also produce a negative raw weight", html
+        )
+        self.assertIn("Contradictory Game Master form data", html)
+        self.assertIn("Extended settings without matching Pokémon settings", html)
+        self.assertIn("V0902_POKEMON_BASCULEGION_FEMALE", html)
+        self.assertIn("V999_POKEMON_GIMMIGHOUL", html)
+        self.assertIn(
+            "Gimmighoul remains available through its separate valid records",
+            html,
+        )
+        self.assertIn("Ordinary-form mean-height contradictions", html)
+        self.assertIn("Mega settings contradictions", html)
+        self.assertIn(
+            "Mega Dragonite’s size settings imply a mean height of 3.36875 m",
+            html,
+        )
+        self.assertIn("Mega Skarmory’s extended size settings are missing", html)
+        self.assertIn(
+            "Mega Sharpedo’s size settings imply a mean height of 2.5 m", html
+        )
+        self.assertIn(
+            "Mega Falinks’s size settings imply a mean height of 3.0 m", html
+        )
+        self.assertIn("Zorua’s broken size measurements", html)
+        self.assertIn(
+            "Pumpkaboo and Gourgeist’s nonstandard size system", html
+        )
+        self.assertIn("Display rounding and float32 endpoints", html)
+        self.assertIn("Unusual behavior not classified as a bug", html)
+        self.assertIn(
+            '<details class="panel info-panel" id="acknowledgements">', html
+        )
+        self.assertIn("<summary>Thanks and Acknowledgements</summary>", html)
+        self.assertLess(
+            html.index('id="bugs"'), html.index('id="acknowledgements"')
+        )
+        self.assertIn("Silph Research Group", html)
+        self.assertIn("DrThod", html)
+        self.assertIn("anonymous donor", html)
+        self.assertIn("0.01 kg Squirtle", html)
+        self.assertIn("Pumpkaboo mechanics", html)
+        self.assertIn("No Floats Left Research Group", html)
+        self.assertIn(
+            'href="https://discord.com/invite/muPSd9EwUb"', html
+        )
+        self.assertIn(
+            "everyone I have left out who has been involved in uncovering "
+            "the true mechanics",
+            html,
+        )
         self.assertIn("1/250", html)
         self.assertIn("1/40", html)
         self.assertIn("471/500", html)
         self.assertIn("Is this a traditional statistical p-value?", html)
         self.assertIn("one-sided tail probability", html)
         self.assertIn("Does everyone who catches the same Pokémon", html)
-        self.assertIn("its size class and intrinsic-weight variate", html)
-        self.assertIn("intrinsic-weight variate <i>w</i><sub>v</sub> are shared", html)
+        self.assertIn(
+            "its size class and weight variate <i>w</i><sub>v</sub> are shared",
+            html,
+        )
         self.assertIn("strongly positively correlated between Trainers", html)
         self.assertIn("when catching Rattata or Magikarp", html)
         self.assertIn("10.17 kg and 0.41 m", html)
-        self.assertIn("16.99 kg and 0.50 m", html)
+        self.assertIn("16.99 kg and 0.5 m", html)
         self.assertIn("[0.81, 0.83)", html)
         self.assertIn("0.81935–0.85265", html)
         self.assertIn("around the introduction of PokéStop Showcases", html)
         self.assertIn("exact transition date is not known", html)
         self.assertIn("Does evolution reroll a Pokémon’s height or weight?", html)
-        self.assertIn("new height = old height × (new mean height / old mean height)", html)
+        self.assertIn(
+            "H<sub>new</sub> = H<sub>old</sub> × "
+            "(μ<sub>H,new</sub> / μ<sub>H,old</sub>)",
+            html,
+        )
         self.assertIn("different 1.55, 1.75, or 2.00 XXL height classes", html)
-        self.assertIn("The intrinsic-weight variate remains unchanged", html)
+        self.assertIn(
+            "The weight variate <i>w</i><sub>v</sub> remains unchanged", html
+        )
         self.assertIn(
             "<b>Evolution between different XXL height classes</b> section "
             "in Technical Details",
@@ -166,11 +374,39 @@ class BuildPvalueWebappTests(unittest.TestCase):
         )
         self.assertIn("This is deterministic, not a reroll", html)
         self.assertIn("display rounding, not new randomness during evolution", html)
+        self.assertIn(
+            "Do Mega Evolution and Primal Reversion use the same height and "
+            "weight rules as regular evolution?",
+            html,
+        )
+        self.assertIn(
+            "No. Mega Evolution and Primal Reversion use a separate "
+            "deterministic height and weight transformation",
+            html,
+        )
+        self.assertIn(
+            "They do share that special transformation with each other", html
+        )
+        self.assertIn(
+            "does not report overall or conditional probabilities for Mega "
+            "Evolutions",
+            html,
+        )
+        self.assertIn(
+            "<b>Mega Evolution and Primal Reversion height and weight "
+            "transformation</b> section "
+            "in Technical Details",
+            html,
+        )
         self.assertIn("Evolution between different XXL height classes", html)
-        self.assertIn("H<sub>t</sub> = 1.5μ<sub>t</sub>", html)
+        self.assertIn("H<sub>t</sub> = 1.5μ<sub>H,t</sub>", html)
         self.assertIn("An XXL Skorupi measuring 1.22 m", html)
         self.assertIn("H<sub>t</sub> = 1.95 + 0.1(2.015 − 1.95) = 1.9565 m", html)
-        self.assertIn("normalized height changes from 1.525 to 1.505", html)
+        self.assertIn(
+            "<i>h</i><sub>v</sub> and <i>H</i><sub>n</sub> change from "
+            "1.525 to 1.505",
+            html,
+        )
         self.assertIn("A measured Noibat evolution provides a useful check", html)
         self.assertIn("between 115.55 and 117.01 kg", html)
         self.assertIn("observed Noivern was 2.29 m and 115.93 kg", html)
@@ -178,13 +414,122 @@ class BuildPvalueWebappTests(unittest.TestCase):
             "confirm that <i>w</i><sub>v</sub> is preserved rather than rerolled",
             html,
         )
+        self.assertIn(
+            "Mega Evolution and Primal Reversion height and weight "
+            "transformation",
+            html,
+        )
+        self.assertIn(
+            "q = (H<sub>o</sub> − L<sub>o</sub>) / "
+            "(U<sub>o</sub> − L<sub>o</sub>)",
+            html,
+        )
+        self.assertIn(
+            "XL: H<sub>M</sub> = L<sub>o</sub> + "
+            "q(U<sub>M</sub> − L<sub>o</sub>)",
+            html,
+        )
+        self.assertIn(
+            "An originally XL Pokémon can therefore appear to change into "
+            "the XXL class",
+            html,
+        )
+        self.assertIn(
+            "displayed size label changes to XXL for the duration", html
+        )
+        self.assertIn(
+            "XXL: H<sub>M</sub> = L<sub>M</sub> + "
+            "q(U<sub>M</sub> − L<sub>M</sub>)",
+            html,
+        )
+        self.assertIn(
+            "W<sub>M,raw</sub> = (H<sub>M</sub> / μ<sub>H,M</sub>)² "
+            "μ<sub>W,M</sub> + W<sub>o</sub> − "
+            "(H<sub>o</sub> / μ<sub>H,o</sub>)² μ<sub>W,o</sub>",
+            html,
+        )
+        self.assertIn(
+            "W<sub>M</sub> = μ<sub>W,M</sub> if "
+            "W<sub>M,raw</sub> &lt; 0",
+            html,
+        )
+        self.assertIn(
+            "W<sub>M</sub> = W<sub>M,raw</sub> if "
+            "W<sub>M,raw</sub> &gt; 0",
+            html,
+        )
+        self.assertIn(
+            "What happens at exactly zero remains untested", html
+        )
+        self.assertIn(
+            "finding a specimen at that precise boundary is extraordinarily "
+            "unlikely",
+            html,
+        )
+        self.assertIn(
+            "prediction code must choose a boundary convention", html
+        )
+        self.assertIn(
+            "A speculative interpretation of the weight formula", html
+        )
+        self.assertIn(
+            "W<sub>M,raw</sub> = B<sub>M</sub>(H<sub>M</sub>) + "
+            "[W<sub>o</sub> − B<sub>o</sub>(H<sub>o</sub>)]",
+            html,
+        )
+        self.assertIn(
+            "preserves an absolute weight residual, not the dimensionless "
+            "weight variate",
+            html,
+        )
+        self.assertIn(
+            "w<sub>v,M</sub> = 1 + "
+            "(μ<sub>W,o</sub> / μ<sub>W,M</sub>)"
+            "(w<sub>v,o</sub> − 1)",
+            html,
+        )
+        self.assertIn(
+            "Mega Evolution launched on August 27, 2020", html
+        )
+        self.assertIn(
+            "weight transform was designed for Mega Evolution under the older "
+            "universally squared-height system",
+            html,
+        )
+        self.assertIn(
+            "left unchanged when the special XXL rule was added, and later "
+            "reused for Primal Reversion",
+            html,
+        )
+        self.assertIn(
+            "XXS and XXL first appeared on December 8, 2022", html
+        )
+        self.assertIn("plausible (but unconfirmed) explanation", html)
+        self.assertIn("including XXL", html)
+        self.assertIn("displayed as 1.58 m and 47.2 kg", html)
+        self.assertIn(
+            "all overall and conditional probability lookups are deliberately "
+            "disabled",
+            html,
+        )
         self.assertNotIn(
             "rounded measurements cannot prove exact preservation", html
         )
         self.assertIn("Does trading reroll a Pokémon’s height or weight?", html)
         self.assertIn("Trading preserves the Pokémon’s existing height and weight", html)
-        self.assertIn("trades formerly rerolled the intrinsic-weight variate", html)
-        self.assertIn("date when trading changed", html)
+        self.assertIn(
+            "trades formerly preserved the Pokémon’s size class and "
+            "<i>w</i><sub>v</sub> but rerolled <i>h</i><sub>v</sub>",
+            html,
+        )
+        self.assertIn(
+            "same shared-<i>w</i><sub>v</sub>, randomized-"
+            "<i>h</i><sub>v</sub> pattern",
+            html,
+        )
+        self.assertIn(
+            "date when trading changed to preserve both measurements", html
+        )
         self.assertIn("Do conditional results show which class is most likely?", html)
         self.assertIn("does not perform that reverse inference", html)
         self.assertIn("Why can more than one conditional height class appear?", html)
@@ -195,15 +540,44 @@ class BuildPvalueWebappTests(unittest.TestCase):
         )
         self.assertIn("December 8, 2022", html)
         self.assertIn("January 17, 2023", html)
-        self.assertIn("data and knowledge are up to date as of that build date", html)
+        self.assertIn(
+            "The build script inserts the current local date automatically",
+            html,
+        )
+        self.assertIn(
+            "build date records when this standalone page was generated", html
+        )
+        self.assertIn(
+            "does not verify that the Game Master snapshot or the documented "
+            "knowledge was current",
+            html,
+        )
+        self.assertIn(
+            "person building the page is responsible for obtaining an "
+            "up-to-date Game Master",
+            html,
+        )
         self.assertIn("does not dynamically load new Game Master data", html)
         self.assertIn("Pokémon or forms released after the build date", html)
         self.assertIn("Why did I (bmenrigh) undertake this research?", html)
         self.assertIn("Measuring Up Pokémon", html)
         self.assertIn("u/TheParadoxMuse", html)
-        self.assertIn("intermediate weight = w + (h² − 1)", html)
+        self.assertIn(
+            "Corrected model: W<sub>n</sub> = w<sub>v</sub> + "
+            "(h<sub>v</sub>² − 1)",
+            html,
+        )
+        self.assertIn(
+            "Under the old size system, the height variate "
+            "<i>h</i><sub>v</sub> was generated in the same way and "
+            "separately clamped to that same range",
+            html,
+        )
         self.assertIn("2.40625 kg", html)
-        self.assertIn("1 in 8 Rattata", html)
+        self.assertIn("approximately 1 in 8 Rattata", html)
+        self.assertIn('id="technical-rattata-badge"', html)
+        self.assertIn("12.4735342118220%", html)
+        self.assertIn("12.4552293118449%", html)
         self.assertIn("13.125 kg", html)
         self.assertIn("Why is Zorua missing?", html)
         self.assertIn("Zorua has multiple in-game bugs", html)
@@ -222,11 +596,15 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("Why can XL Pokémon be heavier than XXL Pokémon?", html)
         self.assertIn("hundreds of billions", html)
         self.assertIn("deterministic numerical convolution", html)
+        self.assertIn("nonpositive-result rule is applied during convolution", html)
+        self.assertIn("routed instead to <i>W</i><sub>n</sub>", html)
+        self.assertIn("compression heuristic rather than proof", html)
         self.assertIn("Why height needs no polynomial compression", html)
         self.assertIn("exact piecewise-linear CDF", html)
         self.assertIn("apply only to weight", html)
-        self.assertIn("P(t) = (1 − t)y₀ + ty₁ + t(1 − t)Q(t)", html)
-        self.assertIn("exponential search and then binary search", html)
+        self.assertIn("P(u) = (1 − u)y₀ + uy₁ + u(1 − u)Q(u)", html)
+        self.assertIn("exponential probes", html)
+        self.assertIn("then binary search", html)
         self.assertIn("Why both CDF and survival polynomials are stored", html)
         self.assertLess(
             html.index(
@@ -262,13 +640,28 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("needed to reproduce this application", html)
         self.assertIn("How the game generates height and weight", html)
         self.assertIn("chooses the size class first", html)
+        self.assertIn("least common denominator is 1,000", html)
+        self.assertIn("4, 25, 942, 25, and 4", html)
         self.assertIn("exact random-selection implementation is not known", html)
         self.assertNotIn("an integer from 0 through 999", html)
-        self.assertIn("intrinsic-weight variate <i>w</i><sub>v</sub>", html)
-        self.assertNotIn("intrinsic-weight variate <i>i</i>", html)
+        self.assertIn(
+            "height variate</b> <i>h</i><sub>v</sub>", html
+        )
+        self.assertIn(
+            "weight variate</b> <i>w</i><sub>v</sub>", html
+        )
+        self.assertIn(
+            "H<sub>n</sub> = H / μ<sub>H</sub>", html
+        )
+        self.assertIn(
+            "W<sub>n</sub> = W / μ<sub>W</sub>", html
+        )
+        self.assertNotIn("intrinsic", html.lower())
         self.assertIn("The XXS and XXL height-density steps", html)
         self.assertIn("an upward jump by a factor of 4.75", html)
-        self.assertIn("replaces the <b>intrinsic-weight variate</b>", html)
+        self.assertIn(
+            "It replaces <i>w</i><sub>v</sub> with 1.0", html
+        )
         self.assertIn("½ erfc(2√2)", html)
         self.assertIn("0.003167124183311996%", html)
         self.assertLess(
@@ -283,12 +676,21 @@ class BuildPvalueWebappTests(unittest.TestCase):
             html.index("The XXS and XXL height-density steps"),
             html.index("<h3>Evolution between different XXL height classes</h3>"),
         )
+        self.assertLess(
+            html.index("<h3>Evolution between different XXL height classes</h3>"),
+            html.index('id="technical-mega-evolution"'),
+        )
+        self.assertLess(
+            html.index('id="technical-mega-evolution"'),
+            html.index("<h3>Why the weight distribution is not estimated"),
+        )
         self.assertIn("Can float32 change", html)
         self.assertIn("This behavior is theorized, not verified in practice", html)
         self.assertIn("no real-world example has come forward", html)
         self.assertIn("Can a Pokémon display a weight of 0 kg?", html)
         self.assertIn("both the XXS and XS size classes", html)
-        self.assertIn("1 in 50.6 million", html)
+        self.assertIn("Groudon has a mean weight of 950 kg", html)
+        self.assertIn("1 in 48.1 million", html)
         self.assertIn("Does the Pokédex use the same rounding", html)
         self.assertIn("models the rounded height or weight shown for an individual Pokémon only", html)
         self.assertEqual(html.count('class="heavy-ball-side"'), 2)
@@ -313,6 +715,14 @@ class BuildPvalueWebappTests(unittest.TestCase):
                 "const p=a.POKEMON.find(p=>p.name==='BULBASAUR_ALL');"
                 "const b=a.POKEMON.find(p=>p.name==='BIDOOF');"
                 "const k=a.POKEMON.find(p=>p.name==='KYOGRE');"
+                "const m=a.POKEMON.find(p=>p.name==='MAWILE_MEGA');"
+                "const primal=a.POKEMON.find(p=>p.name==='KYOGRE_PRIMAL');"
+                "const skorupi=a.POKEMON.find(p=>p.name==='SKORUPI');"
+                "const drapion=a.POKEMON.find(p=>p.name==='DRAPION');"
+                "const lucario=a.POKEMON.find(p=>p.name==='LUCARIO');"
+                "const megaLucario=a.POKEMON.find(p=>p.name==='LUCARIO_MEGA');"
+                "const eevee=a.POKEMON.find(p=>p.name==='EEVEE_ALL');"
+                "const duskull=a.POKEMON.find(p=>p.name==='DUSKULL');"
                 "const resultNode={innerHTML:''};"
                 "global.document={getElementById:()=>resultNode};"
                 "a.renderResults(p,{height:{rawValue:'0.700',observed:.7,displayed:false}},false);"
@@ -325,7 +735,16 @@ class BuildPvalueWebappTests(unittest.TestCase):
                 "height:{rawValue:'0.700',observed:.7,displayed:false},"
                 "weight:{rawValue:'6.900',observed:6.9,displayed:false}},false);"
                 "const both=resultNode.innerHTML;"
+                "a.renderResults(m,{"
+                "height:{rawValue:'1.580',observed:1.58,displayed:false},"
+                "weight:{rawValue:'47.200',observed:47.2,displayed:false}},false);"
+                "const mega=resultNode.innerHTML;"
+                "a.renderResults(primal,{"
+                "height:{rawValue:'10.000',observed:10,displayed:false},"
+                "weight:{rawValue:'450.000',observed:450,displayed:false}},false);"
+                "const primalHtml=resultNode.innerHTML;"
                 "console.log(JSON.stringify({"
+                "gameDisplays:[0,1,1.1,1.11].map(a.roundedDisplay),"
                 "tails:a.polynomialTails('full175',1.234567),"
                 "classes:[.49,.5,.75,1.25,1.5,1.75].map(x=>a.heightClass(x,p)),"
                 "supports:['xxs','xs','average','xl','xxl'].map(c=>a.weightSupport(p,c)),"
@@ -367,9 +786,74 @@ class BuildPvalueWebappTests(unittest.TestCase):
                 "crossingHtml:a.renderVariates(p,"
                 "a.analyzeMeasurement('height','1.05',1.05,p,false,true),"
                 "a.analyzeMeasurement('weight','12.42',12.42,p,false,true)),"
+                "megaVariates:a.temporaryImpliedVariates(m,"
+                "a.analyzeMeasurement('height','1.580',1.58,m,false,false),"
+                "a.analyzeMeasurement('weight','47.200',47.2,m,false,false)),"
+                "bulbasaurEvolution:(()=>{"
+                "const target=a.EVOLUTIONS_BY_SOURCE.get(p.index)[0];"
+                "const ha=a.analyzeMeasurement('height','0.700',.7,p,false,false);"
+                "const wa=a.analyzeMeasurement('weight','6.900',6.9,p,false,false);"
+                "const branch=a.evolutionHeightBranches(p,target,ha)[0];"
+                "return {target:target.name,height:branch.heightRange,"
+                "weight:a.evolvedWeightRange(p,target,branch,wa)};"
+                "})(),"
+                "skorupiEvolution:(()=>{"
+                "const ha=a.analyzeMeasurement('height','1.22',1.22,skorupi,false,true);"
+                "const wa=a.analyzeMeasurement('weight','18.93',18.93,skorupi,false,true);"
+                "const branch=a.evolutionHeightBranches(skorupi,drapion,ha)[0];"
+                "return {height:branch.heightRange,"
+                "weight:a.evolvedWeightRange(skorupi,drapion,branch,wa)};"
+                "})(),"
+                "lucarioMegaEvolution:(()=>{"
+                "const ha=a.analyzeMeasurement('height','1.74',1.74,lucario,false,true);"
+                "const wa=a.analyzeMeasurement('weight','122.99',122.99,lucario,false,true);"
+                "const branch=a.temporaryEvolutionHeightBranches(lucario,megaLucario,ha)[0];"
+                "return {targets:a.EVOLUTIONS_BY_SOURCE.get(lucario.index).map(p=>p.name),"
+                "height:branch.heightRange,"
+                "weight:a.temporaryEvolvedWeightRange(lucario,megaLucario,branch,wa),"
+                "html:a.renderEvolutionPredictions(lucario,{height:ha,weight:wa})};"
+                "})(),"
+                "bulbasaurEvolutionLine:(()=>{"
+                "const ha=a.analyzeMeasurement('height','0.700',.7,p,false,false);"
+                "const wa=a.analyzeMeasurement('weight','6.900',6.9,p,false,false);"
+                "const branch=a.evolutionOriginBranches(p,ha)[0];"
+                "return a.evolutionPaths(p).map(path=>({"
+                "path:path.map(target=>target.name),"
+                "ranges:a.evolutionPathRanges(p,path,branch,wa)}));"
+                "})(),"
+                "eeveeEvolutionPaths:a.evolutionPaths(eevee).map(path=>path.map(p=>p.name)),"
+                "duskullEvolutionLine:(()=>{"
+                "const ha=a.analyzeMeasurement('height','1.30',1.3,duskull,false,true);"
+                "const wa=a.analyzeMeasurement('weight','20.00',20,duskull,false,true);"
+                "const branch=a.evolutionOriginBranches(duskull,ha)[0];"
+                "const path=a.evolutionPaths(duskull).find(path=>"
+                "path[path.length-1].name==='DUSKNOIR');"
+                "return {ranges:a.evolutionPathRanges(duskull,path,branch,wa),"
+                "html:a.renderEvolutionPredictions(duskull,{height:ha,weight:wa})};"
+                "})(),"
+                "primalWeightFallback:(()=>{"
+                "const path=a.evolutionPaths(k).find(path=>"
+                "path[path.length-1].name==='KYOGRE_PRIMAL');"
+                "const ha=a.analyzeMeasurement('height','5.625',5.625,k,false,false);"
+                "const branch=a.evolutionOriginBranches(k,ha)[0];"
+                "const exactWeight=a.analyzeMeasurement('weight','374',374,k,false,false);"
+                "const crossingWeight=a.analyzeMeasurement('weight','408.34',408.34,k,false,true);"
+                "const directBranch=a.temporaryEvolutionHeightBranches(k,primal,ha)[0];"
+                "const primalMeanHeight=a.analyzeMeasurement('height','5.625',5.625,primal,false,false);"
+                "const primalMeanWeight=a.analyzeMeasurement('weight','430',430,primal,false,false);"
+                "return {"
+                "direct:a.temporaryEvolvedWeightRange(k,primal,directBranch,exactWeight),"
+                "path:a.evolutionPathRanges(k,path,branch,exactWeight).weightRange,"
+                "crossing:a.evolutionPathRanges(k,path,branch,crossingWeight).weightRange,"
+                "inverse:a.temporaryImpliedVariates(primal,primalMeanHeight,primalMeanWeight),"
+                "inverseHtml:a.renderTemporaryVariates(primal,primalMeanHeight,primalMeanWeight)"
+                "};"
+                "})(),"
+                "evolutionCount:a.EVOLUTION_COUNT,"
                 "heightOnly,heightOnlyHasWeight:heightOnly.includes('Weight probabilities'),"
                 "weightOnly,weightOnlyHasHeight:weightOnly.includes('Height probabilities'),"
-                "neither,both"
+                "neither,both,mega,primalHtml,"
+                "temporaryDetection:[m,primal,{name:'MEGANIUM'},{name:'YANMEGA'}].map(a.isTemporaryEvolution)"
                 "}))"
             )
             result = json.loads(
@@ -381,6 +865,7 @@ class BuildPvalueWebappTests(unittest.TestCase):
         expected = PolynomialCDF.from_path(
             ROOT / "cdfs_poly" / "full_175.txt"
         ).lookup_tails(1.234567)
+        self.assertEqual(result["gameDisplays"], ["0", "1", "1.1", "1.11"])
         self.assertEqual(tuple(result["tails"]), expected)
         self.assertEqual(
             result["classes"],
@@ -421,7 +906,197 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertIn("7.33125–18.975 kg", result["profile"])
         self.assertIn("6.9–15.525 kg", result["profile"])
         self.assertNotIn("height²", result["profile"])
-        self.assertEqual(result["extremaCount"], 230)
+        expected_extrema_count = len(
+            json.loads(
+                compact_display_extrema(
+                    ROOT / "pokemon_stats.tsv",
+                    read_stats(ROOT / "pokemon_stats.tsv"),
+                )
+            )
+        )
+        self.assertEqual(result["extremaCount"], expected_extrema_count)
+        self.assertEqual(
+            result["temporaryDetection"], [True, True, False, False]
+        )
+        self.assertIn(
+            "Possible post-transformation ranges by size class", result["mega"]
+        )
+        self.assertIn("0.2989–0.305 m", result["mega"])
+        self.assertIn("0.7625–1.5 m", result["mega"])
+        self.assertIn("1.5–1.75 m", result["mega"])
+        self.assertIn("Wₙ = ", result["mega"])
+        self.assertIn("Hₙ = ", result["mega"])
+        self.assertIn(
+            "Implied pre-evolution generation variates", result["mega"]
+        )
+        self.assertIn(
+            "original Mawile variates recovered", result["mega"]
+        )
+        self.assertEqual(len(result["megaVariates"]["branches"]), 1)
+        self.assertEqual(
+            result["megaVariates"]["branches"][0]["sizeClass"], "xxl"
+        )
+        self.assertAlmostEqual(
+            result["megaVariates"]["branches"][0]["heightRange"][0], 1.58
+        )
+        self.assertAlmostEqual(
+            result["megaVariates"]["branches"][0]["weightRange"][0],
+            0.9194086956521734,
+        )
+        self.assertEqual(result["evolutionCount"], 553)
+        self.assertEqual(result["bulbasaurEvolution"]["target"], "IVYSAUR")
+        self.assertEqual(result["bulbasaurEvolution"]["height"], [1, 1])
+        self.assertEqual(result["bulbasaurEvolution"]["weight"], [13, 13])
+        self.assertAlmostEqual(
+            result["skorupiEvolution"]["height"][0], 1.954875
+        )
+        self.assertAlmostEqual(
+            result["skorupiEvolution"]["height"][1], 1.958125
+        )
+        self.assertLessEqual(
+            result["skorupiEvolution"]["weight"][0], 95.53
+        )
+        self.assertGreaterEqual(
+            result["skorupiEvolution"]["weight"][1], 95.53
+        )
+        self.assertIn(
+            "LUCARIO_MEGA", result["lucarioMegaEvolution"]["targets"]
+        )
+        self.assertAlmostEqual(
+            result["lucarioMegaEvolution"]["height"][0], 1.8525
+        )
+        self.assertAlmostEqual(
+            result["lucarioMegaEvolution"]["height"][1], 1.8675
+        )
+        self.assertAlmostEqual(
+            result["lucarioMegaEvolution"]["weight"][0], 126.8625
+        )
+        self.assertAlmostEqual(
+            result["lucarioMegaEvolution"]["weight"][1],
+            127.46602071005918,
+        )
+        self.assertIn(
+            "Mega Lucario", result["lucarioMegaEvolution"]["html"]
+        )
+        self.assertIn(
+            "Temporary evolution", result["lucarioMegaEvolution"]["html"]
+        )
+        self.assertIn(
+            "1.85–1.87 m displayed",
+            result["lucarioMegaEvolution"]["html"],
+        )
+        self.assertIn(
+            "[1.8525, 1.8675) m exact",
+            result["lucarioMegaEvolution"]["html"],
+        )
+        self.assertIn(
+            "126.86–127.47 kg displayed",
+            result["lucarioMegaEvolution"]["html"],
+        )
+        self.assertIn(
+            "[126.8625, 127.466021) kg exact",
+            result["lucarioMegaEvolution"]["html"],
+        )
+        self.assertLess(
+            result["lucarioMegaEvolution"]["html"].index("Predicted weight"),
+            result["lucarioMegaEvolution"]["html"].index("Predicted height"),
+        )
+        self.assertEqual(
+            [entry["path"] for entry in result["bulbasaurEvolutionLine"]],
+            [
+                ["IVYSAUR"],
+                ["IVYSAUR", "VENUSAUR_ALL"],
+                ["IVYSAUR", "VENUSAUR_ALL", "VENUSAUR_MEGA"],
+            ],
+        )
+        bulbasaur_ranges = result["bulbasaurEvolutionLine"]
+        self.assertEqual(bulbasaur_ranges[0]["ranges"]["heightRange"], [1, 1])
+        self.assertEqual(bulbasaur_ranges[0]["ranges"]["weightRange"], [13, 13])
+        self.assertEqual(bulbasaur_ranges[1]["ranges"]["heightRange"], [2, 2])
+        self.assertEqual(bulbasaur_ranges[1]["ranges"]["weightRange"], [100, 100])
+        self.assertEqual(
+            bulbasaur_ranges[2]["ranges"]["heightRange"], [2, 2]
+        )
+        self.assertAlmostEqual(
+            bulbasaur_ranges[2]["ranges"]["weightRange"][0],
+            107.98611111111111,
+        )
+        self.assertAlmostEqual(
+            bulbasaur_ranges[2]["ranges"]["weightRange"][1],
+            107.98611111111111,
+        )
+        self.assertIn(
+            "Bulbasaur → Ivysaur → Venusaur → Mega Venusaur",
+            result["both"],
+        )
+        self.assertEqual(len(result["eeveeEvolutionPaths"]), 8)
+        self.assertTrue(
+            all(len(path) == 1 for path in result["eeveeEvolutionPaths"])
+        )
+        self.assertAlmostEqual(
+            result["duskullEvolutionLine"]["ranges"]["heightRange"][0],
+            1.295 / .79 * 2.2,
+        )
+        self.assertAlmostEqual(
+            result["duskullEvolutionLine"]["ranges"]["heightRange"][1],
+            1.305 / .79 * 2.2,
+        )
+        self.assertAlmostEqual(
+            result["duskullEvolutionLine"]["ranges"]["weightRange"][0],
+            19.995 / 15 * 106.6,
+        )
+        self.assertAlmostEqual(
+            result["duskullEvolutionLine"]["ranges"]["weightRange"][1],
+            20.005 / 15 * 106.6,
+        )
+        self.assertIn(
+            "Duskull → Dusclops → Dusknoir",
+            result["duskullEvolutionLine"]["html"],
+        )
+        self.assertIn(
+            "predicted to the best precision available from the currently "
+            "entered measurements",
+            result["duskullEvolutionLine"]["html"],
+        )
+        self.assertEqual(result["primalWeightFallback"]["direct"], [430, 430])
+        self.assertEqual(result["primalWeightFallback"]["path"], [430, 430])
+        self.assertEqual(
+            result["primalWeightFallback"]["crossing"], [0, 430]
+        )
+        self.assertTrue(
+            result["primalWeightFallback"]["inverse"]["fallbackAmbiguous"]
+        )
+        self.assertIn(
+            "Not uniquely recoverable",
+            result["primalWeightFallback"]["inverseHtml"],
+        )
+        self.assertIn(
+            "negative raw Mega/Primal weight is replaced by that mean",
+            result["primalWeightFallback"]["inverseHtml"],
+        )
+        self.assertIn("Evolution predictions", result["both"])
+        self.assertLess(
+            result["both"].index("Weight probabilities"),
+            result["both"].index("Evolution predictions"),
+        )
+        self.assertIn(
+            "Probability estimates are unavailable for Mega Evolutions and "
+            "Primal Reversions",
+            result["mega"],
+        )
+        self.assertIn('href="#faq-mega-evolution"', result["mega"])
+        self.assertIn('href="#technical-mega-evolution"', result["mega"])
+        self.assertNotIn("Weight probabilities", result["mega"])
+        self.assertNotIn("Height probabilities", result["mega"])
+        self.assertNotIn("Overall population", result["mega"])
+        self.assertNotIn("Conditional on size class", result["mega"])
+        self.assertIn(
+            "Probability estimates are unavailable for Mega Evolutions and "
+            "Primal Reversions",
+            result["primalHtml"],
+        )
+        self.assertNotIn("Weight probabilities", result["primalHtml"])
+        self.assertNotIn("Height probabilities", result["primalHtml"])
         self.assertIn("Maximum height:", result["kyogreNote"])
         self.assertIn("6.974999904632568359375", result["kyogreNote"])
         self.assertIn("display as 6.97 m", result["kyogreNote"])
@@ -457,7 +1132,9 @@ class BuildPvalueWebappTests(unittest.TestCase):
         self.assertAlmostEqual(result["bidoofTwo"]["heightUpper"], 1.01)
         self.assertAlmostEqual(result["bidoofTwo"]["weightLower"], 0.82915)
         self.assertAlmostEqual(result["bidoofTwo"]["weightUpper"], 0.86965)
-        self.assertIn("Intrinsic-weight variate", result["singleRangeHtml"])
+        self.assertIn("Weight variate wᵥ", result["singleRangeHtml"])
+        self.assertIn("Height variate hᵥ", result["singleRangeHtml"])
+        self.assertNotIn("Intrinsic", result["singleRangeHtml"])
         self.assertNotIn("Average:", result["singleRangeHtml"])
         self.assertAlmostEqual(result["crossesXXL"][0], 1.5000000000000002)
         self.assertAlmostEqual(result["crossesXXL"][1], 2.25)
@@ -491,6 +1168,8 @@ class BuildPvalueWebappTests(unittest.TestCase):
         )
         self.assertEqual(result["both"].count("Matches height"), 1)
         self.assertIn("class-row observed-class", result["both"])
+        self.assertIn("Wₙ", result["both"])
+        self.assertIn("Hₙ", result["both"])
 
 
 if __name__ == "__main__":

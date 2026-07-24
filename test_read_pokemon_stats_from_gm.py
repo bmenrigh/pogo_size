@@ -125,6 +125,17 @@ class ReadPokemonStatsTests(unittest.TestCase):
                 "averageWeightKg": 430.0,
             }
         ]
+        extended["data"]["pokemonExtendedSettings"]["tempEvoOverrides"] = [
+            {
+                "tempEvoId": "TEMP_EVOLUTION_PRIMAL",
+                "sizeSettings": {
+                    "xxsLowerBound": 0.49 * 9.8,
+                    "mLowerBound": 0.75 * 9.8,
+                    "mUpperBound": 1.25 * 9.8,
+                    "xxlUpperBound": 1.55 * 9.8,
+                },
+            }
+        ]
 
         rows, problems = extract_pokemon_stats([standard, extended])
 
@@ -136,6 +147,122 @@ class ReadPokemonStatsTests(unittest.TestCase):
         self.assertEqual(primal.mean_weight_kg, 430.0)
         self.assertEqual(primal.xxs_class, 0.49)
         self.assertEqual(primal.xxl_class, 1.55)
+
+    def test_extracts_mega_stats_using_mega_specific_size_settings(self):
+        standard, extended = records(
+            303, "MAWILE", height=0.61, weight=11.5, xxl=1.75
+        )
+        standard["data"]["pokemonSettings"]["tempEvoOverrides"] = [
+            {
+                "tempEvoId": "TEMP_EVOLUTION_MEGA",
+                "averageHeightM": 1.0,
+                "averageWeightKg": 23.5,
+            }
+        ]
+        extended["data"]["pokemonExtendedSettings"]["tempEvoOverrides"] = [
+            {
+                "tempEvoId": "TEMP_EVOLUTION_MEGA",
+                "sizeSettings": {
+                    "xxsLowerBound": 0.49,
+                    "mLowerBound": 0.75,
+                    "mUpperBound": 1.25,
+                    "xxlUpperBound": 1.55,
+                },
+            }
+        ]
+
+        rows, problems = extract_pokemon_stats([standard, extended])
+
+        self.assertEqual(problems, [])
+        self.assertEqual([row.name for row in rows], ["MAWILE", "MAWILE_MEGA"])
+        mega = rows[1]
+        self.assertEqual(mega.pokedex_number, 303)
+        self.assertEqual(mega.mean_height_m, 1.0)
+        self.assertEqual(mega.mean_weight_kg, 23.5)
+        self.assertEqual(mega.xxs_class, 0.49)
+        self.assertEqual(mega.xxl_class, 1.55)
+
+    def test_extracts_mega_x_and_mega_y_as_distinct_forms(self):
+        standard, extended = records(
+            6, "CHARIZARD", height=1.7, weight=90.5, xxl=1.75
+        )
+        standard["data"]["pokemonSettings"]["tempEvoOverrides"] = []
+        extended["data"]["pokemonExtendedSettings"]["tempEvoOverrides"] = []
+        for suffix, height, weight, xxl in (
+            ("X", 1.7, 110.5, 1.75),
+            ("Y", 1.7, 100.5, 2.0),
+        ):
+            temp_evo_id = f"TEMP_EVOLUTION_MEGA_{suffix}"
+            standard["data"]["pokemonSettings"]["tempEvoOverrides"].append(
+                {
+                    "tempEvoId": temp_evo_id,
+                    "averageHeightM": height,
+                    "averageWeightKg": weight,
+                }
+            )
+            extended["data"]["pokemonExtendedSettings"][
+                "tempEvoOverrides"
+            ].append(
+                {
+                    "tempEvoId": temp_evo_id,
+                    "sizeSettings": {
+                        "xxsLowerBound": 0.49 * height,
+                        "mLowerBound": 0.75 * height,
+                        "mUpperBound": 1.25 * height,
+                        "xxlUpperBound": xxl * height,
+                    },
+                }
+            )
+
+        rows, problems = extract_pokemon_stats([standard, extended])
+
+        self.assertEqual(problems, [])
+        self.assertEqual(
+            [row.name for row in rows],
+            ["CHARIZARD", "CHARIZARD_MEGA_X", "CHARIZARD_MEGA_Y"],
+        )
+        self.assertEqual(rows[1].mean_weight_kg, 110.5)
+        self.assertEqual(rows[1].xxl_class, 1.75)
+        self.assertEqual(rows[2].mean_weight_kg, 100.5)
+        self.assertEqual(rows[2].xxl_class, 2.0)
+
+    def test_mega_does_not_prevent_identical_variations_collapsing(self):
+        standard, extended = records(
+            303, "MAWILE", height=0.61, weight=11.5, xxl=1.75
+        )
+        costume = records(
+            303,
+            "MAWILE",
+            form="MAWILE_COSTUME",
+            height=0.61,
+            weight=11.5,
+            xxl=1.75,
+        )
+        standard["data"]["pokemonSettings"]["tempEvoOverrides"] = [
+            {
+                "tempEvoId": "TEMP_EVOLUTION_MEGA",
+                "averageHeightM": 1.0,
+                "averageWeightKg": 23.5,
+            }
+        ]
+        extended["data"]["pokemonExtendedSettings"]["tempEvoOverrides"] = [
+            {
+                "tempEvoId": "TEMP_EVOLUTION_MEGA",
+                "sizeSettings": {
+                    "xxsLowerBound": 0.49,
+                    "mLowerBound": 0.75,
+                    "mUpperBound": 1.25,
+                    "xxlUpperBound": 1.75,
+                },
+            }
+        ]
+
+        rows, problems = extract_pokemon_stats(
+            [standard, extended, *costume]
+        )
+
+        self.assertEqual(problems, [])
+        self.assertEqual([row.name for row in rows], ["MAWILE_ALL", "MAWILE_MEGA"])
 
     def test_collapses_identical_variations_into_all(self):
         base = records(664, "SCATTERBUG", xxs=0.25)

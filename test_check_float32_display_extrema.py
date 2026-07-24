@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from check_float32_display_extrema import (
     PokemonStats,
+    display_text,
     displayed_value,
     find_anomalies,
     to_float32_decimal,
@@ -12,6 +13,12 @@ from check_float32_display_extrema import (
 
 
 class CheckFloat32DisplayExtremaTests(unittest.TestCase):
+    def test_game_display_omits_unnecessary_trailing_zeros(self):
+        self.assertEqual(display_text(Decimal("1.23")), "1.23")
+        self.assertEqual(display_text(Decimal("1.20")), "1.2")
+        self.assertEqual(display_text(Decimal("1.00")), "1")
+        self.assertEqual(display_text(Decimal("0.00")), "0")
+
     def test_kyogre_maximum_height_rounds_down_after_float32(self):
         nominal = Decimal("4.5") * Decimal("1.55")
         float32 = to_float32_decimal(nominal)

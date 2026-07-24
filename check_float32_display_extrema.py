@@ -180,6 +180,11 @@ def _decimal_text(value: Decimal) -> str:
     return format(value, "f")
 
 
+def display_text(value: Decimal) -> str:
+    """Format a rounded game measurement without unnecessary trailing zeros."""
+    return format(value.normalize(), "f")
+
+
 def write_report(
     rows: Sequence[PokemonStats],
     anomalies: Sequence[DisplayAnomaly],
@@ -193,7 +198,8 @@ def write_report(
         file=output,
     )
     print(
-        "Display rounding is positive round-half-up to two decimal places.",
+        "Display rounding is positive round-half-up to the nearest hundredth; "
+        "unnecessary trailing zeros are omitted.",
         file=output,
     )
     print(
@@ -226,7 +232,8 @@ def write_report(
                 f"{item.pokedex_number}\t{item.name}\t"
                 f"{_decimal_text(item.nominal_value)}\t"
                 f"{_decimal_text(item.float32_value)}\t"
-                f"{item.nominal_display:.2f}\t{item.float32_display:.2f}",
+                f"{display_text(item.nominal_display)}\t"
+                f"{display_text(item.float32_display)}",
                 file=output,
             )
 

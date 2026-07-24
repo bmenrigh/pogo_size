@@ -13,9 +13,10 @@ The normal refresh-and-build workflow is:
 
 1. obtain a current Game Master in JSON format;
 2. extract and validate `pokemon_stats.tsv`;
-3. review the float32 display-extrema report;
-4. build `pvalue_lookup.html`; and
-5. run the tests.
+3. extract and validate `pokemon_evolutions.tsv`;
+4. review the float32 display-extrema report;
+5. build `pvalue_lookup.html`; and
+6. run the tests.
 
 The app builder requires Python 3 and the existing compressed distributions in
 `cdfs_poly/`. NumPy is needed only to regenerate those polynomial CDF files,
@@ -28,11 +29,14 @@ source and save it as `GAME_MASTER.json` in the repository root. The extractor
 expects decoded JSON whose top level is an array of Game Master template
 objects, not protobuf data or a partial list containing only ordinary Pokémon
 settings. The extended Pokémon settings and temporary-evolution overrides are
-needed for size bounds and forms such as Primal Groudon and Primal Kyogre.
+needed for size bounds and temporary forms such as Mega Evolutions and Primal
+Reversions.
 
 The build tools do not download the Game Master automatically. The source JSON
 also does not provide a reliable upstream snapshot date or version, so the
-date embedded in the finished page records when the app was built.
+date embedded in the finished page records only when the app was built. The
+person performing the build is responsible for obtaining a current Game Master
+and regenerating the extracted stats and evolution tables first.
 
 ### 2. Extract the Pokémon statistics
 
@@ -63,6 +67,27 @@ maxima of `1.55`, `1.75`, and `2.00`. If a future Game Master introduces
 another class, the extractor and the distribution set must be updated rather
 than silently assigning it to an existing class.
 
+### 3. Extract the evolution graph
+
+Run:
+
+```console
+$ ./read_pokemon_evolutions_from_gm.py GAME_MASTER.json \
+    > pokemon_evolutions.tsv
+```
+
+The extractor reads `evolutionBranch`, `evolutionIds`, and temporary-evolution
+overrides; resolves form-specific targets and collapsed `_ALL` rows through
+the same validated stats model; and writes each unique direct source-to-target
+evolution. Mega Evolutions and Primal Reversions are included so the page can
+predict their distinct transformations, but they remain identifiable as
+temporary rather than permanent targets. Warnings go to standard error, and
+`--strict` gives them a nonzero exit status.
+
+The standalone builder embeds this table as compact Pokémon-row index pairs.
+It is used only for deterministic post-evolution height and weight predictions;
+it does not affect the probability distributions.
+
 ### Audit evolutions that change XXL height class
 
 To produce a TSV containing every direct evolution whose source and target
@@ -85,7 +110,7 @@ an evolution audit even though Zorua is omitted from the probability app.
 Pumpkaboo and Gourgeist are ignored entirely: their special form-size system
 does not use the ordinary XXL height classes modeled by this report.
 
-### 3. Audit float32 display extrema
+### 4. Audit float32 display extrema
 
 Generate the human-readable report with:
 
@@ -101,7 +126,7 @@ artifact and is not an input to the next command: the app builder runs the
 same extrema calculation directly from `pokemon_stats.tsv` and embeds the
 affected rows automatically.
 
-### 4. Build the standalone HTML
+### 5. Build the standalone HTML
 
 With the default filenames and directories, run:
 
@@ -112,6 +137,7 @@ $ ./build_pvalue_webapp.py
 This reads:
 
 - `pokemon_stats.tsv`;
+- `pokemon_evolutions.tsv`;
 - the 12 compressed CDF files in `cdfs_poly/`; and
 - `pvalue_webapp_template.html`.
 
@@ -121,11 +147,26 @@ date is embedded as the page's build date. The builder also verifies the stats,
 compressed-CDF format, contiguous polynomial ranges, and template markers
 before writing the page.
 
+Technical equations are authored in the template as a limited TeX expression
+in each equation's `data-tex` attribute, with the existing Unicode/HTML text
+inside the element as its fallback. During the build, Python converts the TeX
+to native presentation MathML, retains the TeX source as an annotation, and
+wraps the Unicode fallback beside it. The finished page performs a small
+MathML layout test: supported browsers show the prebuilt MathML, while other
+browsers or browsers with JavaScript disabled keep showing the fallback. No
+TeX parser, MathJax dependency, or network request is used at runtime.
+
+Edit equations in `pvalue_webapp_template.html`, not in the generated
+`pvalue_lookup.html`, and keep the TeX and fallback versions equivalent. The
+builder deliberately supports only the TeX commands used by this page and
+fails with the template line number if an unsupported command is introduced.
+
 Alternative locations can be supplied explicitly:
 
 ```console
 $ ./build_pvalue_webapp.py \
     --stats pokemon_stats.tsv \
+    --evolutions pokemon_evolutions.tsv \
     --cdfs cdfs_poly \
     --template pvalue_webapp_template.html \
     --output pvalue_lookup.html
@@ -136,7 +177,7 @@ adding ordinary Pokémon or forms normally requires only a new stats extraction
 and HTML build. Regenerate the CDFs when the modeled generation algorithm,
 class distributions, numerical convolution, or compression settings change.
 
-### 5. Verify the build
+### 6. Verify the build
 
 Run the app, stats-extractor, and float32-extrema tests:
 
@@ -144,6 +185,7 @@ Run the app, stats-extractor, and float32-extrema tests:
 $ python3 -m unittest -q \
     test_build_pvalue_webapp.py \
     test_check_float32_display_extrema.py \
+    test_read_pokemon_evolutions_from_gm.py \
     test_read_pokemon_stats_from_gm.py
 ```
 

@@ -18,6 +18,12 @@ TEMPLATE_RE = re.compile(r"^V(?P<number>\d+)_POKEMON_.+$")
 XXS_CLASSES = (0.25, 0.49)
 XXL_CLASSES = (1.55, 1.75, 2.0)
 SKIPPED_POKEMON = frozenset(("PUMPKABOO", "GOURGEIST", "ZORUA"))
+TEMP_EVOLUTION_LABELS = {
+    "TEMP_EVOLUTION_MEGA": "Mega",
+    "TEMP_EVOLUTION_MEGA_X": "Mega X",
+    "TEMP_EVOLUTION_MEGA_Y": "Mega Y",
+    "TEMP_EVOLUTION_PRIMAL": "Primal",
+}
 CLASS_REL_TOLERANCE = 1e-9
 HEIGHT_REL_TOLERANCE = 1e-9
 
@@ -229,12 +235,12 @@ def extract_pokemon_stats(
             )
         )
 
-    primal_rows = _extract_primal_stats(standard, extended, problems)
-    rows.extend(primal_rows)
-    for row in primal_rows:
-        variation_counts[row.pokedex_number] = (
-            variation_counts.get(row.pokedex_number, 0) + 1
-        )
+    temp_evolution_rows = _extract_temporary_evolution_stats(
+        standard,
+        extended,
+        problems,
+        skipped_pokemon=skipped_pokemon,
+    )
 
     rows, omitted_normal_counts = _omit_redundant_normal_variations(rows)
     effective_variation_counts = {
@@ -242,20 +248,26 @@ def extract_pokemon_stats(
         for pokedex_number, count in variation_counts.items()
     }
     rows = _collapse_identical_variations(rows, effective_variation_counts)
+    # Temporary evolutions are distinct selectable forms, but they must not
+    # prevent otherwise identical permanent variations from collapsing to
+    # POKEMON_ALL.
+    rows.extend(temp_evolution_rows)
     rows.sort(key=lambda row: (row.pokedex_number, row.name, row.template_id))
     return rows, problems
 
 
-def _extract_primal_stats(
+def _extract_temporary_evolution_stats(
     standard: Mapping[str, Mapping[str, Any]],
     extended: Mapping[str, Mapping[str, Any]],
     problems: list[str],
+    *,
+    skipped_pokemon: frozenset[str],
 ) -> list[PokemonStats]:
-    """Extract Primal means stored inside a base form's tempEvoOverrides."""
+    """Extract Mega and Primal forms stored inside tempEvoOverrides."""
     rows: list[PokemonStats] = []
     for template_id, pokemon in sorted(standard.items()):
         # The base and _NORMAL records contain duplicate override data. Use the
-        # form-less base record so each Primal form is emitted exactly once.
+        # form-less base record so each temporary evolution is emitted once.
         if pokemon.get("form") is not None:
             continue
         overrides = pokemon.get("tempEvoOverrides")
@@ -263,15 +275,38 @@ def _extract_primal_stats(
             continue
         match = TEMPLATE_RE.fullmatch(template_id)
         pokemon_id = pokemon.get("pokemonId")
-        if match is None or not isinstance(pokemon_id, str) or not pokemon_id:
+        if (
+            match is None
+            or not isinstance(pokemon_id, str)
+            or not pokemon_id
+            or pokemon_id in skipped_pokemon
+        ):
             continue
 
+        extended_overrides = extended.get(template_id, {}).get("tempEvoOverrides")
+        extended_by_id: dict[str, Mapping[str, Any]] = {}
+        if isinstance(extended_overrides, list):
+            for extended_override in extended_overrides:
+                if not isinstance(extended_override, dict):
+                    continue
+                temp_evo_id = extended_override.get("tempEvoId")
+                if temp_evo_id not in TEMP_EVOLUTION_LABELS:
+                    continue
+                if temp_evo_id in extended_by_id:
+                    problems.append(
+                        f"{template_id}: duplicate {TEMP_EVOLUTION_LABELS[temp_evo_id]} "
+                        "extended size override"
+                    )
+                    continue
+                extended_by_id[temp_evo_id] = extended_override
+
         for override in overrides:
-            if (
-                not isinstance(override, dict)
-                or override.get("tempEvoId") != "TEMP_EVOLUTION_PRIMAL"
-            ):
+            if not isinstance(override, dict):
                 continue
+            temp_evo_id = override.get("tempEvoId")
+            if temp_evo_id not in TEMP_EVOLUTION_LABELS:
+                continue
+            label = TEMP_EVOLUTION_LABELS[temp_evo_id]
 
             height = override.get("averageHeightM")
             weight = override.get("averageWeightKg")
@@ -282,12 +317,12 @@ def _extract_primal_stats(
                 or float(weight) <= 0.0
             ):
                 problems.append(
-                    f"{template_id}: Primal override has missing or invalid "
+                    f"{template_id}: {label} override has missing or invalid "
                     "average height or weight"
                 )
                 continue
 
-            size_settings = extended.get(template_id, {}).get("sizeSettings")
+            size_settings = extended_by_id.get(temp_evo_id, {}).get("sizeSettings")
             if not isinstance(size_settings, dict) or any(
                 not _is_finite_number(size_settings.get(field))
                 for field in (
@@ -298,42 +333,68 @@ def _extract_primal_stats(
                 )
             ):
                 problems.append(
-                    f"{template_id}: cannot determine Primal size classes "
-                    "from the base extended settings"
+                    f"{template_id}: {label} extended size settings are "
+                    "missing or invalid"
                 )
                 continue
 
-            base_mean = (
+            mean_height = (
                 float(size_settings["mLowerBound"])
                 + float(size_settings["mUpperBound"])
             ) / 2.0
-            if base_mean <= 0.0:
+            if mean_height <= 0.0:
                 problems.append(
-                    f"{template_id}: cannot determine Primal size classes "
-                    "from a nonpositive base mean"
-                )
-                continue
-            xxs_ratio = float(size_settings["xxsLowerBound"]) / base_mean
-            xxl_ratio = float(size_settings["xxlUpperBound"]) / base_mean
-            xxs_class = _canonical_class(xxs_ratio, XXS_CLASSES)
-            xxl_class = _canonical_class(xxl_ratio, XXL_CLASSES)
-            if xxs_class is None or xxl_class is None:
-                problems.append(
-                    f"{template_id}: base size classes are invalid for the "
-                    "Primal override"
+                    f"{template_id}: {label} mean height must be positive, "
+                    f"got {mean_height:g}"
                 )
                 continue
 
+            row_is_valid = True
+            if not math.isclose(
+                mean_height,
+                float(height),
+                rel_tol=HEIGHT_REL_TOLERANCE,
+                abs_tol=HEIGHT_REL_TOLERANCE,
+            ):
+                problems.append(
+                    f"{template_id}: {label} size-settings mean height "
+                    f"{mean_height:.12g} does not match averageHeightM "
+                    f"{float(height):.12g}"
+                )
+                row_is_valid = False
+
+            xxs_ratio = float(size_settings["xxsLowerBound"]) / mean_height
+            xxl_ratio = float(size_settings["xxlUpperBound"]) / mean_height
+            xxs_class = _canonical_class(xxs_ratio, XXS_CLASSES)
+            xxl_class = _canonical_class(xxl_ratio, XXL_CLASSES)
+            if xxs_class is None:
+                choices = ", ".join(f"{value:g}" for value in XXS_CLASSES)
+                problems.append(
+                    f"{template_id}: {label} XXS ratio {xxs_ratio:.12g} does "
+                    f"not match an allowed class ({choices})"
+                )
+                row_is_valid = False
+            if xxl_class is None:
+                choices = ", ".join(f"{value:g}" for value in XXL_CLASSES)
+                problems.append(
+                    f"{template_id}: {label} XXL ratio {xxl_ratio:.12g} does "
+                    f"not match an allowed class ({choices})"
+                )
+                row_is_valid = False
+            if not row_is_valid:
+                continue
+
+            name_suffix = temp_evo_id.removeprefix("TEMP_EVOLUTION_")
             rows.append(
                 PokemonStats(
                     pokedex_number=int(match.group("number")),
                     pokemon_id=pokemon_id,
-                    name=f"{pokemon_id}_PRIMAL",
-                    mean_height_m=float(height),
+                    name=f"{pokemon_id}_{name_suffix}",
+                    mean_height_m=mean_height,
                     mean_weight_kg=float(weight),
                     xxs_class=xxs_class,
                     xxl_class=xxl_class,
-                    template_id=f"{template_id}#TEMP_EVOLUTION_PRIMAL",
+                    template_id=f"{template_id}#{temp_evo_id}",
                 )
             )
     return rows
